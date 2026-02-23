@@ -21,13 +21,13 @@
       position: relative;
       height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      background: #0a0a0a;
     }
 
-    /* Foto — nessun bordo, solo scale */
+    /* Foto fullscreen dietro — si sfocha mentre scorri */
     #hero-img {
       position: absolute;
       inset: 0;
@@ -35,49 +35,45 @@
       height: 100%;
       object-fit: cover;
       transform-origin: center center;
-      will-change: transform, opacity;
-      /* niente border-radius, niente clip */
+      will-change: transform, filter, opacity;
+      filter: blur(0px);
     }
 
-    /* Wrapper nomi — sovrapposto alla foto */
+    /* ── TESTO CON FOTO DENTRO LE LETTERE (effetto GTA VI) ── */
     #hero-name {
       position: relative;
       z-index: 2;
+      text-align: center;
+      line-height: 0.88;
       width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      pointer-events: none;
+      padding: 0 2vw;
+      /* La foto apparirà DENTRO le lettere tramite background-clip */
+      background-image: url('foto.jpg');
+      background-size: cover;
+      background-position: center;
+      -webkit-background-clip: text;
+      background-clip: text;
+      /* Colore di fallback trasparente per vedere la foto nelle lettere */
+      color: transparent;
+      will-change: filter, opacity;
+      filter: blur(0px);
+      opacity: 0; /* parte invisibile, appare scorrendo */
     }
 
     .name-top,
     .name-bottom {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(80px, 17vw, 190px);
-      letter-spacing: 0.04em;
-      line-height: 0.9;
+      font-size: clamp(100px, 22vw, 260px);
+      letter-spacing: -0.01em;
       display: block;
-      will-change: transform, opacity;
+      will-change: transform;
     }
 
-    .name-top  { color: #ffffff; }
-    .name-bottom { color: #e0e0e0; }
+    .name-top  { transform: translateY(-80px); opacity: 0; }
+    .name-bottom { transform: translateY(80px); opacity: 0; }
 
-    /* Foto piccola in mezzo alle scritte */
-    #hero-img-small {
-      position: relative;
-      z-index: 2;
-      width: 260px;
-      height: 320px;
-      object-fit: cover;
-      margin: 18px 0;
-      /* nessun border-radius */
-      will-change: transform, opacity;
-      transform-origin: center center;
-    }
-
-    /* ── SPACER ── ridotto rispetto a prima */
-    #hero-spacer { height: 160vh; }
+    /* ── SPACER ── */
+    #hero-spacer { height: 180vh; }
 
     /* ── SEZIONI TESTO ── */
     .text-section {
@@ -125,20 +121,15 @@
 </head>
 <body>
 
-  <!-- HERO WRAPPER (pin target) -->
   <div id="hero-wrapper">
     <section id="hero">
 
-      <!-- Foto fullscreen iniziale -->
+      <!-- Foto fullscreen che si sfocha -->
       <img id="hero-img" src="foto.jpg" alt="Gabriele Madeo" />
 
-      <!-- Nome + foto piccola sovrapposti -->
+      <!-- Nomi: la foto appare DENTRO le lettere -->
       <div id="hero-name">
         <span class="name-top">Gabriele</span>
-
-        <!-- Foto piccola tra le due scritte -->
-        <img id="hero-img-small" src="foto.jpg" alt="" />
-
         <span class="name-bottom">Madeo</span>
       </div>
 
@@ -146,7 +137,7 @@
     <div id="hero-spacer"></div>
   </div>
 
-  <!-- SEZIONE 1: BIO -->
+  <!-- SEZIONI -->
   <section class="text-section" id="section-bio">
     <div class="inner">
       <div class="label">Chi sono</div>
@@ -158,7 +149,6 @@
     </div>
   </section>
 
-  <!-- SEZIONE 2: SKILLS -->
   <section class="text-section" id="section-skills">
     <div class="inner">
       <div class="label">Competenze</div>
@@ -170,7 +160,6 @@
     </div>
   </section>
 
-  <!-- SEZIONE 3: PROGETTI -->
   <section class="text-section" id="section-projects">
     <div class="inner">
       <div class="label">Progetti</div>
@@ -184,99 +173,105 @@
 
   <footer>gabriele madeo © 2026</footer>
 
-  <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    /* ══════════════════════════════════════════
-       HERO TIMELINE
-       0.00 → 0.30  foto fullscreen zoom-out + fade out
-       0.00 → 0.30  "GABRIELE" entra dall'alto
-       0.00 → 0.30  "MADEO" entra dal basso
-       0.20 → 0.50  foto piccola appare e si rimpicciolisce
-       0.55 → 1.00  tutto il blocco nome+foto esce in fade
-    ══════════════════════════════════════════ */
+    /*
+      TIMELINE HERO
+      ─────────────────────────────────────────
+      0.00 → 0.35  foto fullscreen: zoom-out leggero
+      0.00 → 0.40  "GABRIELE" scende dall'alto  → posizione finale
+      0.00 → 0.40  "MADEO"    sale dal basso    → posizione finale
+      0.10 → 0.45  hero-name: opacity 0 → 1  (foto appare nelle lettere)
+      0.35 → 0.75  foto fullscreen: si sfocha sempre di più
+      0.65 → 1.00  hero-name: si sfocha + opacity → 0
+      0.65 → 1.00  foto fullscreen: opacity → 0
+    */
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: "#hero-wrapper",
         start: "top top",
         end: "bottom bottom",
-        scrub: 1.2,
+        scrub: 1.5,
         pin: "#hero",
       }
     });
 
-    // Foto fullscreen: zoom-out da 1.15 a 0.55 + fade
+    // Foto fullscreen: leggero zoom-out
     tl.fromTo("#hero-img",
-      { scale: 1.15, opacity: 1 },
-      { scale: 0.55, opacity: 0, ease: "none" },
+      { scale: 1.1 },
+      { scale: 1.0, ease: "none" },
       0
     )
 
-    // "GABRIELE" entra dall'alto (da -120px a 0)
-    .fromTo(".name-top",
-      { y: -120, opacity: 0 },
+    // "GABRIELE" entra dall'alto
+    .to(".name-top",
       { y: 0, opacity: 1, ease: "none" },
       0
     )
 
-    // "MADEO" entra dal basso (da +120px a 0)
-    .fromTo(".name-bottom",
-      { y: 120, opacity: 0 },
+    // "MADEO" entra dal basso
+    .to(".name-bottom",
       { y: 0, opacity: 1, ease: "none" },
       0
     )
 
-    // Foto piccola: appare e si rimpicciolisce scorrendo
-    .fromTo("#hero-img-small",
-      { scale: 1.3, opacity: 0 },
-      { scale: 0.4, opacity: 1, ease: "none" },
-      0.15
-    )
-
-    // Foto piccola: fade out finale
-    .to("#hero-img-small",
-      { opacity: 0, ease: "none" },
-      0.55
-    )
-
-    // Testo nomi: si rimpicciolisce e scompare
+    // hero-name (foto nelle lettere): appare
     .to("#hero-name",
-      { scale: 0.5, opacity: 0, ease: "none" },
-      0.55
+      { opacity: 1, ease: "none" },
+      0.10
+    )
+
+    // Foto fullscreen: inizia a sfocarsi (0px → 18px di blur)
+    .to("#hero-img",
+      {
+        filter: "blur(18px)",
+        scale: 1.08, // leggero zoom mentre sfocha, come GTA
+        ease: "none"
+      },
+      0.35
+    )
+
+    // Foto fullscreen: fade out mentre il blur è massimo
+    .to("#hero-img",
+      { opacity: 0, ease: "none" },
+      0.62
+    )
+
+    // hero-name: si sfocha e scompare (uscita)
+    .to("#hero-name",
+      {
+        filter: "blur(12px)",
+        opacity: 0,
+        scale: 0.85,
+        ease: "none"
+      },
+      0.68
     );
 
 
-    /* ══════════════════════════════════════════
-       SEZIONI TESTO
-       fade in mentre entrano, fade out mentre escono
-    ══════════════════════════════════════════ */
-
+    /* SEZIONI TESTO */
     document.querySelectorAll(".text-section .inner").forEach((el) => {
       gsap.to(el, {
-        opacity: 1,
-        y: 0,
-        ease: "none",
+        opacity: 1, y: 0, ease: "none",
         scrollTrigger: {
           trigger: el,
           start: "top 78%",
-          end: "top 38%",
+          end: "top 35%",
           scrub: true,
         }
       });
 
       gsap.to(el, {
-        opacity: 0,
-        y: -40,
-        ease: "none",
+        opacity: 0, y: -40, ease: "none",
         scrollTrigger: {
           trigger: el,
           start: "bottom 65%",
-          end: "bottom 25%",
+          end: "bottom 20%",
           scrub: true,
         }
       });
