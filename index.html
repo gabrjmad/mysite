@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gabriele Madeo</title>
   <style>
@@ -9,71 +9,129 @@
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
-      background: #0a0a0a;
+    html, body {
+      background: #000;
       color: #fff;
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
     }
 
-    /* ── HERO ── */
+    /* ══════════════════════════════════════
+       HERO SECTION — pinned durante lo scroll
+    ══════════════════════════════════════ */
     #hero {
       position: relative;
+      width: 100%;
       height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
-      background: #0a0a0a;
+      background: #000;
     }
 
-    /* Foto fullscreen dietro — si sfocha mentre scorri */
-    #hero-img {
+    /* Foto fullscreen — sta sotto tutto */
+    #hero-bg {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center top;
       transform-origin: center center;
       will-change: transform, filter, opacity;
-      filter: blur(0px);
+      z-index: 1;
     }
 
-    /* ── TESTO CON FOTO DENTRO LE LETTERE (effetto GTA VI) ── */
-    #hero-name {
-      position: relative;
+    /* ── OVERLAY NERO con buco a forma di testo ──
+       Questo è il cuore dell'effetto GTA VI:
+       un div nero a tutto schermo con le lettere
+       ritagliate usando mix-blend-mode + SVG mask
+    */
+    #title-mask-wrapper {
+      position: absolute;
+      inset: 0;
       z-index: 2;
-      text-align: center;
-      line-height: 0.88;
-      width: 100%;
-      padding: 0 2vw;
-      /* La foto apparirà DENTRO le lettere tramite background-clip */
-      background-image: url('foto.jpg');
-      background-size: cover;
-      background-position: center;
-      -webkit-background-clip: text;
-      background-clip: text;
-      /* Colore di fallback trasparente per vedere la foto nelle lettere */
-      color: transparent;
-      will-change: filter, opacity;
-      filter: blur(0px);
-      opacity: 0; /* parte invisibile, appare scorrendo */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Sfondo nero che copre tutto tranne i buchi delle lettere */
+      background: #000;
+      /* Le lettere saranno "buchi" tramite mask */
+      -webkit-mask-image: url(#text-mask);
+      mask-image: url(#text-mask);
     }
 
-    .name-top,
-    .name-bottom {
+    /* 
+      Approccio alternativo più compatibile:
+      Usiamo due livelli:
+      1. La foto (z-index:1) visibile ovunque
+      2. Un overlay nero (z-index:2) che copre tutto
+      3. Il testo (z-index:3) con mix-blend-mode:destination-out
+         che "buca" l'overlay nero → la foto si vede solo nelle lettere
+    */
+
+    #black-overlay {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      z-index: 2;
+      will-change: opacity;
+    }
+
+    /* Il contenitore del testo usa isolation per il blend */
+    #title-container {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      /* isolation:isolate fa sì che il mix-blend-mode
+         agisca solo sull'overlay nero sotto, non sulla foto */
+      isolation: isolate;
+      will-change: opacity;
+    }
+
+    .title-line {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(100px, 22vw, 260px);
+      font-size: clamp(110px, 23vw, 280px);
+      line-height: 0.85;
       letter-spacing: -0.01em;
+      color: #000; /* nero */
       display: block;
-      will-change: transform;
+      text-align: center;
+      will-change: transform, opacity;
+      /* Questo "buca" l'overlay nero → la foto appare nelle lettere */
+      mix-blend-mode: destination-out;
     }
 
-    .name-top  { transform: translateY(-80px); opacity: 0; }
-    .name-bottom { transform: translateY(80px); opacity: 0; }
+    /* Wrapper separato per il blur della foto nelle lettere */
+    #hero-bg-blur {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      z-index: 4; /* sopra l'overlay ma sotto il testo "buco" */
+      will-change: filter, opacity;
+      opacity: 0; /* appare solo quando vogliamo il blur nelle lettere */
+      filter: blur(0px);
+      /* Questa foto si renderizza SOLO dove il testo ha fatto il buco */
+    }
+
+    /* Overlay bianco per l'effetto dissolve finale */
+    #white-overlay {
+      position: absolute;
+      inset: 0;
+      background: #fff;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      will-change: opacity;
+    }
 
     /* ── SPACER ── */
-    #hero-spacer { height: 180vh; }
+    #hero-spacer { height: 200vh; }
 
     /* ── SEZIONI TESTO ── */
     .text-section {
@@ -82,6 +140,7 @@
       align-items: center;
       justify-content: center;
       padding: 0 10vw;
+      background: #000;
     }
 
     .text-section .inner {
@@ -124,50 +183,52 @@
   <div id="hero-wrapper">
     <section id="hero">
 
-      <!-- Foto fullscreen che si sfocha -->
-      <img id="hero-img" src="foto.jpg" alt="Gabriele Madeo" />
+      <!-- LAYER 1: Foto nitida (sotto tutto) -->
+      <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
 
-      <!-- Nomi: la foto appare DENTRO le lettere -->
-      <div id="hero-name">
-        <span class="name-top">Gabriele</span>
-        <span class="name-bottom">Madeo</span>
+      <!-- LAYER 2: Overlay nero (verrà "bucato" dal testo) -->
+      <div id="black-overlay"></div>
+
+      <!-- LAYER 3: Testo con mix-blend-mode destination-out
+           → le lettere nere "bucano" l'overlay nero
+           → la foto è visibile SOLO dentro le lettere -->
+      <div id="title-container">
+        <span class="title-line" id="line-gabriele">Gabriele</span>
+        <span class="title-line" id="line-madeo">Madeo</span>
       </div>
+
+      <!-- LAYER 4: Overlay bianco per dissolvenza finale -->
+      <div id="white-overlay"></div>
 
     </section>
     <div id="hero-spacer"></div>
   </div>
 
   <!-- SEZIONI -->
-  <section class="text-section" id="section-bio">
+  <section class="text-section">
     <div class="inner">
       <div class="label">Chi sono</div>
-      <p>
-        Sono un IT Systems Integrator in formazione all'ITS Umbria Academy,
+      <p>Sono un IT Systems Integrator in formazione all'ITS Umbria Academy,
         appassionato di reti, cloud e sviluppo web. Costruisco soluzioni
-        digitali a partire dall'infrastruttura fino all'interfaccia.
-      </p>
+        digitali dall'infrastruttura all'interfaccia.</p>
     </div>
   </section>
 
-  <section class="text-section" id="section-skills">
+  <section class="text-section">
     <div class="inner">
       <div class="label">Competenze</div>
-      <p>
-        Networking, Docker, Flask, React, MySQL, Linux.
+      <p>Networking, Docker, Flask, React, MySQL, Linux.
         Lavoro su stack moderni e amo l'automazione.
-        Sempre alla ricerca della prossima sfida tecnica.
-      </p>
+        Sempre alla ricerca della prossima sfida tecnica.</p>
     </div>
   </section>
 
-  <section class="text-section" id="section-projects">
+  <section class="text-section">
     <div class="inner">
       <div class="label">Progetti</div>
-      <p>
-        Dai container Docker alle web app full-stack,
-        ogni progetto è un'opportunità di migliorarsi.
-        Esplora il mio lavoro su GitHub.
-      </p>
+      <p>Dai container Docker alle web app full-stack,
+        ogni progetto è un'opportunità di crescita.
+        Esplora il mio lavoro su GitHub.</p>
     </div>
   </section>
 
@@ -180,15 +241,24 @@
     gsap.registerPlugin(ScrollTrigger);
 
     /*
-      TIMELINE HERO
-      ─────────────────────────────────────────
-      0.00 → 0.35  foto fullscreen: zoom-out leggero
-      0.00 → 0.40  "GABRIELE" scende dall'alto  → posizione finale
-      0.00 → 0.40  "MADEO"    sale dal basso    → posizione finale
-      0.10 → 0.45  hero-name: opacity 0 → 1  (foto appare nelle lettere)
-      0.35 → 0.75  foto fullscreen: si sfocha sempre di più
-      0.65 → 1.00  hero-name: si sfocha + opacity → 0
-      0.65 → 1.00  foto fullscreen: opacity → 0
+      SEQUENZA ANIMAZIONE (come GTA VI):
+      ────────────────────────────────────────────
+      FASE 1 [0.00 → 0.35]
+        - Foto fullscreen: leggero zoom-out
+        - Overlay nero: opacity 0 → 1 (copre la foto)
+        - "GABRIELE": scende dall'alto (y: -100vh → 0)
+        - "MADEO":    sale dal basso  (y: +100vh → 0)
+        → Le lettere nere bucano l'overlay: foto visibile solo nelle lettere
+
+      FASE 2 [0.35 → 0.65]
+        - Foto nitida: si sfocha progressivamente (blur 0 → 20px)
+        - Foto: leggero zoom IN mentre si sfocha (effetto GTA)
+        - Le lettere rimangono ferme
+
+      FASE 3 [0.65 → 1.00]
+        - Overlay bianco: opacity 0 → 1 (dissolvenza totale in bianco)
+        - Testo: scale up leggerissimo mentre scompare nel bianco
+      ────────────────────────────────────────────
     */
 
     const tl = gsap.timeline({
@@ -196,65 +266,69 @@
         trigger: "#hero-wrapper",
         start: "top top",
         end: "bottom bottom",
-        scrub: 1.5,
+        scrub: 1.8,
         pin: "#hero",
       }
     });
 
-    // Foto fullscreen: leggero zoom-out
-    tl.fromTo("#hero-img",
-      { scale: 1.1 },
+    // ── FASE 1: lettere entrano, overlay nero copre ──
+
+    // Overlay nero: appare (0 → 1)
+    tl.fromTo("#black-overlay",
+      { opacity: 0 },
+      { opacity: 1, ease: "none" },
+      0
+    )
+
+    // Foto: leggero zoom-out mentre l'overlay sale
+    .fromTo("#hero-bg",
+      { scale: 1.12 },
       { scale: 1.0, ease: "none" },
       0
     )
 
-    // "GABRIELE" entra dall'alto
-    .to(".name-top",
-      { y: 0, opacity: 1, ease: "none" },
+    // "GABRIELE" scende dall'alto
+    .fromTo("#line-gabriele",
+      { y: "-80vh", opacity: 0 },
+      { y: "0vh", opacity: 1, ease: "none" },
       0
     )
 
-    // "MADEO" entra dal basso
-    .to(".name-bottom",
-      { y: 0, opacity: 1, ease: "none" },
+    // "MADEO" sale dal basso
+    .fromTo("#line-madeo",
+      { y: "80vh", opacity: 0 },
+      { y: "0vh", opacity: 1, ease: "none" },
       0
     )
 
-    // hero-name (foto nelle lettere): appare
-    .to("#hero-name",
-      { opacity: 1, ease: "none" },
-      0.10
-    )
+    // ── FASE 2: foto si sfocha dentro le lettere ──
 
-    // Foto fullscreen: inizia a sfocarsi (0px → 18px di blur)
-    .to("#hero-img",
+    // Foto: blur progressivo (0 → 20px) + leggero zoom in
+    .to("#hero-bg",
       {
-        filter: "blur(18px)",
-        scale: 1.08, // leggero zoom mentre sfocha, come GTA
+        filter: "blur(20px) brightness(1.4) saturate(0.4)",
+        scale: 1.1,
         ease: "none"
       },
       0.35
     )
 
-    // Foto fullscreen: fade out mentre il blur è massimo
-    .to("#hero-img",
-      { opacity: 0, ease: "none" },
-      0.62
+    // ── FASE 3: dissolve in bianco ──
+
+    // Overlay bianco: appare
+    .to("#white-overlay",
+      { opacity: 1, ease: "none" },
+      0.65
     )
 
-    // hero-name: si sfocha e scompare (uscita)
-    .to("#hero-name",
-      {
-        filter: "blur(12px)",
-        opacity: 0,
-        scale: 0.85,
-        ease: "none"
-      },
-      0.68
+    // Testo: scala leggermente su mentre scompare nel bianco
+    .to("#title-container",
+      { scale: 1.08, ease: "none" },
+      0.65
     );
 
 
-    /* SEZIONI TESTO */
+    /* ── SEZIONI TESTO ── */
     document.querySelectorAll(".text-section .inner").forEach((el) => {
       gsap.to(el, {
         opacity: 1, y: 0, ease: "none",
@@ -265,7 +339,6 @@
           scrub: true,
         }
       });
-
       gsap.to(el, {
         opacity: 0, y: -40, ease: "none",
         scrollTrigger: {
