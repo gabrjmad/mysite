@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gabriele Madeo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400&display=swap');
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: auto; }
+
+    body {
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ── SEZIONE 1: HERO ── */
+    #hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #hero-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform-origin: center center;
+      will-change: transform, opacity;
+    }
+
+    #hero-name {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      line-height: 0.9;
+      opacity: 0;
+      mix-blend-mode: screen; /* effetto dissolve immagine nel testo */
+    }
+
+    #hero-name .first {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(80px, 18vw, 200px);
+      display: block;
+      letter-spacing: 0.05em;
+    }
+
+    #hero-name .last {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(80px, 18vw, 200px);
+      display: block;
+      letter-spacing: 0.05em;
+      color: #e0e0e0;
+    }
+
+    /* ── SEZIONE 2: SPACER SCROLL per hero ── */
+    #hero-spacer {
+      height: 250vh; /* spazio scroll per le animazioni hero */
+    }
+
+    /* ── SEZIONI TESTO ── */
+    .text-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10vw;
+    }
+
+    .text-section .inner {
+      max-width: 700px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(40px);
+    }
+
+    .text-section .label {
+      font-size: 11px;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .text-section p {
+      font-size: clamp(16px, 2.5vw, 22px);
+      font-weight: 300;
+      line-height: 1.7;
+      color: #ccc;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(40px, 8vw, 80px);
+      letter-spacing: 0.1em;
+      color: #333;
+      border-top: 1px solid #1a1a1a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HERO PIN WRAPPER -->
+  <div id="hero-wrapper">
+    <section id="hero">
+      <img id="hero-img" src="MIA_FOTO.jpg" alt="Gabriele Madeo" />
+      <div id="hero-name">
+        <span class="first">Gabriele</span>
+        <span class="last">Madeo</span>
+      </div>
+    </section>
+    <div id="hero-spacer"></div>
+  </div>
+
+  <!-- SEZIONE 1: BIO -->
+  <section class="text-section" id="section-bio">
+    <div class="inner">
+      <div class="label">Chi sono</div>
+      <p>
+        Sono un IT Systems Integrator in formazione all'ITS Umbria Academy,
+        appassionato di reti, cloud e sviluppo web. Costruisco soluzioni
+        digitali a partire dall'infrastruttura fino all'interfaccia.
+      </p>
+    </div>
+  </section>
+
+  <!-- SEZIONE 2: SKILLS -->
+  <section class="text-section" id="section-skills">
+    <div class="inner">
+      <div class="label">Competenze</div>
+      <p>
+        Networking, Docker, Flask, React, MySQL, Linux.
+        Lavoro su stack moderni e amo l'automazione.
+        Sempre alla ricerca della prossima sfida tecnica.
+      </p>
+    </div>
+  </section>
+
+  <!-- SEZIONE 3: PROGETTI -->
+  <section class="text-section" id="section-projects">
+    <div class="inner">
+      <div class="label">Progetti</div>
+      <p>
+        Dai container Docker alle web app full-stack,
+        ogni progetto è un'opportunità di migliorarsi.
+        Esplora il mio lavoro su GitHub.
+      </p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>gabriele madeo &copy; 2026</footer>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ══════════════════════════════════════════
+       FASE 1 — Foto fullscreen → si rimpicciolisce + fade out
+       FASE 2 — Nome appare (dissolve dalla foto)
+       FASE 3 — Nome si rimpicciolisce
+    ══════════════════════════════════════════ */
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: "#hero-wrapper",
+        start: "top top",
+        end: "bottom bottom",
+        scrub: 1.5,       // segue lo scroll fluidamente
+        pin: "#hero",     // blocca la sezione hero mentre scorri
+      }
+    });
+
+    // Fase 1 (0% → 35%): foto zoom-out
+    tl.fromTo("#hero-img",
+      { scale: 1.2 },
+      { scale: 0.85, ease: "none" },
+      0
+    )
+    // Fase 1b: foto fade out verso il 40%
+    .to("#hero-img", { opacity: 0, ease: "none" }, 0.25)
+
+    // Fase 2 (30% → 55%): nome appare mentre la foto scompare
+    .to("#hero-name", { opacity: 1, ease: "none" }, 0.25)
+
+    // Fase 3 (55% → 100%): nome si rimpicciolisce + fade out
+    .to("#hero-name", {
+      scale: 0.3,
+      opacity: 0,
+      ease: "none"
+    }, 0.55);
+
+
+    /* ══════════════════════════════════════════
+       SEZIONI TESTO — appaiono e scompaiono
+       progressivamente mentre scorri
+    ══════════════════════════════════════════ */
+
+    document.querySelectorAll(".text-section .inner").forEach((el) => {
+      // Fade IN
+      gsap.to(el, {
+        opacity: 1,
+        y: 0,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 75%",
+          end: "top 35%",
+          scrub: true,
+        }
+      });
+
+      // Fade OUT mentre lasci la sezione
+      gsap.to(el, {
+        opacity: 0,
+        y: -40,
+        ease: "none",
+        scrollTrigger: {
+          trigger: el,
+          start: "bottom 60%",
+          end: "bottom 20%",
+          scrub: true,
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
