@@ -8,13 +8,7 @@
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400&display=swap');
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html, body {
-      background: #000;
-      color: #fff;
-      font-family: 'Inter', sans-serif;
-      overflow-x: hidden;
-    }
+    html, body { background: #000; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
     /* ══ HERO ══ */
     #hero {
@@ -25,275 +19,242 @@
       background: #000;
     }
 
-    /* LAYER 1 — Foto fullscreen sotto tutto */
+    /* LAYER 1 — Foto sotto tutto */
     #hero-bg {
       position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
+      inset: 0; width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
       z-index: 1;
-      will-change: filter, opacity;
+      will-change: filter, opacity, transform;
     }
 
-    /* LAYER 2 — Overlay bianco che si dissolve sulla foto */
-    #white-fill {
+    /* LAYER 2 — SVG mask: nero con buchi a forma di lettere
+       L'SVG copre tutto lo schermo.
+       La maschera SVG rende trasparenti solo le zone delle lettere.
+       Parte ENORME (scala 8x) → scorrendo si rimpicciolisce a 1x */
+    #svg-overlay {
       position: absolute;
       inset: 0;
-      background: #fff;
+      width: 100%; height: 100%;
       z-index: 2;
-      opacity: 0;
+      will-change: transform;
+      transform-origin: center center;
+      /* Parte a scala 8: le lettere sono così grandi che
+         vedi solo blocchi neri che occupano tutto lo schermo */
+      transform: scale(8);
+    }
+
+    /* LAYER 3 — Overlay bianco per dissolve finale */
+    #white-overlay {
+      position: absolute;
+      inset: 0; background: #fff;
+      z-index: 3; opacity: 0;
       pointer-events: none;
       will-change: opacity;
     }
 
-    /* LAYER 3 — Overlay nero con buchi a forma di lettere
-       Tecnica: sfondo nero + testo con mix-blend-mode:destination-out
-       Le lettere "bucano" il nero → foto visibile SOLO nelle lettere */
-    #mask-layer {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      /* isolation fondamentale: il blend agisce solo dentro questo layer */
-      isolation: isolate;
-      background: #000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    /* Le lettere nere bucano il layer nero */
-    .title-line {
-      font-family: 'Bebas Neue', sans-serif;
-      /* PARTONO ENORMISSIME — vedi solo blocchi neri */
-      font-size: clamp(200px, 42vw, 600px);
-      line-height: 0.82;
-      letter-spacing: -0.02em;
-      color: #000;
-      display: block;
-      text-align: center;
-      /* Questo è il trucco: le lettere nere bucano lo sfondo nero
-         rendendo quelle zone trasparenti → la foto si vede attraverso */
-      mix-blend-mode: destination-out;
-      will-change: font-size, transform;
-      /* Bordo bianco delle lettere */
-      -webkit-text-stroke: 3px rgba(255,255,255,0.15);
-    }
-
-    /* SPACER per lo scroll */
-    #hero-spacer { height: 220vh; }
+    /* ══ SPACER ══ */
+    #hero-spacer { height: 250vh; }
 
     /* ══ SEZIONI TESTO ══ */
     .text-section {
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 10vw;
-      background: #000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 10vw; background: #000;
     }
-
     .text-section .inner {
-      max-width: 680px;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(40px);
+      max-width: 680px; text-align: center;
+      opacity: 0; transform: translateY(40px);
     }
-
     .text-section .label {
-      font-size: 11px;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: #444;
-      margin-bottom: 20px;
+      font-size: 11px; letter-spacing: 0.3em;
+      text-transform: uppercase; color: #444; margin-bottom: 20px;
     }
-
     .text-section p {
       font-size: clamp(15px, 2.2vw, 20px);
-      font-weight: 300;
-      line-height: 1.75;
-      color: #aaa;
+      font-weight: 300; line-height: 1.75; color: #aaa;
     }
-
     footer {
-      padding: 60px 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 60px 0; display: flex;
+      align-items: center; justify-content: center;
       font-family: 'Bebas Neue', sans-serif;
       font-size: clamp(24px, 4vw, 48px);
-      letter-spacing: 0.12em;
-      color: #222;
+      letter-spacing: 0.12em; color: #222;
       border-top: 1px solid #111;
     }
   </style>
 </head>
 <body>
 
-  <div id="hero-wrapper">
-    <section id="hero">
+<div id="hero-wrapper">
+  <section id="hero">
 
-      <!-- L1: Foto -->
-      <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
+    <!-- L1: Foto -->
+    <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
 
-      <!-- L2: Bianco che si dissolve dentro le lettere -->
-      <div id="white-fill"></div>
+    <!-- L2: SVG MASK — nero pieno con buchi a forma di "GABRIELE" e "MADEO"
+         Tecnica identica al sito GTA VI: SVG con <mask> che usa <text>
+         Il rettangolo nero copre tutto, il testo bianco dentro la mask
+         crea i "buchi" trasparenti dove si vede la foto sotto -->
+    <svg id="svg-overlay"
+         viewBox="0 0 100 100"
+         preserveAspectRatio="xMidYMid slice"
+         xmlns="http://www.w3.org/2000/svg">
 
-      <!-- L3: Nero con lettere-buco -->
-      <div id="mask-layer">
-        <span class="title-line" id="line-g">Gabriele</span>
-        <span class="title-line" id="line-m">Madeo</span>
-      </div>
+      <defs>
+        <mask id="textMask" maskUnits="userSpaceOnUse"
+              x="0" y="0" width="100" height="100">
+          <!-- Rettangolo bianco = tutto visibile (nero dell'overlay) -->
+          <rect x="0" y="0" width="100" height="100" fill="white"/>
+          <!-- Testo nero = buco trasparente dove si vede la foto -->
+          <text
+            x="50" y="52"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            font-family="'Bebas Neue', sans-serif"
+            font-size="18"
+            letter-spacing="-0.3"
+            fill="black">GABRIELE</text>
+          <text
+            x="50" y="72"
+            text-anchor="middle"
+            dominant-baseline="middle"
+            font-family="'Bebas Neue', sans-serif"
+            font-size="18"
+            letter-spacing="-0.3"
+            fill="black">MADEO</text>
+        </mask>
+      </defs>
 
-    </section>
-    <div id="hero-spacer"></div>
+      <!-- Rettangolo nero mascherato: copre tutto tranne le lettere -->
+      <rect x="0" y="0" width="100" height="100"
+            fill="black"
+            mask="url(#textMask)"/>
+    </svg>
+
+    <!-- L3: Bianco dissolve -->
+    <div id="white-overlay"></div>
+
+  </section>
+  <div id="hero-spacer"></div>
+</div>
+
+<!-- SEZIONI -->
+<section class="text-section">
+  <div class="inner">
+    <div class="label">Chi sono</div>
+    <p>Sono un IT Systems Integrator in formazione all'ITS Umbria Academy,
+       appassionato di reti, cloud e sviluppo web. Costruisco soluzioni
+       digitali dall'infrastruttura all'interfaccia.</p>
   </div>
+</section>
 
-  <section class="text-section">
-    <div class="inner">
-      <div class="label">Chi sono</div>
-      <p>Sono un IT Systems Integrator in formazione all'ITS Umbria Academy,
-         appassionato di reti, cloud e sviluppo web. Costruisco soluzioni
-         digitali dall'infrastruttura all'interfaccia.</p>
-    </div>
-  </section>
+<section class="text-section">
+  <div class="inner">
+    <div class="label">Competenze</div>
+    <p>Networking, Docker, Flask, React, MySQL, Linux.
+       Stack moderni, automazione e sempre alla ricerca
+       della prossima sfida tecnica.</p>
+  </div>
+</section>
 
-  <section class="text-section">
-    <div class="inner">
-      <div class="label">Competenze</div>
-      <p>Networking, Docker, Flask, React, MySQL, Linux.
-         Stack moderni, automazione e sempre alla ricerca
-         della prossima sfida tecnica.</p>
-    </div>
-  </section>
+<section class="text-section">
+  <div class="inner">
+    <div class="label">Progetti</div>
+    <p>Dai container Docker alle web app full-stack,
+       ogni progetto è un'opportunità di crescita.
+       Esplora il mio lavoro su GitHub.</p>
+  </div>
+</section>
 
-  <section class="text-section">
-    <div class="inner">
-      <div class="label">Progetti</div>
-      <p>Dai container Docker alle web app full-stack,
-         ogni progetto è un'opportunità di crescita.
-         Esplora il mio lavoro su GitHub.</p>
-    </div>
-  </section>
+<footer>gabriele madeo © 2026</footer>
 
-  <footer>gabriele madeo © 2026</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+/*
+  SEQUENZA ESATTA COME GTA VI — SVG MASK + SCROLL
+  ──────────────────────────────────────────────────
+  INIZIO:   SVG scala 8x → vedi solo blocchi neri enormi
+            (come sul sito: vedi "hef" "aut" — lettere tagliate)
 
-  <script>
-    gsap.registerPlugin(ScrollTrigger);
+  FASE 1  [0.00 → 0.55]
+    SVG scale: 8 → 1
+    Le forme nere si rivelano come lettere "GABRIELE" / "MADEO"
+    La foto si vede nitida attraverso i buchi delle lettere
+    Foto: zoom-out leggero (scale 1.15 → 1.0)
 
-    /*
-    ════════════════════════════════════════════
-    SEQUENZA ESATTA (come GTA VI):
+  FASE 2  [0.45 → 0.75]
+    Foto dentro le lettere: si sfocha (blur 0 → 16px)
+    + diventa più chiara (brightness aumenta)
+    → effetto: foto si dissolve in bianco dentro le lettere
 
-    FASE 1  [0.00 → 0.55]
-      Le lettere partono a font-size ENORME (42vw → ~14vw)
-      Vedi solo blocchi neri → scorrendo si rivelano come lettere
-      "GABRIELE" scende leggermente dall'alto mentre rimpicciolisce
-      "MADEO" sale leggermente dal basso mentre rimpicciolisce
-      La foto è già visibile nei buchi delle lettere
+  FASE 3  [0.72 → 1.00]
+    Overlay bianco: opacity 0 → 1
+    Tutto scompare nel bianco → arrivano le sezioni
+  ──────────────────────────────────────────────────
+*/
 
-    FASE 2  [0.30 → 0.70]
-      Il bianco inside le lettere cresce (white-fill opacity 0→1)
-      La foto dentro le lettere diventa bianca progressivamente
-      Le lettere mantengono il bordo nero
+const tl = gsap.timeline({
+  scrollTrigger: {
+    trigger: "#hero-wrapper",
+    start: "top top",
+    end: "bottom bottom",
+    scrub: 2,
+    pin: "#hero",
+  }
+});
 
-    FASE 3  [0.70 → 1.00]
-      Tutto il mask-layer (nero + lettere) fa fade out
-      Rimane solo schermo bianco → poi arrivano le sezioni
-    ════════════════════════════════════════════
-    */
+// FASE 1: SVG zoom-out (la cosa principale — identica a GTA VI)
+tl.fromTo("#svg-overlay",
+  { scale: 8 },
+  { scale: 1, ease: "none" },
+  0
+)
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: "#hero-wrapper",
-        start: "top top",
-        end: "bottom bottom",
-        scrub: 2,
-        pin: "#hero",
-      }
-    });
+// Foto: leggero zoom-out sincrono
+.fromTo("#hero-bg",
+  { scale: 1.15 },
+  { scale: 1.0, ease: "none" },
+  0
+)
 
-    // ── FASE 1: lettere si rimpiccioliscono (zoom-out delle lettere)
-    // Da enormi (scala 1 = già al font-size clamp(200px,42vw,600px))
-    // a dimensione leggibile (~14vw equivalente = scala 0.33)
+// FASE 2: foto si sfocha + schiarisce dentro le lettere
+.to("#hero-bg",
+  {
+    filter: "blur(14px) brightness(2) saturate(0.3)",
+    ease: "none"
+  },
+  0.45
+)
 
-    tl.fromTo("#line-g",
-      { scale: 1, y: "-8vh" },
-      { scale: 0.33, y: "0vh", ease: "none" },
-      0
-    )
+// FASE 3: overlay bianco appare → dissolve tutto
+.to("#white-overlay",
+  { opacity: 1, ease: "none" },
+  0.72
+)
 
-    .fromTo("#line-m",
-      { scale: 1, y: "8vh" },
-      { scale: 0.33, y: "0vh", ease: "none" },
-      0
-    )
-
-    // Foto: leggerissimo zoom-out mentre le lettere si rimpiccioliscono
-    .fromTo("#hero-bg",
-      { scale: 1.1 },
-      { scale: 1.0, ease: "none" },
-      0
-    )
-
-    // ── FASE 2: bianco invade l'interno delle lettere
-    // white-fill appare → essendo sotto mask-layer ma sopra la foto,
-    // il suo bianco è visibile SOLO nei buchi delle lettere
-
-    .to("#white-fill",
-      { opacity: 1, ease: "none" },
-      0.30
-    )
-
-    // La foto si sfocha mentre il bianco avanza
-    .to("#hero-bg",
-      {
-        filter: "blur(8px) brightness(1.6) saturate(0.2)",
-        ease: "none"
-      },
-      0.30
-    )
-
-    // ── FASE 3: mask-layer (nero) scompare → schermo bianco totale
-    .to("#mask-layer",
-      { opacity: 0, ease: "none" },
-      0.72
-    )
-
-    .to("#hero-bg",
-      { opacity: 0, ease: "none" },
-      0.72
-    );
+// SVG scala leggermente su mentre scompare nel bianco
+.to("#svg-overlay",
+  { scale: 1.06, ease: "none" },
+  0.72
+);
 
 
-    /* ── SEZIONI TESTO ── */
-    document.querySelectorAll(".text-section .inner").forEach((el) => {
-      gsap.to(el, {
-        opacity: 1, y: 0, ease: "none",
-        scrollTrigger: {
-          trigger: el,
-          start: "top 78%",
-          end: "top 35%",
-          scrub: true,
-        }
-      });
-      gsap.to(el, {
-        opacity: 0, y: -40, ease: "none",
-        scrollTrigger: {
-          trigger: el,
-          start: "bottom 65%",
-          end: "bottom 20%",
-          scrub: true,
-        }
-      });
-    });
-  </script>
+/* SEZIONI TESTO */
+document.querySelectorAll(".text-section .inner").forEach((el) => {
+  gsap.to(el, {
+    opacity: 1, y: 0, ease: "none",
+    scrollTrigger: { trigger: el, start: "top 78%", end: "top 35%", scrub: true }
+  });
+  gsap.to(el, {
+    opacity: 0, y: -40, ease: "none",
+    scrollTrigger: { trigger: el, start: "bottom 65%", end: "bottom 20%", scrub: true }
+  });
+});
+</script>
 
 </body>
 </html>
