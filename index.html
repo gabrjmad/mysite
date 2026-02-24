@@ -18,7 +18,7 @@
 
     #scroll-container {
       position: relative;
-      height: 500vh;
+      height: 500vh; /* Alto per scrub lungo e fluido come GTA */
     }
 
     #sticky-hero {
@@ -39,13 +39,10 @@
       object-position: center 20%;
       z-index: 1;
       will-change: filter, transform;
-      transform: scale(1.08);
+      transform: scale(1.1); /* Leggero zoom-in iniziale per parallax GTA-like */
     }
 
-    /* LAYER 2 — Pannello bianco che schiarisce la foto
-       Sta sopra la foto ma sotto il titolo.
-       Opacity parte da 0 → arriva a 1 scorrendo
-       → la foto si schiarisce progressivamente */
+    /* LAYER 2 — Pannello bianco che schiarisce la foto nelle lettere */
     #white-panel {
       position: absolute;
       inset: 0;
@@ -56,37 +53,18 @@
       pointer-events: none;
     }
 
-    /* LAYER 3 — Canvas overlay (PNG generato via JS)
-       Il canvas ha sfondo nero con lettere trasparenti (bucate).
-       Parte a scale(10) → vedi solo nero.
-       GSAP → scale(1): le lettere si rivelano. */
-    #title-canvas {
+    /* LAYER 3 — Immagine mask titolo (nera con lettere trasparenti) */
+    #title-mask {
       position: absolute;
       inset: 0;
       width: 100%; height: 100%;
+      object-fit: contain; /* Adatta il testo PNG senza distorsioni */
+      object-position: center;
       z-index: 3;
       will-change: transform, opacity;
       transform-origin: center center;
-      transform: scale(10);
-    }
-
-    /* LAYER 4 — Titolo testuale piccolo che appare dopo
-       (il titolo "sale" al centro-alto come su GTA VI) */
-    #title-small {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 4;
-      text-align: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(40px, 6vw, 72px);
-      letter-spacing: 0.08em;
-      color: #fff;
-      opacity: 0;
-      will-change: transform, opacity;
-      pointer-events: none;
-      line-height: 1;
+      opacity: 0; /* Iniziale: trasparente → solo foto visibile */
+      display: block;
     }
 
     /* ══ CONTENUTO ══ */
@@ -123,20 +101,14 @@
 
 <div id="scroll-container">
   <div id="sticky-hero">
-
-    <!-- L1: Foto -->
+    <!-- L1: Foto bg -->
     <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
 
-    <!-- L2: Pannello bianco (schiarisce la foto dentro le lettere) -->
+    <!-- L2: Pannello bianco -->
     <div id="white-panel"></div>
 
-    <!-- L3: Canvas con lettere bucate -->
-    <canvas id="title-canvas"></canvas>
-
-    <!-- L4: Titolo piccolo che sale in alto poi si dissolve -->
-    <div id="title-small">
-      GABRIELE<br>MADEO
-    </div>
+    <!-- L3: Mask immagine titolo (usa title-mask.png dall'allegato) -->
+    <img id="title-mask" src="title-mask.png" alt="GABRIELE MADEO"/>
 
   </div>
 </div>
@@ -169,59 +141,27 @@
   <footer>gabriele madeo © 2026</footer>
 </div>
 
-<!-- Carica Google Font prima di GSAP -->
+<!-- Script con Lenis per scroll fluido GTA-like + GSAP -->
+<script src="https://cdn.skypack.dev/lenis@1"></script>
 <script>
-  // Aspetta che Bebas Neue sia caricato prima di disegnare il canvas
+  // Init Lenis smooth scroll
+  const lenis = new Lenis({
+    duration: 1.2,
+    easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    smooth: true
+  });
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+
+  // Carica fonts poi GSAP
   document.fonts.load('1em "Bebas Neue"').then(() => {
-    initCanvas();
     initGSAP();
   });
 
-  function initCanvas() {
-    const canvas = document.getElementById('title-canvas');
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    canvas.width  = W;
-    canvas.height = H;
-
-    const ctx = canvas.getContext('2d');
-
-    /*
-      TECNICA CANVAS — identica al PNG di GTA VI:
-      1. Riempi tutto di nero opaco
-      2. Imposta globalCompositeOperation = 'destination-out'
-      3. Disegna il testo bianco → "buca" il nero
-      → Risultato: sfondo nero con lettere trasparenti
-    */
-
-    // Step 1: sfondo nero pieno
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, W, H);
-
-    // Step 2: modalità "buca"
-    ctx.globalCompositeOperation = 'destination-out';
-
-    // Step 3: disegna le lettere trasparenti
-    const fontSize = Math.min(W * 0.28, H * 0.38, 320);
-    ctx.font = `900 ${fontSize}px "Bebas Neue", sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = 'rgba(0,0,0,1)'; // colore non importa con destination-out
-
-    const centerX = W / 2;
-    const lineH   = fontSize * 0.92;
-    const totalH  = lineH * 2;
-    const startY  = (H / 2) - (totalH / 2) + lineH;
-
-    ctx.fillText('GABRIELE', centerX, startY);
-    ctx.fillText('MADEO',    centerX, startY + lineH);
-
-    // Ripristina composite normale
-    ctx.globalCompositeOperation = 'source-over';
-  }
-
   function initGSAP() {
-    // GSAP caricato dopo, carichiamolo dinamicamente
     const s1 = document.createElement('script');
     s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
     s1.onload = () => {
@@ -235,109 +175,68 @@
 
   function setupAnimations() {
     gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.scrollerProxy(document.body, {
+      scrollTop(value) {
+        return arguments.length ? lenis.scrollTo(value, { immediate: true }) : lenis.scroll;
+      },
+      getBoundingClientRect() {
+        return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
+      },
+      pinType: "transform"
+    });
 
-    /*
-      SEQUENZA ANIMAZIONE — verificata step by step:
-
-      STATO INIZIALE (scroll = 0):
-        - hero-bg: foto nitida, scale(1.08) ✓
-        - title-canvas: scale(10) → solo nero pieno, ZERO lettere visibili ✓
-        - white-panel: opacity 0 → trasparente ✓
-        - title-small: opacity 0 ✓
-
-      FASE 1 [0 → 0.50]: canvas scale 10 → 1
-        Le forme nere si rivelano come "GABRIELE" "MADEO"
-        La foto nitida è visibile nei buchi delle lettere ✓
-
-      FASE 2 [0.40 → 0.72]: white-panel opacity 0 → 0.88
-        Il pannello bianco si sovrappone alla foto DENTRO le lettere
-        (fuori dalle lettere c'è il nero del canvas → il bianco non si vede lì)
-        → effetto: foto dentro le lettere diventa sempre più chiara/bianca ✓
-        Lo sfondo nero NON cambia mai ✓
-
-      FASE 3 [0.65 → 0.82]: canvas scale 1 → 1.04 + opacity 1 → 0
-        Il canvas (nero+lettere) svanisce
-        Rimane per un attimo la foto + pannello bianco
-
-      FASE 4 [0.72 → 0.88]: title-small appare e sale verso l'alto
-        opacity 0 → 1, poi y va verso top: 15%
-
-      FASE 5 [0.85 → 0.96]: title-small si dissolve + hero-bg scompare
-        opacity → 0 entrambi
-        Schermo nero → arriva il contenuto ✓
-    */
-
+    // Timeline principale: più fluida, timings GTA-inspired
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: "#scroll-container",
         start: "top top",
         end: "bottom bottom",
-        scrub: 2.2,
+        scrub: 1.5, /* Più reattivo */
+        pin: "#sticky-hero" /* Pin hero come GTA */
       }
     });
 
-    // FASE 1: canvas zoom-out
-    tl.fromTo("#title-canvas",
-      { scale: 10 },
-      { scale: 1, ease: "power2.out", duration: 0.50 },
-      0
-    )
-    // Foto: leggero zoom-out sincrono
-    .fromTo("#hero-bg",
-      { scale: 1.08 },
-      { scale: 1.0, ease: "power2.out", duration: 0.50 },
-      0
-    )
+    // FASE 1: Reveal mask (fade-in nero con buchi → foto nel testo)
+    tl.to("#title-mask", { opacity: 1, scale: 1.02, ease: "power3.out", duration: 0.45 }, 0)
+    // Parallax foto
+      .to("#hero-bg", { scale: 1.02, ease: "power3.out", duration: 0.45 }, 0);
 
-    // FASE 2: pannello bianco sale (foto dentro lettere si schiarisce)
-    .to("#white-panel",
-      { opacity: 0.88, ease: "power1.inOut", duration: 0.32 },
-      0.40
-    )
+    // FASE 2: Schiarisci foto nel testo
+    .to("#white-panel", { opacity: 0.92, ease: "power2.inOut", duration: 0.35 }, 0.35);
 
-    // FASE 3: canvas svanisce (leggermente scala su mentre esce)
-    .to("#title-canvas",
-      { scale: 1.05, opacity: 0, ease: "power1.in", duration: 0.17 },
-      0.65
-    )
+    // FASE 3: Mask sale leggermente + inizia a salire verso top (titolo va in alto)
+    .to("#title-mask", { yPercent: -65, scale: 1.08, opacity: 0.95, ease: "power2.inOut", duration: 0.4 }, 0.75)
+    // Foto sfuma mentre titolo sale
+      .to("#hero-bg", { opacity: 0.3, ease: "power2.in", duration: 0.25 }, 1.0);
 
-    // FASE 4: title-small appare e sale in alto
-    .fromTo("#title-small",
-      { opacity: 0, top: "50%" },
-      { opacity: 1, top: "50%", ease: "power2.out", duration: 0.14 },
-      0.72
-    )
-    .to("#title-small",
-      { top: "14%", ease: "power2.inOut", duration: 0.13 },
-      0.82
-    )
+    // FASE 4: Mask svanisce parzialmente, schermo nero per content
+    .to("#title-mask", { opacity: 0, ease: "power2.in", duration: 0.3 }, 1.3)
+    .to("#white-panel", { opacity: 0, ease: "power2.in", duration: 0.2 }, 1.3);
 
-    // FASE 5: title-small e foto scompaiono → schermo nero
-    .to("#title-small",
-      { opacity: 0, ease: "power1.in", duration: 0.10 },
-      0.88
-    )
-    .to("#hero-bg",
-      { opacity: 0, ease: "power1.in", duration: 0.10 },
-      0.88
-    )
-    .to("#white-panel",
-      { opacity: 0, ease: "power1.in", duration: 0.10 },
-      0.88
-    );
-
-    // SEZIONI TESTO
-    ["#sec1","#sec2","#sec3"].forEach((id) => {
-      const el = document.querySelector(id);
-      gsap.to(el, {
-        opacity: 1, y: 0, ease: "power2.out",
-        scrollTrigger: { trigger: el, start: "top 75%", end: "top 32%", scrub: 1 }
+    // Sezioni: Competenze emerge mentre titolo sale (timing su sec2)
+    ["#sec1", "#sec2", "#sec3"].forEach((id, i) => {
+      gsap.to(id, {
+        opacity: 1, y: 0, ease: "power3.out",
+        scrollTrigger: {
+          trigger: id,
+          start: "top 80%",
+          end: "top 40%",
+          scrub: 1.2
+        }
       });
-      gsap.to(el, {
-        opacity: 0, y: -30, ease: "power2.in",
-        scrollTrigger: { trigger: el, start: "bottom 68%", end: "bottom 25%", scrub: 1 }
+      gsap.to(id, {
+        opacity: 0, y: -40, ease: "power3.in",
+        scrollTrigger: {
+          trigger: id,
+          start: "bottom 70%",
+          end: "bottom 30%",
+          scrub: 1
+        }
       });
     });
+
+    // Refresh ScrollTrigger dopo Lenis
+    ScrollTrigger.refresh();
   }
 </script>
 
