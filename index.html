@@ -16,9 +16,7 @@
       overflow-x: hidden;
     }
 
-    /* ══════════════════════════════════════
-       HERO SECTION — pinned durante lo scroll
-    ══════════════════════════════════════ */
+    /* ══ HERO ══ */
     #hero {
       position: relative;
       width: 100%;
@@ -27,113 +25,68 @@
       background: #000;
     }
 
-    /* Foto fullscreen — sta sotto tutto */
+    /* LAYER 1 — Foto fullscreen sotto tutto */
     #hero-bg {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center top;
-      transform-origin: center center;
-      will-change: transform, filter, opacity;
+      object-position: center;
       z-index: 1;
-    }
-
-    /* ── OVERLAY NERO con buco a forma di testo ──
-       Questo è il cuore dell'effetto GTA VI:
-       un div nero a tutto schermo con le lettere
-       ritagliate usando mix-blend-mode + SVG mask
-    */
-    #title-mask-wrapper {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      /* Sfondo nero che copre tutto tranne i buchi delle lettere */
-      background: #000;
-      /* Le lettere saranno "buchi" tramite mask */
-      -webkit-mask-image: url(#text-mask);
-      mask-image: url(#text-mask);
-    }
-
-    /* 
-      Approccio alternativo più compatibile:
-      Usiamo due livelli:
-      1. La foto (z-index:1) visibile ovunque
-      2. Un overlay nero (z-index:2) che copre tutto
-      3. Il testo (z-index:3) con mix-blend-mode:destination-out
-         che "buca" l'overlay nero → la foto si vede solo nelle lettere
-    */
-
-    #black-overlay {
-      position: absolute;
-      inset: 0;
-      background: #000;
-      z-index: 2;
-      will-change: opacity;
-    }
-
-    /* Il contenitore del testo usa isolation per il blend */
-    #title-container {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      /* isolation:isolate fa sì che il mix-blend-mode
-         agisca solo sull'overlay nero sotto, non sulla foto */
-      isolation: isolate;
-      will-change: opacity;
-    }
-
-    .title-line {
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(110px, 23vw, 280px);
-      line-height: 0.85;
-      letter-spacing: -0.01em;
-      color: #000; /* nero */
-      display: block;
-      text-align: center;
-      will-change: transform, opacity;
-      /* Questo "buca" l'overlay nero → la foto appare nelle lettere */
-      mix-blend-mode: destination-out;
-    }
-
-    /* Wrapper separato per il blur della foto nelle lettere */
-    #hero-bg-blur {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center top;
-      z-index: 4; /* sopra l'overlay ma sotto il testo "buco" */
       will-change: filter, opacity;
-      opacity: 0; /* appare solo quando vogliamo il blur nelle lettere */
-      filter: blur(0px);
-      /* Questa foto si renderizza SOLO dove il testo ha fatto il buco */
     }
 
-    /* Overlay bianco per l'effetto dissolve finale */
-    #white-overlay {
+    /* LAYER 2 — Overlay bianco che si dissolve sulla foto */
+    #white-fill {
       position: absolute;
       inset: 0;
       background: #fff;
-      z-index: 10;
+      z-index: 2;
       opacity: 0;
       pointer-events: none;
       will-change: opacity;
     }
 
-    /* ── SPACER ── */
-    #hero-spacer { height: 200vh; }
+    /* LAYER 3 — Overlay nero con buchi a forma di lettere
+       Tecnica: sfondo nero + testo con mix-blend-mode:destination-out
+       Le lettere "bucano" il nero → foto visibile SOLO nelle lettere */
+    #mask-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      /* isolation fondamentale: il blend agisce solo dentro questo layer */
+      isolation: isolate;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
 
-    /* ── SEZIONI TESTO ── */
+    /* Le lettere nere bucano il layer nero */
+    .title-line {
+      font-family: 'Bebas Neue', sans-serif;
+      /* PARTONO ENORMISSIME — vedi solo blocchi neri */
+      font-size: clamp(200px, 42vw, 600px);
+      line-height: 0.82;
+      letter-spacing: -0.02em;
+      color: #000;
+      display: block;
+      text-align: center;
+      /* Questo è il trucco: le lettere nere bucano lo sfondo nero
+         rendendo quelle zone trasparenti → la foto si vede attraverso */
+      mix-blend-mode: destination-out;
+      will-change: font-size, transform;
+      /* Bordo bianco delle lettere */
+      -webkit-text-stroke: 3px rgba(255,255,255,0.15);
+    }
+
+    /* SPACER per lo scroll */
+    #hero-spacer { height: 220vh; }
+
+    /* ══ SEZIONI TESTO ══ */
     .text-section {
       min-height: 100vh;
       display: flex;
@@ -144,7 +97,7 @@
     }
 
     .text-section .inner {
-      max-width: 700px;
+      max-width: 680px;
       text-align: center;
       opacity: 0;
       transform: translateY(40px);
@@ -154,27 +107,27 @@
       font-size: 11px;
       letter-spacing: 0.3em;
       text-transform: uppercase;
-      color: #555;
-      margin-bottom: 24px;
+      color: #444;
+      margin-bottom: 20px;
     }
 
     .text-section p {
-      font-size: clamp(16px, 2.5vw, 22px);
+      font-size: clamp(15px, 2.2vw, 20px);
       font-weight: 300;
-      line-height: 1.7;
-      color: #bbb;
+      line-height: 1.75;
+      color: #aaa;
     }
 
     footer {
-      min-height: 40vh;
+      padding: 60px 0;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(30px, 6vw, 60px);
-      letter-spacing: 0.1em;
-      color: #2a2a2a;
-      border-top: 1px solid #1a1a1a;
+      font-size: clamp(24px, 4vw, 48px);
+      letter-spacing: 0.12em;
+      color: #222;
+      border-top: 1px solid #111;
     }
   </style>
 </head>
@@ -183,34 +136,28 @@
   <div id="hero-wrapper">
     <section id="hero">
 
-      <!-- LAYER 1: Foto nitida (sotto tutto) -->
+      <!-- L1: Foto -->
       <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
 
-      <!-- LAYER 2: Overlay nero (verrà "bucato" dal testo) -->
-      <div id="black-overlay"></div>
+      <!-- L2: Bianco che si dissolve dentro le lettere -->
+      <div id="white-fill"></div>
 
-      <!-- LAYER 3: Testo con mix-blend-mode destination-out
-           → le lettere nere "bucano" l'overlay nero
-           → la foto è visibile SOLO dentro le lettere -->
-      <div id="title-container">
-        <span class="title-line" id="line-gabriele">Gabriele</span>
-        <span class="title-line" id="line-madeo">Madeo</span>
+      <!-- L3: Nero con lettere-buco -->
+      <div id="mask-layer">
+        <span class="title-line" id="line-g">Gabriele</span>
+        <span class="title-line" id="line-m">Madeo</span>
       </div>
-
-      <!-- LAYER 4: Overlay bianco per dissolvenza finale -->
-      <div id="white-overlay"></div>
 
     </section>
     <div id="hero-spacer"></div>
   </div>
 
-  <!-- SEZIONI -->
   <section class="text-section">
     <div class="inner">
       <div class="label">Chi sono</div>
       <p>Sono un IT Systems Integrator in formazione all'ITS Umbria Academy,
-        appassionato di reti, cloud e sviluppo web. Costruisco soluzioni
-        digitali dall'infrastruttura all'interfaccia.</p>
+         appassionato di reti, cloud e sviluppo web. Costruisco soluzioni
+         digitali dall'infrastruttura all'interfaccia.</p>
     </div>
   </section>
 
@@ -218,8 +165,8 @@
     <div class="inner">
       <div class="label">Competenze</div>
       <p>Networking, Docker, Flask, React, MySQL, Linux.
-        Lavoro su stack moderni e amo l'automazione.
-        Sempre alla ricerca della prossima sfida tecnica.</p>
+         Stack moderni, automazione e sempre alla ricerca
+         della prossima sfida tecnica.</p>
     </div>
   </section>
 
@@ -227,8 +174,8 @@
     <div class="inner">
       <div class="label">Progetti</div>
       <p>Dai container Docker alle web app full-stack,
-        ogni progetto è un'opportunità di crescita.
-        Esplora il mio lavoro su GitHub.</p>
+         ogni progetto è un'opportunità di crescita.
+         Esplora il mio lavoro su GitHub.</p>
     </div>
   </section>
 
@@ -241,24 +188,25 @@
     gsap.registerPlugin(ScrollTrigger);
 
     /*
-      SEQUENZA ANIMAZIONE (come GTA VI):
-      ────────────────────────────────────────────
-      FASE 1 [0.00 → 0.35]
-        - Foto fullscreen: leggero zoom-out
-        - Overlay nero: opacity 0 → 1 (copre la foto)
-        - "GABRIELE": scende dall'alto (y: -100vh → 0)
-        - "MADEO":    sale dal basso  (y: +100vh → 0)
-        → Le lettere nere bucano l'overlay: foto visibile solo nelle lettere
+    ════════════════════════════════════════════
+    SEQUENZA ESATTA (come GTA VI):
 
-      FASE 2 [0.35 → 0.65]
-        - Foto nitida: si sfocha progressivamente (blur 0 → 20px)
-        - Foto: leggero zoom IN mentre si sfocha (effetto GTA)
-        - Le lettere rimangono ferme
+    FASE 1  [0.00 → 0.55]
+      Le lettere partono a font-size ENORME (42vw → ~14vw)
+      Vedi solo blocchi neri → scorrendo si rivelano come lettere
+      "GABRIELE" scende leggermente dall'alto mentre rimpicciolisce
+      "MADEO" sale leggermente dal basso mentre rimpicciolisce
+      La foto è già visibile nei buchi delle lettere
 
-      FASE 3 [0.65 → 1.00]
-        - Overlay bianco: opacity 0 → 1 (dissolvenza totale in bianco)
-        - Testo: scale up leggerissimo mentre scompare nel bianco
-      ────────────────────────────────────────────
+    FASE 2  [0.30 → 0.70]
+      Il bianco inside le lettere cresce (white-fill opacity 0→1)
+      La foto dentro le lettere diventa bianca progressivamente
+      Le lettere mantengono il bordo nero
+
+    FASE 3  [0.70 → 1.00]
+      Tutto il mask-layer (nero + lettere) fa fade out
+      Rimane solo schermo bianco → poi arrivano le sezioni
+    ════════════════════════════════════════════
     */
 
     const tl = gsap.timeline({
@@ -266,65 +214,61 @@
         trigger: "#hero-wrapper",
         start: "top top",
         end: "bottom bottom",
-        scrub: 1.8,
+        scrub: 2,
         pin: "#hero",
       }
     });
 
-    // ── FASE 1: lettere entrano, overlay nero copre ──
+    // ── FASE 1: lettere si rimpiccioliscono (zoom-out delle lettere)
+    // Da enormi (scala 1 = già al font-size clamp(200px,42vw,600px))
+    // a dimensione leggibile (~14vw equivalente = scala 0.33)
 
-    // Overlay nero: appare (0 → 1)
-    tl.fromTo("#black-overlay",
-      { opacity: 0 },
-      { opacity: 1, ease: "none" },
+    tl.fromTo("#line-g",
+      { scale: 1, y: "-8vh" },
+      { scale: 0.33, y: "0vh", ease: "none" },
       0
     )
 
-    // Foto: leggero zoom-out mentre l'overlay sale
+    .fromTo("#line-m",
+      { scale: 1, y: "8vh" },
+      { scale: 0.33, y: "0vh", ease: "none" },
+      0
+    )
+
+    // Foto: leggerissimo zoom-out mentre le lettere si rimpiccioliscono
     .fromTo("#hero-bg",
-      { scale: 1.12 },
+      { scale: 1.1 },
       { scale: 1.0, ease: "none" },
       0
     )
 
-    // "GABRIELE" scende dall'alto
-    .fromTo("#line-gabriele",
-      { y: "-80vh", opacity: 0 },
-      { y: "0vh", opacity: 1, ease: "none" },
-      0
+    // ── FASE 2: bianco invade l'interno delle lettere
+    // white-fill appare → essendo sotto mask-layer ma sopra la foto,
+    // il suo bianco è visibile SOLO nei buchi delle lettere
+
+    .to("#white-fill",
+      { opacity: 1, ease: "none" },
+      0.30
     )
 
-    // "MADEO" sale dal basso
-    .fromTo("#line-madeo",
-      { y: "80vh", opacity: 0 },
-      { y: "0vh", opacity: 1, ease: "none" },
-      0
-    )
-
-    // ── FASE 2: foto si sfocha dentro le lettere ──
-
-    // Foto: blur progressivo (0 → 20px) + leggero zoom in
+    // La foto si sfocha mentre il bianco avanza
     .to("#hero-bg",
       {
-        filter: "blur(20px) brightness(1.4) saturate(0.4)",
-        scale: 1.1,
+        filter: "blur(8px) brightness(1.6) saturate(0.2)",
         ease: "none"
       },
-      0.35
+      0.30
     )
 
-    // ── FASE 3: dissolve in bianco ──
-
-    // Overlay bianco: appare
-    .to("#white-overlay",
-      { opacity: 1, ease: "none" },
-      0.65
+    // ── FASE 3: mask-layer (nero) scompare → schermo bianco totale
+    .to("#mask-layer",
+      { opacity: 0, ease: "none" },
+      0.72
     )
 
-    // Testo: scala leggermente su mentre scompare nel bianco
-    .to("#title-container",
-      { scale: 1.08, ease: "none" },
-      0.65
+    .to("#hero-bg",
+      { opacity: 0, ease: "none" },
+      0.72
     );
 
 
