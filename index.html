@@ -17,23 +17,39 @@
       overflow-x: hidden;
     }
 
-    /* ── SCROLL CONTAINER ── */
     #scroll-container {
       position: relative;
-      height: 500vh; /* più lungo = scroll più lento e cinematico */
+      height: 600vh;
     }
 
-    /* ── STICKY HERO ── */
     #sticky-hero {
       position: sticky;
       top: 0;
       height: 100vh;
       width: 100%;
-      overflow: hidden;
       background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
-    /* LAYER 0 — Foto sempre visibile al caricamento */
+    /*
+      #hero-frame è il rettangolo che scala.
+      Parte 100vw × 100vh, poi si rimpicciolisce
+      ma overflow:hidden garantisce che la foto
+      non mostri mai i bordi bianchi/neri.
+    */
+    #hero-frame {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      will-change: transform;
+      transform-origin: center center;
+    }
+
+    /* La foto riempie sempre il frame al 100% */
     #hero-bg {
       position: absolute;
       inset: 0;
@@ -41,30 +57,32 @@
       height: 100%;
       object-fit: cover;
       object-position: center 18%;
-      z-index: 1;
-      transform: scale(1.12);
+      will-change: transform;
+      /* Leggero overscale iniziale per il parallax */
+      transform: scale(1.08);
       transform-origin: center 20%;
-      will-change: transform, opacity;
     }
 
-    /* LAYER 1 — Gradiente subtile per dare profondità alla foto */
+    /* Gradiente atmosferico sulla foto */
     #photo-grad {
       position: absolute;
       inset: 0;
       z-index: 2;
+      pointer-events: none;
       background: linear-gradient(
         to bottom,
-        rgba(0,0,0,0.08) 0%,
-        rgba(0,0,0,0.0)  40%,
-        rgba(0,0,0,0.35) 100%
+        rgba(0,0,0,0.05) 0%,
+        rgba(0,0,0,0.00) 35%,
+        rgba(0,0,0,0.40) 100%
       );
-      pointer-events: none;
     }
 
-    /* LAYER 2 — Canvas: sfondo nero forato dalle lettere.
-       Parte opacity:0 così la foto si vede libera.
-       Poi sale ad opacity:1 → la foto scompare TRANNE
-       attraverso i buchi (le lettere). */
+    /*
+      Canvas: sfondo nero con buchi a forma di lettera.
+      opacity 0 → la foto si vede libera.
+      opacity 1 → il nero copre tutto TRANNE le lettere.
+      Scala insieme al frame.
+    */
     #title-canvas {
       position: absolute;
       inset: 0;
@@ -72,22 +90,21 @@
       height: 100%;
       z-index: 3;
       opacity: 0;
-      will-change: opacity, transform;
-      transform-origin: center center;
+      will-change: opacity;
     }
 
-    /* LAYER 3 — Vignette bordi */
+    /* Vignette — dentro il frame, scala con lui */
     #vignette {
       position: absolute;
       inset: 0;
       z-index: 4;
+      pointer-events: none;
       background: radial-gradient(
         ellipse at center,
-        transparent 18%,
-        rgba(0,0,0,0.42) 58%,
-        rgba(0,0,0,0.90) 100%
+        transparent 15%,
+        rgba(0,0,0,0.38) 55%,
+        rgba(0,0,0,0.88) 100%
       );
-      pointer-events: none;
       opacity: 0;
       will-change: opacity;
     }
@@ -108,12 +125,9 @@
       font-family: "Bebas Neue", sans-serif;
       font-size: 15px;
       letter-spacing: 0.28em;
-      color: #fff;
     }
     #navbar .nav-links {
-      display: flex;
-      gap: 36px;
-      list-style: none;
+      display: flex; gap: 36px; list-style: none;
     }
     #navbar .nav-links a {
       font-size: 10px;
@@ -132,9 +146,8 @@
       z-index: 10;
     }
 
-    /* Ogni sezione occupa più spazio così il testo rimane a schermo più a lungo */
     .text-section {
-      min-height: 120vh;
+      min-height: 130vh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -162,7 +175,6 @@
       font-family: 'Bebas Neue', sans-serif;
       font-size: clamp(52px, 7.5vw, 100px);
       letter-spacing: 0.05em;
-      color: #fff;
       line-height: 1.0;
       margin-bottom: 22px;
     }
@@ -211,10 +223,12 @@
 
 <div id="scroll-container">
   <div id="sticky-hero">
-    <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
-    <div id="photo-grad"></div>
-    <canvas id="title-canvas"></canvas>
-    <div id="vignette"></div>
+    <div id="hero-frame">
+      <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
+      <div id="photo-grad"></div>
+      <canvas id="title-canvas"></canvas>
+      <div id="vignette"></div>
+    </div>
   </div>
 </div>
 
@@ -258,59 +272,48 @@
 </div>
 
 <script>
-/* ─────────────────────────────────────────────────────────
-   CANVAS — sfondo nero + buchi trasparenti a forma di lettera.
-   La foto sotto traspare SOLO attraverso le lettere.
-───────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────
+   CANVAS: sfondo nero + buchi lettera
+───────────────────────────────────── */
 function drawTitleCanvas() {
   const canvas = document.getElementById('title-canvas');
-  const W = window.innerWidth;
-  const H = window.innerHeight;
+  const W = canvas.offsetWidth  || window.innerWidth;
+  const H = canvas.offsetHeight || window.innerHeight;
   canvas.width  = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  // Sfondo nero solido
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, W, H);
 
-  // Calcola dimensione font: riempi circa 78% della larghezza
-  // con la parola più lunga (GABRIELE)
-  let fontSize = 10;
-  ctx.font = `900 ${fontSize}px "Bebas Neue", Impact, sans-serif`;
-  const targetW = W * 0.78;
-  // Scala proporzionalmente basandosi su GABRIELE
-  const testW = ctx.measureText('GABRIELE').width;
-  fontSize = Math.floor(fontSize * (targetW / testW));
-  // Clamp ragionevole
-  fontSize = Math.max(60, Math.min(fontSize, Math.floor(H * 0.40)));
+  // Misura il font per coprire ~80% larghezza con "GABRIELE"
+  let fs = 100;
+  ctx.font = `900 ${fs}px "Bebas Neue", Impact, sans-serif`;
+  const ratio = (W * 0.80) / ctx.measureText('GABRIELE').width;
+  fs = Math.floor(fs * ratio);
+  fs = Math.max(50, Math.min(fs, Math.floor(H * 0.42)));
 
-  ctx.font = `900 ${fontSize}px "Bebas Neue", Impact, sans-serif`;
+  ctx.font = `900 ${fs}px "Bebas Neue", Impact, sans-serif`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'alphabetic';
-
-  // destination-out: i pixel scritti diventano trasparenti
   ctx.globalCompositeOperation = 'destination-out';
   ctx.fillStyle = 'rgba(0,0,0,1)';
 
-  const lineH  = fontSize * 0.90;
+  const lineH  = fs * 0.92;
   const totalH = lineH * 2;
-  // Centra verticalmente le due righe, leggermente sopra il centro
-  const startY = (H - totalH) / 2 + lineH - fontSize * 0.06;
+  const startY = (H - totalH) / 2 + lineH;
 
   ctx.fillText('GABRIELE', W / 2, startY);
   ctx.fillText('MADEO',    W / 2, startY + lineH);
 
-  // Ripristina
   ctx.globalCompositeOperation = 'source-over';
 }
 
-/* ─────────────────────────────────────────────────────────
-   BOOTSTRAP — aspetta font, poi carica GSAP
-───────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────
+   BOOTSTRAP
+───────────────────────────────────── */
 function bootstrap() {
   drawTitleCanvas();
-
   const s1 = document.createElement('script');
   s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
   s1.onload = () => {
@@ -321,153 +324,151 @@ function bootstrap() {
   };
   document.head.appendChild(s1);
 }
-
-// Attende che Bebas Neue sia disponibile prima di disegnare
 document.fonts.load('900 1px "Bebas Neue"').then(bootstrap).catch(bootstrap);
 
-/* ─────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────
    GSAP — Timeline stile GTA VI
 
-   Sequenza:
-   TOP     → foto a tutto schermo visibile (canvas opacity 0)
-   scroll  → canvas appare: foto emerge SOLO dentro le lettere
-           → vignette rinforza i bordi
-           → parallax foto leggero
-   scroll  → canvas scala verso l'alto (logo sale come GTA)
-   scroll  → tutto dissolve nel nero
-   bottom  → navbar appare, sezioni di testo entrano
-───────────────────────────────────────────────────────── */
+   La meccanica GTA VI in 4 atti:
+
+   ATTO 1 (0.00→0.20)
+     La foto è visibile a schermo intero.
+     Il canvas appare → le lettere scolpiscono la foto.
+     Vignette rinforza i bordi.
+
+   ATTO 2 (0.20→0.55)
+     TUTTO (frame = foto + canvas) scala da 1 → ~0.55
+     Effetto "zoom out" mentre vedi il titolo rimpicciolirsi.
+     La foto rimane sempre cropped (overflow:hidden sul frame).
+     Il canvas scala CON il frame → le lettere rimangono
+     proporzionate alla foto, niente bordi visibili.
+
+   ATTO 3 (0.55→0.80)
+     Frame continua a rimpicciolirsi fino a 0.
+     Canvas opacity → 0.
+     Foto opacity → 0.
+     Tutto dissolve nel nero mentre è già piccolo al centro.
+
+   ATTO 4 (0.82→1.00)
+     Navbar appare.
+─────────────────────────────────────────────────────────────────── */
 function initAnimations() {
   gsap.registerPlugin(ScrollTrigger);
 
-  // Stato iniziale: foto visibile, canvas invisibile
-  gsap.set('#title-canvas',  { opacity: 0, scale: 1, y: 0 });
-  gsap.set('#hero-bg',       { scale: 1.12, opacity: 1 });
-  gsap.set('#vignette',      { opacity: 0 });
-  gsap.set('#navbar',        { opacity: 0 });
+  gsap.set('#hero-frame',   { scale: 1,    transformOrigin: 'center center' });
+  gsap.set('#hero-bg',      { scale: 1.08, opacity: 1, transformOrigin: 'center 20%' });
+  gsap.set('#title-canvas', { opacity: 0 });
+  gsap.set('#vignette',     { opacity: 0 });
+  gsap.set('#navbar',       { opacity: 0 });
 
-  /*
-    La timeline copre l'intero scroll-container (500vh).
-    Ogni "duration" è una frazione di quel percorso.
-    
-    0.00            Inizio — foto a schermo intero
-    0.00 → 0.18     Canvas sale da 0→1: lettere scolpiscono la foto
-    0.04 → 0.22     Vignette entra
-    0.04 → 0.60     Foto: zoom-out lento da scale(1.12) → scale(1.0)
-    0.18 → 0.55     Fase stabile — effetto fermo, bello da guardare
-    0.55 → 0.78     Canvas scala + sale (logo GTA che si rimpicciolisce)
-    0.72 → 0.88     Canvas opacity → 0  (lettera scompare)
-    0.72 → 0.88     Foto opacity → 0
-    0.72 → 0.85     Vignette → 0
-    0.88 → 1.00     Navbar appare
-  */
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '#scroll-container',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 2.5,
+      scrub: 2.2,
     }
   });
 
-  // — Fase 1: Canvas rivela le lettere (foto emerge attraverso di esse)
+  /* ── ATTO 1: canvas rivela le lettere ── */
   tl.to('#title-canvas', {
     opacity: 1,
     ease: 'power2.inOut',
-    duration: 0.18
+    duration: 0.20
   }, 0.00);
 
-  // — Vignette entra
   tl.to('#vignette', {
     opacity: 1,
     ease: 'power1.inOut',
-    duration: 0.18
-  }, 0.04);
+    duration: 0.20
+  }, 0.02);
 
-  // — Parallax foto: zoom-out lento durante tutto l'hero
+  /* Parallax leggero sulla foto dentro il frame */
   tl.to('#hero-bg', {
     scale: 1.0,
     ease: 'none',
-    duration: 0.56
-  }, 0.04);
+    duration: 0.60
+  }, 0.00);
 
-  // — Fase 2 stabile (0.18 → 0.55): nessuna animazione, l'effetto è fermo
+  /* ── ATTO 2: tutto il frame si rimpicciolisce
+     Il frame parte 100% e scala a 0.52 (come GTA VI
+     che porta il logo da fullscreen a un riquadro centrale) ── */
+  tl.to('#hero-frame', {
+    scale: 0.52,
+    ease: 'power1.inOut',
+    duration: 0.35
+  }, 0.20);
 
-  // — Fase 3: Logo si rimpicciolisce e sale verso l'alto (identico a GTA VI)
-  tl.to('#title-canvas', {
-    scale: 0.26,
-    y: '-26vh',
-    ease: 'power2.inOut',
-    duration: 0.23
-  }, 0.55);
+  /* ── ATTO 3: dissolve mentre è già piccolo ── */
 
-  // — Fase 4: Tutto dissolve nel nero
+  // Canvas sparisce un po' prima del frame
   tl.to('#title-canvas', {
     opacity: 0,
-    ease: 'power3.in',
-    duration: 0.16
-  }, 0.72);
+    ease: 'power2.in',
+    duration: 0.14
+  }, 0.55);
+
+  // Frame scala a 0 e dissolve insieme
+  tl.to('#hero-frame', {
+    scale: 0.30,
+    ease: 'power2.in',
+    duration: 0.20
+  }, 0.57);
 
   tl.to('#hero-bg', {
     opacity: 0,
     ease: 'power2.in',
-    duration: 0.16
-  }, 0.72);
+    duration: 0.18
+  }, 0.60);
 
   tl.to('#vignette', {
     opacity: 0,
     ease: 'power1.in',
-    duration: 0.13
-  }, 0.73);
+    duration: 0.14
+  }, 0.60);
 
-  // — Fase 5: Navbar appare
+  /* ── ATTO 4: navbar ── */
   tl.to('#navbar', {
     opacity: 1,
     ease: 'power2.out',
     duration: 0.12
-  }, 0.88);
+  }, 0.82);
 
-  /* ─── SEZIONI DI TESTO ─────────────────────────────────
-     Entrano lentamente dal basso, restano a schermo a lungo,
-     poi escono verso l'alto. Distanze di scrub ampliate
-     per massimizzare il tempo di lettura (stile GTA VI).
-  ───────────────────────────────────────────────────────── */
+  /* ─────────────────────────────────────────────────────
+     SEZIONI — entrano lente dal basso, escono verso l'alto.
+     Range di scrub molto ampi = testo visibile a lungo.
+  ───────────────────────────────────────────────────── */
   ['#sec1', '#sec2', '#sec3'].forEach((id) => {
     const el = document.querySelector(id);
     if (!el) return;
 
-    // ENTRA: percorso lungo → animazione lenta e cinematica
     gsap.fromTo(el,
-      { opacity: 0, y: 80 },
+      { opacity: 0, y: 90 },
       {
-        opacity: 1,
-        y: 0,
+        opacity: 1, y: 0,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: el,
-          start: 'top 92%',
-          end: 'top 35%',
-          scrub: 1.8
+          start: 'top 95%',
+          end: 'top 30%',
+          scrub: 2.0
         }
       }
     );
 
-    // ESCE: altrettanto lungo per non sparire troppo in fretta
     gsap.to(el, {
-      opacity: 0,
-      y: -80,
+      opacity: 0, y: -90,
       ease: 'power3.in',
       scrollTrigger: {
         trigger: el,
-        start: 'bottom 70%',
-        end: 'bottom 10%',
-        scrub: 1.8
+        start: 'bottom 72%',
+        end: 'bottom 5%',
+        scrub: 2.0
       }
     });
   });
 
-  // Divisori
-  ['#div0', '#div1', '#div2'].forEach((id) => {
+  ['#div0','#div1','#div2'].forEach((id) => {
     const el = document.querySelector(id);
     if (!el) return;
     gsap.to(el, {
@@ -481,11 +482,11 @@ function initAnimations() {
     });
   });
 
-  // Resize con debounce
-  let resizeTimer;
+  /* Resize */
+  let t;
   window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
+    clearTimeout(t);
+    t = setTimeout(() => {
       document.fonts.ready.then(() => {
         drawTitleCanvas();
         ScrollTrigger.refresh();
