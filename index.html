@@ -17,6 +17,9 @@
       overflow-x: hidden;
     }
 
+    /* ════════════════════════════════
+       HERO SCROLL CONTAINER
+    ════════════════════════════════ */
     #scroll-container {
       position: relative;
       height: 600vh;
@@ -28,28 +31,13 @@
       height: 100vh;
       width: 100%;
       background: #000;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
     }
 
-    /*
-      #hero-frame è il rettangolo che scala.
-      Parte 100vw × 100vh, poi si rimpicciolisce
-      ma overflow:hidden garantisce che la foto
-      non mostri mai i bordi bianchi/neri.
-    */
-    #hero-frame {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      will-change: transform;
-      transform-origin: center center;
-    }
-
-    /* La foto riempie sempre il frame al 100% */
+    /* ── FOTO: sempre centrata, sempre cropped ── */
     #hero-bg {
       position: absolute;
       inset: 0;
@@ -57,31 +45,18 @@
       height: 100%;
       object-fit: cover;
       object-position: center 18%;
-      will-change: transform;
-      /* Leggero overscale iniziale per il parallax */
-      transform: scale(1.08);
+      z-index: 1;
+      transform: scale(1.18);
       transform-origin: center 20%;
-    }
-
-    /* Gradiente atmosferico sulla foto */
-    #photo-grad {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-      background: linear-gradient(
-        to bottom,
-        rgba(0,0,0,0.05) 0%,
-        rgba(0,0,0,0.00) 35%,
-        rgba(0,0,0,0.40) 100%
-      );
+      will-change: transform, filter;
     }
 
     /*
-      Canvas: sfondo nero con buchi a forma di lettera.
-      opacity 0 → la foto si vede libera.
-      opacity 1 → il nero copre tutto TRANNE le lettere.
-      Scala insieme al frame.
+      CANVAS principale:
+      - Sfondo nero solido
+      - Buchi a forma di lettera (destination-out)
+      → Fuori dalle lettere: nero opaco (foto nascosta)
+      → Dentro le lettere: foto visibile attraverso la trasparenza
     */
     #title-canvas {
       position: absolute;
@@ -93,53 +68,50 @@
       will-change: opacity;
     }
 
-    /* Vignette — dentro il frame, scala con lui */
+    /*
+      CANVAS LETTERE ANIMATE (sopra il canvas principale):
+      Contiene solo le lettere come forme bianche,
+      usato per animare GABRIELE (entra dall'alto) e
+      MADEO (entra dal basso) prima che il canvas principale
+      si riveli completamente.
+    */
+    #letters-top {
+      position: absolute;
+      left: 0; right: 0;
+      width: 100%;
+      z-index: 4;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    #letters-bottom {
+      position: absolute;
+      left: 0; right: 0;
+      width: 100%;
+      z-index: 4;
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+
+    /* Vignette */
     #vignette {
       position: absolute;
       inset: 0;
-      z-index: 4;
+      z-index: 5;
       pointer-events: none;
       background: radial-gradient(
         ellipse at center,
-        transparent 15%,
-        rgba(0,0,0,0.38) 55%,
-        rgba(0,0,0,0.88) 100%
+        transparent 10%,
+        rgba(0,0,0,0.32) 52%,
+        rgba(0,0,0,0.85) 100%
       );
       opacity: 0;
       will-change: opacity;
     }
 
-    /* ── NAVBAR ── */
-    #navbar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      padding: 22px 48px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      opacity: 0;
-      will-change: opacity;
-    }
-    #navbar .nav-name {
-      font-family: "Bebas Neue", sans-serif;
-      font-size: 15px;
-      letter-spacing: 0.28em;
-    }
-    #navbar .nav-links {
-      display: flex; gap: 36px; list-style: none;
-    }
-    #navbar .nav-links a {
-      font-size: 10px;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      text-decoration: none;
-      transition: color 0.3s;
-    }
-    #navbar .nav-links a:hover { color: #fff; }
-
-    /* ── CONTENT ── */
+    /* ════════════════════════════════
+       CONTENT
+    ════════════════════════════════ */
     #content {
       background: #000;
       position: relative;
@@ -149,7 +121,6 @@
     .text-section {
       min-height: 130vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 80px 10vw;
@@ -212,23 +183,13 @@
 </head>
 <body>
 
-<nav id="navbar">
-  <span class="nav-name">Gabriele Madeo</span>
-  <ul class="nav-links">
-    <li><a href="#sec1-wrap">About</a></li>
-    <li><a href="#sec2-wrap">Skills</a></li>
-    <li><a href="#sec3-wrap">Projects</a></li>
-  </ul>
-</nav>
-
 <div id="scroll-container">
   <div id="sticky-hero">
-    <div id="hero-frame">
-      <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
-      <div id="photo-grad"></div>
-      <canvas id="title-canvas"></canvas>
-      <div id="vignette"></div>
-    </div>
+    <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
+    <canvas id="title-canvas"></canvas>
+    <canvas id="letters-top"></canvas>
+    <canvas id="letters-bottom"></canvas>
+    <div id="vignette"></div>
   </div>
 </div>
 
@@ -272,13 +233,48 @@
 </div>
 
 <script>
-/* ─────────────────────────────────────
-   CANVAS: sfondo nero + buchi lettera
-───────────────────────────────────── */
-function drawTitleCanvas() {
+/* ══════════════════════════════════════════════════════════════
+   STATO GLOBALE
+══════════════════════════════════════════════════════════════ */
+let FONT_SIZE = 100;
+let W = 0, H = 0;
+let LINE_H = 0;
+let START_Y_TOP = 0;    // baseline GABRIELE quando centrato
+let START_Y_BOTTOM = 0; // baseline MADEO quando centrato
+
+/* ══════════════════════════════════════════════════════════════
+   CALCOLA DIMENSIONI FONT
+══════════════════════════════════════════════════════════════ */
+function calcFont() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+
+  const testCanvas = document.createElement('canvas');
+  testCanvas.width = W; testCanvas.height = H;
+  const ctx = testCanvas.getContext('2d');
+
+  let fs = 100;
+  ctx.font = `900 ${fs}px "Bebas Neue", Impact, sans-serif`;
+  const ratio = (W * 0.80) / ctx.measureText('GABRIELE').width;
+  fs = Math.floor(fs * ratio);
+  FONT_SIZE = Math.max(50, Math.min(fs, Math.floor(H * 0.42)));
+
+  ctx.font = `900 ${FONT_SIZE}px "Bebas Neue", Impact, sans-serif`;
+  LINE_H = FONT_SIZE * 0.92;
+  const totalH = LINE_H * 2;
+
+  // Posizione centrata verticalmente (baseline delle due righe)
+  START_Y_TOP    = (H - totalH) / 2 + LINE_H;
+  START_Y_BOTTOM = START_Y_TOP + LINE_H;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DISEGNA CANVAS PRINCIPALE (nero + buchi lettera)
+   Usato per il masking: la foto traspare dentro le lettere,
+   il nero opaco nasconde la foto fuori dalle lettere.
+══════════════════════════════════════════════════════════════ */
+function drawMaskCanvas() {
   const canvas = document.getElementById('title-canvas');
-  const W = canvas.offsetWidth  || window.innerWidth;
-  const H = canvas.offsetHeight || window.innerHeight;
   canvas.width  = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -286,34 +282,69 @@ function drawTitleCanvas() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, W, H);
 
-  // Misura il font per coprire ~80% larghezza con "GABRIELE"
-  let fs = 100;
-  ctx.font = `900 ${fs}px "Bebas Neue", Impact, sans-serif`;
-  const ratio = (W * 0.80) / ctx.measureText('GABRIELE').width;
-  fs = Math.floor(fs * ratio);
-  fs = Math.max(50, Math.min(fs, Math.floor(H * 0.42)));
-
-  ctx.font = `900 ${fs}px "Bebas Neue", Impact, sans-serif`;
+  ctx.font = `900 ${FONT_SIZE}px "Bebas Neue", Impact, sans-serif`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'alphabetic';
   ctx.globalCompositeOperation = 'destination-out';
   ctx.fillStyle = 'rgba(0,0,0,1)';
-
-  const lineH  = fs * 0.92;
-  const totalH = lineH * 2;
-  const startY = (H - totalH) / 2 + lineH;
-
-  ctx.fillText('GABRIELE', W / 2, startY);
-  ctx.fillText('MADEO',    W / 2, startY + lineH);
-
+  ctx.fillText('GABRIELE', W / 2, START_Y_TOP);
+  ctx.fillText('MADEO',    W / 2, START_Y_BOTTOM);
   ctx.globalCompositeOperation = 'source-over';
 }
 
-/* ─────────────────────────────────────
+/* ══════════════════════════════════════════════════════════════
+   DISEGNA LETTERE ANIMATE (bianche su trasparente)
+   - letters-top:    contiene "GABRIELE" (entra dall'alto)
+   - letters-bottom: contiene "MADEO"    (entra dal basso)
+
+   Queste due canvas si animano con GSAP in translateY.
+   Una volta in posizione, il mask canvas prende il controllo.
+══════════════════════════════════════════════════════════════ */
+function drawLetterCanvases() {
+  // Altezza di ogni canvas = solo la loro riga + margine
+  const padding = FONT_SIZE * 0.25;
+  const canvasH = LINE_H + padding * 2;
+
+  // ── TOP: GABRIELE ──
+  const cTop = document.getElementById('letters-top');
+  cTop.width  = W;
+  cTop.height = canvasH;
+  // Posiziona verticalmente: top corrisponde a START_Y_TOP - LINE_H - padding
+  cTop.style.top    = `${START_Y_TOP - LINE_H - padding}px`;
+  cTop.style.height = `${canvasH}px`;
+
+  const ctxT = cTop.getContext('2d');
+  ctxT.clearRect(0, 0, W, canvasH);
+  ctxT.font         = `900 ${FONT_SIZE}px "Bebas Neue", Impact, sans-serif`;
+  ctxT.textAlign    = 'center';
+  ctxT.textBaseline = 'alphabetic';
+  ctxT.fillStyle    = '#fff';
+  ctxT.fillText('GABRIELE', W / 2, LINE_H + padding * 0.9);
+
+  // ── BOTTOM: MADEO ──
+  const cBot = document.getElementById('letters-bottom');
+  cBot.width  = W;
+  cBot.height = canvasH;
+  cBot.style.top    = `${START_Y_BOTTOM - LINE_H - padding}px`;
+  cBot.style.height = `${canvasH}px`;
+
+  const ctxB = cBot.getContext('2d');
+  ctxB.clearRect(0, 0, W, canvasH);
+  ctxB.font         = `900 ${FONT_SIZE}px "Bebas Neue", Impact, sans-serif`;
+  ctxB.textAlign    = 'center';
+  ctxB.textBaseline = 'alphabetic';
+  ctxB.fillStyle    = '#fff';
+  ctxB.fillText('MADEO', W / 2, LINE_H + padding * 0.9);
+}
+
+/* ══════════════════════════════════════════════════════════════
    BOOTSTRAP
-───────────────────────────────────── */
+══════════════════════════════════════════════════════════════ */
 function bootstrap() {
-  drawTitleCanvas();
+  calcFont();
+  drawMaskCanvas();
+  drawLetterCanvases();
+
   const s1 = document.createElement('script');
   s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
   s1.onload = () => {
@@ -324,120 +355,161 @@ function bootstrap() {
   };
   document.head.appendChild(s1);
 }
+
 document.fonts.load('900 1px "Bebas Neue"').then(bootstrap).catch(bootstrap);
 
-/* ─────────────────────────────────────────────────────────────────────
-   GSAP — Timeline stile GTA VI
+/* ══════════════════════════════════════════════════════════════
+   GSAP ANIMATIONS
 
-   La meccanica GTA VI in 4 atti:
+   SEQUENZA ESATTA GTA VI:
 
-   ATTO 1 (0.00→0.20)
-     La foto è visibile a schermo intero.
-     Il canvas appare → le lettere scolpiscono la foto.
-     Vignette rinforza i bordi.
+   ATTO 0 (top della pagina)
+     Foto a schermo intero, zoomata (scale 1.18).
+     Lettere bianche: GABRIELE fuori schermo in ALTO,
+     MADEO fuori schermo in BASSO.
+     Canvas maschera: opacity 0.
 
-   ATTO 2 (0.20→0.55)
-     TUTTO (frame = foto + canvas) scala da 1 → ~0.55
-     Effetto "zoom out" mentre vedi il titolo rimpicciolirsi.
-     La foto rimane sempre cropped (overflow:hidden sul frame).
-     Il canvas scala CON il frame → le lettere rimangono
-     proporzionate alla foto, niente bordi visibili.
+   ATTO 1 — scroll 0→0.22
+     Le due righe di testo scivolano verso il centro
+     da direzioni opposte (GABRIELE dall'alto, MADEO dal basso).
+     Foto: leggero zoom-out.
+     Appaiono come lettere bianche sopra la foto.
 
-   ATTO 3 (0.55→0.80)
-     Frame continua a rimpicciolirsi fino a 0.
-     Canvas opacity → 0.
-     Foto opacity → 0.
-     Tutto dissolve nel nero mentre è già piccolo al centro.
+   ATTO 2 — scroll 0.22→0.30
+     Le lettere bianche arrivano in posizione.
+     Il canvas maschera fa un crossfade opacity 0→1:
+     la foto compare DENTRO le lettere (sfocata fuori).
+     Le lettere bianche spariscono (opacity→0).
+     Vignette appare.
 
-   ATTO 4 (0.82→1.00)
-     Navbar appare.
-─────────────────────────────────────────────────────────────────── */
+   ATTO 3 — scroll 0.30→0.62
+     Fase stabile: il masking è attivo, bello da vedere.
+     La foto dentro le lettere è nitida, fuori è nascosta.
+     Lento zoom-out continua.
+
+   ATTO 4 — scroll 0.62→0.82
+     Tutto il gruppo (foto + canvas) scala verso il centro
+     rimpicciolandosi, come se la telecamera si allontanasse.
+     Effetto "zoom out + move to center".
+
+   ATTO 5 — scroll 0.82→0.96
+     Dissolvenza finale nel nero.
+══════════════════════════════════════════════════════════════ */
 function initAnimations() {
   gsap.registerPlugin(ScrollTrigger);
 
-  gsap.set('#hero-frame',   { scale: 1,    transformOrigin: 'center center' });
-  gsap.set('#hero-bg',      { scale: 1.08, opacity: 1, transformOrigin: 'center 20%' });
-  gsap.set('#title-canvas', { opacity: 0 });
+  // ── STATI INIZIALI ──
+  gsap.set('#hero-bg',      { scale: 1.18, filter: 'blur(0px)', transformOrigin: 'center 20%' });
+  gsap.set('#title-canvas', { opacity: 0,  scale: 1, transformOrigin: 'center center' });
   gsap.set('#vignette',     { opacity: 0 });
-  gsap.set('#navbar',       { opacity: 0 });
+
+  // Lettere bianche: partono fuori schermo
+  // GABRIELE: si sposta di -H (sopra lo schermo)
+  // MADEO:    si sposta di +H (sotto lo schermo)
+  gsap.set('#letters-top',    { y: -H * 0.55, opacity: 1 });
+  gsap.set('#letters-bottom', { y:  H * 0.55, opacity: 1 });
 
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '#scroll-container',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 2.2,
+      scrub: 2.4,
     }
   });
 
-  /* ── ATTO 1: canvas rivela le lettere ── */
-  tl.to('#title-canvas', {
-    opacity: 1,
-    ease: 'power2.inOut',
-    duration: 0.20
+  /* ── ATTO 1: lettere scivolano verso il centro ── */
+  tl.to('#letters-top', {
+    y: 0,
+    ease: 'power2.out',
+    duration: 0.22
   }, 0.00);
 
-  tl.to('#vignette', {
-    opacity: 1,
-    ease: 'power1.inOut',
-    duration: 0.20
-  }, 0.02);
+  tl.to('#letters-bottom', {
+    y: 0,
+    ease: 'power2.out',
+    duration: 0.22
+  }, 0.00);
 
-  /* Parallax leggero sulla foto dentro il frame */
+  // Leggero zoom-out foto durante tutta la sequenza
   tl.to('#hero-bg', {
     scale: 1.0,
     ease: 'none',
-    duration: 0.60
+    duration: 0.62
   }, 0.00);
 
-  /* ── ATTO 2: tutto il frame si rimpicciolisce
-     Il frame parte 100% e scala a 0.52 (come GTA VI
-     che porta il logo da fullscreen a un riquadro centrale) ── */
-  tl.to('#hero-frame', {
-    scale: 0.52,
+  /* ── ATTO 2: crossfade lettere bianche → maschera ── */
+  // Canvas maschera appare
+  tl.to('#title-canvas', {
+    opacity: 1,
+    ease: 'power2.inOut',
+    duration: 0.10
+  }, 0.22);
+
+  // Vignette entra
+  tl.to('#vignette', {
+    opacity: 1,
     ease: 'power1.inOut',
-    duration: 0.35
-  }, 0.20);
+    duration: 0.10
+  }, 0.23);
 
-  /* ── ATTO 3: dissolve mentre è già piccolo ── */
+  // Lettere bianche spariscono (canvas le sostituisce)
+  tl.to('#letters-top', {
+    opacity: 0,
+    ease: 'power1.in',
+    duration: 0.08
+  }, 0.22);
 
-  // Canvas sparisce un po' prima del frame
+  tl.to('#letters-bottom', {
+    opacity: 0,
+    ease: 'power1.in',
+    duration: 0.08
+  }, 0.22);
+
+  /* ── ATTO 3: fase stabile (0.32→0.62) — nessuna animazione ── */
+
+  /* ── ATTO 4: zoom-out del canvas verso il centro ──
+     Il canvas scala: la foto dentro le lettere rimpicciolisce
+     e si concentra al centro, esattamente come GTA VI.
+     La foto fuori (nascosta dal nero) rimane nera = nessun bordo visibile. */
+  tl.to('#title-canvas', {
+    scale: 0.30,
+    y: 0,
+    ease: 'power2.inOut',
+    duration: 0.20
+  }, 0.62);
+
+  // La foto stessa scala un po' per dare profondità
+  tl.to('#hero-bg', {
+    scale: 0.88,
+    ease: 'power2.inOut',
+    duration: 0.20
+  }, 0.62);
+
+  /* ── ATTO 5: dissolvenza finale ── */
   tl.to('#title-canvas', {
     opacity: 0,
-    ease: 'power2.in',
+    ease: 'power3.in',
     duration: 0.14
-  }, 0.55);
-
-  // Frame scala a 0 e dissolve insieme
-  tl.to('#hero-frame', {
-    scale: 0.30,
-    ease: 'power2.in',
-    duration: 0.20
-  }, 0.57);
+  }, 0.82);
 
   tl.to('#hero-bg', {
     opacity: 0,
     ease: 'power2.in',
-    duration: 0.18
-  }, 0.60);
+    duration: 0.14
+  }, 0.83);
 
   tl.to('#vignette', {
     opacity: 0,
     ease: 'power1.in',
-    duration: 0.14
-  }, 0.60);
-
-  /* ── ATTO 4: navbar ── */
-  tl.to('#navbar', {
-    opacity: 1,
-    ease: 'power2.out',
     duration: 0.12
-  }, 0.82);
+  }, 0.83);
 
-  /* ─────────────────────────────────────────────────────
-     SEZIONI — entrano lente dal basso, escono verso l'alto.
-     Range di scrub molto ampi = testo visibile a lungo.
-  ───────────────────────────────────────────────────── */
+  /* ════════════════════════════════════════════════════
+     SEZIONI DI TESTO
+     Ogni sezione entra lentamente dal basso e
+     resta a schermo a lungo prima di uscire verso l'alto.
+  ════════════════════════════════════════════════════ */
   ['#sec1', '#sec2', '#sec3'].forEach((id) => {
     const el = document.querySelector(id);
     if (!el) return;
@@ -450,8 +522,8 @@ function initAnimations() {
         scrollTrigger: {
           trigger: el,
           start: 'top 95%',
-          end: 'top 30%',
-          scrub: 2.0
+          end: 'top 28%',
+          scrub: 2.2
         }
       }
     );
@@ -461,9 +533,9 @@ function initAnimations() {
       ease: 'power3.in',
       scrollTrigger: {
         trigger: el,
-        start: 'bottom 72%',
+        start: 'bottom 75%',
         end: 'bottom 5%',
-        scrub: 2.0
+        scrub: 2.2
       }
     });
   });
@@ -482,13 +554,15 @@ function initAnimations() {
     });
   });
 
-  /* Resize */
-  let t;
+  /* ── RESIZE ── */
+  let resizeTimer;
   window.addEventListener('resize', () => {
-    clearTimeout(t);
-    t = setTimeout(() => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
       document.fonts.ready.then(() => {
-        drawTitleCanvas();
+        calcFont();
+        drawMaskCanvas();
+        drawLetterCanvases();
         ScrollTrigger.refresh();
       });
     }, 200);
