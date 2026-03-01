@@ -15,13 +15,12 @@
       color: #fff;
       font-family: 'Inter', sans-serif;
       overflow-x: hidden;
-      scroll-behavior: auto;
     }
 
-    /* ── SCROLL CONTAINER (altezza = spazio di scrub) ── */
+    /* ── SCROLL CONTAINER ── */
     #scroll-container {
       position: relative;
-      height: 400vh;
+      height: 500vh; /* più lungo = scroll più lento e cinematico */
     }
 
     /* ── STICKY HERO ── */
@@ -34,35 +33,38 @@
       background: #000;
     }
 
-    /* LAYER 0 — Foto di sfondo */
+    /* LAYER 0 — Foto sempre visibile al caricamento */
     #hero-bg {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 15%;
+      object-position: center 18%;
       z-index: 1;
-      transform: scale(1.15);
+      transform: scale(1.12);
       transform-origin: center 20%;
       will-change: transform, opacity;
     }
 
-    /* LAYER 1 — Overlay gradiente scuro sopra la foto */
-    #photo-overlay {
+    /* LAYER 1 — Gradiente subtile per dare profondità alla foto */
+    #photo-grad {
       position: absolute;
       inset: 0;
+      z-index: 2;
       background: linear-gradient(
         to bottom,
-        rgba(0,0,0,0.15) 0%,
-        rgba(0,0,0,0.05) 40%,
-        rgba(0,0,0,0.3) 100%
+        rgba(0,0,0,0.08) 0%,
+        rgba(0,0,0,0.0)  40%,
+        rgba(0,0,0,0.35) 100%
       );
-      z-index: 2;
       pointer-events: none;
     }
 
-    /* LAYER 2 — Maschera nera che copre la foto, bucata dalle lettere */
+    /* LAYER 2 — Canvas: sfondo nero forato dalle lettere.
+       Parte opacity:0 così la foto si vede libera.
+       Poi sale ad opacity:1 → la foto scompare TRANNE
+       attraverso i buchi (le lettere). */
     #title-canvas {
       position: absolute;
       inset: 0;
@@ -74,29 +76,20 @@
       transform-origin: center center;
     }
 
-    /* LAYER 3 — Vignette */
+    /* LAYER 3 — Vignette bordi */
     #vignette {
       position: absolute;
       inset: 0;
       z-index: 4;
       background: radial-gradient(
         ellipse at center,
-        transparent 20%,
-        rgba(0,0,0,0.45) 60%,
-        rgba(0,0,0,0.92) 100%
+        transparent 18%,
+        rgba(0,0,0,0.42) 58%,
+        rgba(0,0,0,0.90) 100%
       );
       pointer-events: none;
       opacity: 0;
       will-change: opacity;
-    }
-
-    /* LAYER 4 — Schermo nero iniziale */
-    #initial-black {
-      position: absolute;
-      inset: 0;
-      background: #000;
-      z-index: 5;
-      pointer-events: none;
     }
 
     /* ── NAVBAR ── */
@@ -139,20 +132,21 @@
       z-index: 10;
     }
 
+    /* Ogni sezione occupa più spazio così il testo rimane a schermo più a lungo */
     .text-section {
-      min-height: 80vh;
+      min-height: 120vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 10vw;
+      padding: 80px 10vw;
     }
 
     .text-section .inner {
-      max-width: 860px;
+      max-width: 880px;
       text-align: center;
       opacity: 0;
-      transform: translateY(60px);
+      transform: translateY(70px);
       will-change: opacity, transform;
     }
 
@@ -160,27 +154,25 @@
       font-size: 10px;
       letter-spacing: 0.58em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-      margin-bottom: 20px;
+      color: rgba(255,255,255,0.28);
+      margin-bottom: 22px;
     }
 
-    /* Headline stile GTA */
     .text-section .headline {
       font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(48px, 7vw, 96px);
+      font-size: clamp(52px, 7.5vw, 100px);
       letter-spacing: 0.05em;
       color: #fff;
       line-height: 1.0;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
 
-    /* Paragrafo grande come GTA */
     .text-section p {
-      font-size: clamp(18px, 2.2vw, 28px);
+      font-size: clamp(19px, 2.3vw, 29px);
       font-weight: 300;
-      line-height: 1.75;
-      color: rgba(255,255,255,0.5);
-      max-width: 680px;
+      line-height: 1.78;
+      color: rgba(255,255,255,0.48);
+      max-width: 700px;
       margin: 0 auto;
     }
 
@@ -201,7 +193,7 @@
       font-family: 'Bebas Neue', sans-serif;
       font-size: clamp(13px, 1.8vw, 20px);
       letter-spacing: 0.32em;
-      color: rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.14);
       border-top: 1px solid rgba(255,255,255,0.05);
     }
   </style>
@@ -220,10 +212,9 @@
 <div id="scroll-container">
   <div id="sticky-hero">
     <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
-    <div id="photo-overlay"></div>
+    <div id="photo-grad"></div>
     <canvas id="title-canvas"></canvas>
     <div id="vignette"></div>
-    <div id="initial-black"></div>
   </div>
 </div>
 
@@ -267,9 +258,10 @@
 </div>
 
 <script>
-/* ─────────────────────────────────────────────
-   Disegna il canvas: sfondo nero + buchi lettera
-   ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────
+   CANVAS — sfondo nero + buchi trasparenti a forma di lettera.
+   La foto sotto traspare SOLO attraverso le lettere.
+───────────────────────────────────────────────────────── */
 function drawTitleCanvas() {
   const canvas = document.getElementById('title-canvas');
   const W = window.innerWidth;
@@ -278,38 +270,47 @@ function drawTitleCanvas() {
   canvas.height = H;
   const ctx = canvas.getContext('2d');
 
-  /* Sfondo completamente nero */
+  // Sfondo nero solido
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, W, H);
 
-  /* Font size dinamico: riempie bene lo schermo come GTA */
-  const fontSize = Math.min(W * 0.38, H * 0.38, 420);
+  // Calcola dimensione font: riempi circa 78% della larghezza
+  // con la parola più lunga (GABRIELE)
+  let fontSize = 10;
+  ctx.font = `900 ${fontSize}px "Bebas Neue", Impact, sans-serif`;
+  const targetW = W * 0.78;
+  // Scala proporzionalmente basandosi su GABRIELE
+  const testW = ctx.measureText('GABRIELE').width;
+  fontSize = Math.floor(fontSize * (targetW / testW));
+  // Clamp ragionevole
+  fontSize = Math.max(60, Math.min(fontSize, Math.floor(H * 0.40)));
+
   ctx.font = `900 ${fontSize}px "Bebas Neue", Impact, sans-serif`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'alphabetic';
 
-  /* destination-out: "cancella" i pixel → la foto traspare */
+  // destination-out: i pixel scritti diventano trasparenti
   ctx.globalCompositeOperation = 'destination-out';
   ctx.fillStyle = 'rgba(0,0,0,1)';
 
-  const lineH  = fontSize * 0.92;
-  /* Centro verticale: due righe */
+  const lineH  = fontSize * 0.90;
   const totalH = lineH * 2;
-  const startY = (H - totalH) / 2 + lineH;
+  // Centra verticalmente le due righe, leggermente sopra il centro
+  const startY = (H - totalH) / 2 + lineH - fontSize * 0.06;
 
   ctx.fillText('GABRIELE', W / 2, startY);
   ctx.fillText('MADEO',    W / 2, startY + lineH);
 
+  // Ripristina
   ctx.globalCompositeOperation = 'source-over';
 }
 
-/* ─────────────────────────────────────────────
-   Carica GSAP dopo che il font è SICURAMENTE pronto
-   ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────
+   BOOTSTRAP — aspetta font, poi carica GSAP
+───────────────────────────────────────────────────────── */
 function bootstrap() {
   drawTitleCanvas();
 
-  /* Carica GSAP + ScrollTrigger */
   const s1 = document.createElement('script');
   s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
   s1.onload = () => {
@@ -321,90 +322,86 @@ function bootstrap() {
   document.head.appendChild(s1);
 }
 
-/* Aspetta che il font Bebas Neue sia caricato (criticamente importante) */
-if (document.fonts && document.fonts.load) {
-  document.fonts.load('900 1px "Bebas Neue"').then(bootstrap);
-} else {
-  /* Fallback per browser vecchi */
-  setTimeout(bootstrap, 800);
-}
+// Attende che Bebas Neue sia disponibile prima di disegnare
+document.fonts.load('900 1px "Bebas Neue"').then(bootstrap).catch(bootstrap);
 
-/* ─────────────────────────────────────────────
-   GSAP Animations — stile GTA VI
-   ───────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────
+   GSAP — Timeline stile GTA VI
+
+   Sequenza:
+   TOP     → foto a tutto schermo visibile (canvas opacity 0)
+   scroll  → canvas appare: foto emerge SOLO dentro le lettere
+           → vignette rinforza i bordi
+           → parallax foto leggero
+   scroll  → canvas scala verso l'alto (logo sale come GTA)
+   scroll  → tutto dissolve nel nero
+   bottom  → navbar appare, sezioni di testo entrano
+───────────────────────────────────────────────────────── */
 function initAnimations() {
   gsap.registerPlugin(ScrollTrigger);
 
-  /* ── STATI INIZIALI ── */
-  gsap.set('#title-canvas',   { opacity: 0, scale: 1 });
-  gsap.set('#hero-bg',        { scale: 1.15, opacity: 1 });
-  gsap.set('#vignette',       { opacity: 0 });
-  gsap.set('#initial-black',  { opacity: 1 });
-  gsap.set('#navbar',         { opacity: 0 });
+  // Stato iniziale: foto visibile, canvas invisibile
+  gsap.set('#title-canvas',  { opacity: 0, scale: 1, y: 0 });
+  gsap.set('#hero-bg',       { scale: 1.12, opacity: 1 });
+  gsap.set('#vignette',      { opacity: 0 });
+  gsap.set('#navbar',        { opacity: 0 });
 
-  /* ────────────────────────────────────────────────────────────
-     TIMELINE PRINCIPALE  (scrub su tutto #scroll-container)
-     
-     Dividiamo 0→1 in fasi chiare come fa il sito GTA VI:
-
-     0.00 → 0.08   Fade-in iniziale: schermo nero → foto
-     0.08 → 0.22   Foto visibile pura, zoom-out lento (cinematic)
-     0.22 → 0.38   Canvas appare: lettere rivelano la foto
-     0.38 → 0.55   Effetto stabile + vignette
-     0.55 → 0.72   Canvas rimpicciolisce e sale (zoom-out logo style GTA)
-     0.72 → 0.88   Canvas + foto dissolvono via
-     0.88 → 1.00   Navbar appare
-  ──────────────────────────────────────────────────────────── */
+  /*
+    La timeline copre l'intero scroll-container (500vh).
+    Ogni "duration" è una frazione di quel percorso.
+    
+    0.00            Inizio — foto a schermo intero
+    0.00 → 0.18     Canvas sale da 0→1: lettere scolpiscono la foto
+    0.04 → 0.22     Vignette entra
+    0.04 → 0.60     Foto: zoom-out lento da scale(1.12) → scale(1.0)
+    0.18 → 0.55     Fase stabile — effetto fermo, bello da guardare
+    0.55 → 0.78     Canvas scala + sale (logo GTA che si rimpicciolisce)
+    0.72 → 0.88     Canvas opacity → 0  (lettera scompare)
+    0.72 → 0.88     Foto opacity → 0
+    0.72 → 0.85     Vignette → 0
+    0.88 → 1.00     Navbar appare
+  */
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '#scroll-container',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 2.0,
+      scrub: 2.5,
     }
   });
 
-  /* FASE 1 — Schermo nero svanisce, appare la foto */
-  tl.to('#initial-black', {
-    opacity: 0,
-    ease: 'power2.inOut',
-    duration: 0.08
-  }, 0.00);
-
-  /* FASE 2 — Foto zoom-out cinematico */
-  tl.to('#hero-bg', {
-    scale: 1.0,
-    ease: 'none',
-    duration: 0.50
-  }, 0.08);
-
-  /* FASE 3 — Canvas (maschera con buchi lettera) appare
-     La foto "traspare" attraverso le lettere */
+  // — Fase 1: Canvas rivela le lettere (foto emerge attraverso di esse)
   tl.to('#title-canvas', {
     opacity: 1,
     ease: 'power2.inOut',
-    duration: 0.16
-  }, 0.22);
+    duration: 0.18
+  }, 0.00);
 
-  /* Vignette entra insieme al canvas */
+  // — Vignette entra
   tl.to('#vignette', {
     opacity: 1,
     ease: 'power1.inOut',
     duration: 0.18
-  }, 0.24);
+  }, 0.04);
 
-  /* FASE 4 — Pausa visiva stabile (niente da animare, effetto resta) */
+  // — Parallax foto: zoom-out lento durante tutto l'hero
+  tl.to('#hero-bg', {
+    scale: 1.0,
+    ease: 'none',
+    duration: 0.56
+  }, 0.04);
 
-  /* FASE 5 — Logo si rimpicciolisce e sale (identico a GTA VI)
-     La foto rimane al suo posto, solo il canvas scala */
+  // — Fase 2 stabile (0.18 → 0.55): nessuna animazione, l'effetto è fermo
+
+  // — Fase 3: Logo si rimpicciolisce e sale verso l'alto (identico a GTA VI)
   tl.to('#title-canvas', {
-    scale: 0.28,
-    y: '-24vh',
+    scale: 0.26,
+    y: '-26vh',
     ease: 'power2.inOut',
-    duration: 0.28
-  }, 0.48);
+    duration: 0.23
+  }, 0.55);
 
-  /* FASE 6 — Tutto dissolve: canvas, foto, vignette */
+  // — Fase 4: Tutto dissolve nel nero
   tl.to('#title-canvas', {
     opacity: 0,
     ease: 'power3.in',
@@ -420,55 +417,56 @@ function initAnimations() {
   tl.to('#vignette', {
     opacity: 0,
     ease: 'power1.in',
-    duration: 0.14
-  }, 0.72);
+    duration: 0.13
+  }, 0.73);
 
-  /* FASE 7 — Navbar compare */
+  // — Fase 5: Navbar appare
   tl.to('#navbar', {
     opacity: 1,
     ease: 'power2.out',
     duration: 0.12
   }, 0.88);
 
-  /* ────────────────────────────────────────────────────────────
-     SEZIONI DI TESTO — entrano dal basso, escono verso l'alto
-     Come fa GTA VI con il testo delle sezioni
-  ──────────────────────────────────────────────────────────── */
+  /* ─── SEZIONI DI TESTO ─────────────────────────────────
+     Entrano lentamente dal basso, restano a schermo a lungo,
+     poi escono verso l'alto. Distanze di scrub ampliate
+     per massimizzare il tempo di lettura (stile GTA VI).
+  ───────────────────────────────────────────────────────── */
   ['#sec1', '#sec2', '#sec3'].forEach((id) => {
     const el = document.querySelector(id);
     if (!el) return;
 
-    /* Entra */
+    // ENTRA: percorso lungo → animazione lenta e cinematica
     gsap.fromTo(el,
-      { opacity: 0, y: 70 },
+      { opacity: 0, y: 80 },
       {
         opacity: 1,
         y: 0,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: el,
-          start: 'top 88%',
-          end: 'top 40%',
-          scrub: 1.2
+          start: 'top 92%',
+          end: 'top 35%',
+          scrub: 1.8
         }
       }
     );
 
-    /* Esce */
+    // ESCE: altrettanto lungo per non sparire troppo in fretta
     gsap.to(el, {
       opacity: 0,
-      y: -70,
+      y: -80,
       ease: 'power3.in',
       scrollTrigger: {
         trigger: el,
-        start: 'bottom 62%',
-        end: 'bottom 18%',
-        scrub: 1.2
+        start: 'bottom 70%',
+        end: 'bottom 10%',
+        scrub: 1.8
       }
     });
   });
 
-  /* Divisori */
+  // Divisori
   ['#div0', '#div1', '#div2'].forEach((id) => {
     const el = document.querySelector(id);
     if (!el) return;
@@ -476,14 +474,14 @@ function initAnimations() {
       opacity: 1,
       scrollTrigger: {
         trigger: el,
-        start: 'top 82%',
-        end: 'top 52%',
-        scrub: 1
+        start: 'top 85%',
+        end: 'top 55%',
+        scrub: 1.2
       }
     });
   });
 
-  /* ── RESIZE ── */
+  // Resize con debounce
   let resizeTimer;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
