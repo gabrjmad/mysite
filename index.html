@@ -17,9 +17,9 @@
       overflow-x: hidden;
     }
 
-    /* ════════════════════════════════
-       HERO SCROLL CONTAINER
-    ════════════════════════════════ */
+    /* ══════════════════════════════════
+       HERO
+    ══════════════════════════════════ */
     #scroll-container {
       position: relative;
       height: 600vh;
@@ -32,68 +32,93 @@
       width: 100%;
       background: #000;
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
-    /* ── FOTO: sempre centrata, sempre cropped ── */
+    /*
+      FOTO DI SFONDO
+      La foto è verticale (formato telefono).
+      object-fit: cover la centra e la taglia per riempire
+      lo schermo desktop senza mostrare bordi bianchi.
+      object-position: center 15% mantiene la figura
+      (in basso al centro) visibile sullo schermo.
+    */
     #hero-bg {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center 18%;
+      object-position: center 30%;
       z-index: 1;
-      transform: scale(1.18);
-      transform-origin: center 20%;
-      will-change: transform, filter;
+      transform: scale(1.15);
+      transform-origin: center 30%;
+      will-change: transform, opacity;
+      /* Filtro cinematico caldo per avvicinarsi all'estetica GTA VI */
+      filter: saturate(1.15) contrast(1.05) brightness(0.92);
     }
 
     /*
-      CANVAS principale:
-      - Sfondo nero solido
-      - Buchi a forma di lettera (destination-out)
-      → Fuori dalle lettere: nero opaco (foto nascosta)
-      → Dentro le lettere: foto visibile attraverso la trasparenza
+      GRADIENTE LATERALE
+      Copre i bordi sinistro e destro dove la foto
+      verticale potrebbe essere meno densa su schermi
+      molto larghi. Crea anche profondità cinematica.
     */
-    #title-canvas {
+    #side-grad {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        linear-gradient(to right,
+          rgba(0,0,0,0.55) 0%,
+          transparent 22%,
+          transparent 78%,
+          rgba(0,0,0,0.55) 100%
+        ),
+        linear-gradient(to bottom,
+          rgba(0,0,0,0.25) 0%,
+          transparent 30%,
+          transparent 65%,
+          rgba(0,0,0,0.60) 100%
+        );
+    }
+
+    /*
+      CANVAS MASCHERA — il cuore dell'effetto GTA VI:
+      - Sfondo: nero solido (nasconde la foto)
+      - Lettere: trasparenti (la foto traspare SOLO qui)
+      Inizia opacity:0 (foto libera) → opacity:1 (effetto attivo)
+    */
+    #mask-canvas {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       z-index: 3;
       opacity: 0;
-      will-change: opacity;
+      will-change: opacity, transform;
+      transform-origin: center center;
     }
 
     /*
-      CANVAS LETTERE ANIMATE (sopra il canvas principale):
-      Contiene solo le lettere come forme bianche,
-      usato per animare GABRIELE (entra dall'alto) e
-      MADEO (entra dal basso) prima che il canvas principale
-      si riveli completamente.
+      CANVAS LETTERE ANIMATE
+      Due canvas separati per GABRIELE (alto) e MADEO (basso).
+      Partono fuori schermo e scivolano al centro.
+      Lettere bianche su trasparente — visibili sopra la foto.
+      Spariscono con crossfade quando il mask canvas appare.
     */
-    #letters-top {
-      position: absolute;
-      left: 0; right: 0;
-      width: 100%;
-      z-index: 4;
-      pointer-events: none;
-      will-change: transform, opacity;
-    }
-
+    #letters-top,
     #letters-bottom {
       position: absolute;
-      left: 0; right: 0;
+      left: 0;
+      right: 0;
       width: 100%;
       z-index: 4;
       pointer-events: none;
       will-change: transform, opacity;
     }
 
-    /* Vignette */
+    /* Vignette radiale per bordi cinematici */
     #vignette {
       position: absolute;
       inset: 0;
@@ -101,17 +126,17 @@
       pointer-events: none;
       background: radial-gradient(
         ellipse at center,
-        transparent 10%,
-        rgba(0,0,0,0.32) 52%,
-        rgba(0,0,0,0.85) 100%
+        transparent 12%,
+        rgba(0,0,0,0.28) 50%,
+        rgba(0,0,0,0.82) 100%
       );
       opacity: 0;
       will-change: opacity;
     }
 
-    /* ════════════════════════════════
-       CONTENT
-    ════════════════════════════════ */
+    /* ══════════════════════════════════
+       CONTENT — sezioni testo
+    ══════════════════════════════════ */
     #content {
       background: #000;
       position: relative;
@@ -119,35 +144,42 @@
     }
 
     .text-section {
-      min-height: 130vh;
+      min-height: 160vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 80px 10vw;
+      padding: 100px 10vw;
     }
 
     .text-section .inner {
       max-width: 880px;
       text-align: center;
-      opacity: 0;
-      transform: translateY(70px);
-      will-change: opacity, transform;
     }
 
+    /* Label piccola sopra il titolo */
     .text-section .label {
       font-size: 10px;
       letter-spacing: 0.58em;
       text-transform: uppercase;
       color: rgba(255,255,255,0.28);
       margin-bottom: 22px;
+      display: block;
+      opacity: 0;
+      transform: translateY(30px);
+      will-change: opacity, transform;
     }
 
+    /* Headline grande stile GTA */
     .text-section .headline {
       font-family: 'Bebas Neue', sans-serif;
       font-size: clamp(52px, 7.5vw, 100px);
       letter-spacing: 0.05em;
       line-height: 1.0;
-      margin-bottom: 22px;
+      margin-bottom: 28px;
+      display: block;
+      opacity: 0;
+      transform: translateY(30px);
+      will-change: opacity, transform;
     }
 
     .text-section p {
@@ -157,6 +189,19 @@
       color: rgba(255,255,255,0.48);
       max-width: 700px;
       margin: 0 auto;
+    }
+
+    /* Ogni riga del paragrafo animata separatamente */
+    .p-line {
+      display: block;
+      overflow: hidden;
+    }
+
+    .p-line-inner {
+      display: block;
+      opacity: 0;
+      transform: translateY(28px);
+      will-change: opacity, transform;
     }
 
     .section-divider {
@@ -185,8 +230,9 @@
 
 <div id="scroll-container">
   <div id="sticky-hero">
-    <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
-    <canvas id="title-canvas"></canvas>
+    <img id="hero-bg" src="image.jpg" alt="Gabriele Madeo"/>
+    <div id="side-grad"></div>
+    <canvas id="mask-canvas"></canvas>
     <canvas id="letters-top"></canvas>
     <canvas id="letters-bottom"></canvas>
     <div id="vignette"></div>
@@ -198,10 +244,13 @@
 
   <section class="text-section" id="sec1-wrap">
     <div class="inner" id="sec1">
-      <div class="label">Chi sono</div>
-      <div class="headline">IT Systems Integrator</div>
-      <p>In formazione all'ITS Umbria Academy, costruisco soluzioni
-         digitali dall'infrastruttura all'interfaccia — reti, cloud e sviluppo web.</p>
+      <span class="label">Chi sono</span>
+      <span class="headline">IT Systems Integrator</span>
+      <p>
+        <span class="p-line"><span class="p-line-inner">In formazione all'ITS Umbria Academy,</span></span>
+        <span class="p-line"><span class="p-line-inner">costruisco soluzioni digitali dall'infrastruttura</span></span>
+        <span class="p-line"><span class="p-line-inner">all'interfaccia — reti, cloud e sviluppo web.</span></span>
+      </p>
     </div>
   </section>
 
@@ -209,11 +258,13 @@
 
   <section class="text-section" id="sec2-wrap">
     <div class="inner" id="sec2">
-      <div class="label">Competenze</div>
-      <div class="headline">Stack Moderno</div>
-      <p>Networking · Docker · Flask · React · MySQL · Linux.
-         Automazione, containerizzazione e sempre alla ricerca
-         della prossima sfida tecnica.</p>
+      <span class="label">Competenze</span>
+      <span class="headline">Stack Moderno</span>
+      <p>
+        <span class="p-line"><span class="p-line-inner">Networking · Docker · Flask · React</span></span>
+        <span class="p-line"><span class="p-line-inner">MySQL · Linux · Automazione</span></span>
+        <span class="p-line"><span class="p-line-inner">e containerizzazione.</span></span>
+      </p>
     </div>
   </section>
 
@@ -221,11 +272,13 @@
 
   <section class="text-section" id="sec3-wrap">
     <div class="inner" id="sec3">
-      <div class="label">Progetti</div>
-      <div class="headline">Dal Codice al Deploy</div>
-      <p>Dalle web app full-stack ai container Docker,
-         ogni progetto è un'opportunità di crescita.
-         Esplora il mio lavoro su GitHub.</p>
+      <span class="label">Progetti</span>
+      <span class="headline">Dal Codice al Deploy</span>
+      <p>
+        <span class="p-line"><span class="p-line-inner">Dalle web app full-stack</span></span>
+        <span class="p-line"><span class="p-line-inner">ai container Docker, ogni progetto</span></span>
+        <span class="p-line"><span class="p-line-inner">è un'opportunità di crescita.</span></span>
+      </p>
     </div>
   </section>
 
@@ -233,117 +286,110 @@
 </div>
 
 <script>
-/* ══════════════════════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    STATO GLOBALE
-══════════════════════════════════════════════════════════════ */
-let FONT_SIZE = 100;
-let W = 0, H = 0;
-let LINE_H = 0;
-let START_Y_TOP = 0;    // baseline GABRIELE quando centrato
-let START_Y_BOTTOM = 0; // baseline MADEO quando centrato
+══════════════════════════════════════════════════════ */
+let FS = 100, W = 0, H = 0, LINE_H = 0, Y_TOP = 0, Y_BOT = 0;
 
-/* ══════════════════════════════════════════════════════════════
-   CALCOLA DIMENSIONI FONT
-══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   CALCOLA FONT SIZE
+   Scala "GABRIELE" a 82% della larghezza dello schermo,
+   identico a come GTA VI scala il suo titolo.
+══════════════════════════════════════════════════════ */
 function calcFont() {
   W = window.innerWidth;
   H = window.innerHeight;
-
-  const testCanvas = document.createElement('canvas');
-  testCanvas.width = W; testCanvas.height = H;
-  const ctx = testCanvas.getContext('2d');
-
+  const tmp = document.createElement('canvas');
+  const ctx = tmp.getContext('2d');
   let fs = 100;
   ctx.font = `900 ${fs}px "Bebas Neue", Impact, sans-serif`;
-  const ratio = (W * 0.80) / ctx.measureText('GABRIELE').width;
-  fs = Math.floor(fs * ratio);
-  FONT_SIZE = Math.max(50, Math.min(fs, Math.floor(H * 0.42)));
-
-  ctx.font = `900 ${FONT_SIZE}px "Bebas Neue", Impact, sans-serif`;
-  LINE_H = FONT_SIZE * 0.92;
-  const totalH = LINE_H * 2;
-
-  // Posizione centrata verticalmente (baseline delle due righe)
-  START_Y_TOP    = (H - totalH) / 2 + LINE_H;
-  START_Y_BOTTOM = START_Y_TOP + LINE_H;
+  FS = Math.floor(fs * (W * 0.82) / ctx.measureText('GABRIELE').width);
+  FS = Math.max(48, Math.min(FS, Math.floor(H * 0.40)));
+  LINE_H = FS * 0.92;
+  const total = LINE_H * 2;
+  // Centra verticalmente le due righe, leggermente sopra il centro
+  Y_TOP = (H - total) / 2 + LINE_H - FS * 0.04;
+  Y_BOT = Y_TOP + LINE_H;
 }
 
-/* ══════════════════════════════════════════════════════════════
-   DISEGNA CANVAS PRINCIPALE (nero + buchi lettera)
-   Usato per il masking: la foto traspare dentro le lettere,
-   il nero opaco nasconde la foto fuori dalle lettere.
-══════════════════════════════════════════════════════════════ */
-function drawMaskCanvas() {
-  const canvas = document.getElementById('title-canvas');
-  canvas.width  = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
+/* ══════════════════════════════════════════════════════
+   DISEGNA IL CANVAS MASCHERA
 
+   Tecnica identica a GTA VI:
+   1. Riempi tutto di nero opaco
+   2. Usa destination-out per "cancellare" i pixel
+      nella forma delle lettere → diventano trasparenti
+   3. La foto sottostante (z-index inferiore) è visibile
+      SOLO attraverso questi buchi trasparenti
+   4. Tutto il resto rimane nero → foto nascosta fuori dalle lettere
+══════════════════════════════════════════════════════ */
+function drawMask() {
+  const c = document.getElementById('mask-canvas');
+  c.width = W; c.height = H;
+  const ctx = c.getContext('2d');
+
+  // Sfondo nero pieno
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, W, H);
 
-  ctx.font = `900 ${FONT_SIZE}px "Bebas Neue", Impact, sans-serif`;
+  // Buchi a forma di lettera
+  ctx.font = `900 ${FS}px "Bebas Neue", Impact, sans-serif`;
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'alphabetic';
   ctx.globalCompositeOperation = 'destination-out';
   ctx.fillStyle = 'rgba(0,0,0,1)';
-  ctx.fillText('GABRIELE', W / 2, START_Y_TOP);
-  ctx.fillText('MADEO',    W / 2, START_Y_BOTTOM);
+  ctx.fillText('GABRIELE', W / 2, Y_TOP);
+  ctx.fillText('MADEO',    W / 2, Y_BOT);
   ctx.globalCompositeOperation = 'source-over';
 }
 
-/* ══════════════════════════════════════════════════════════════
-   DISEGNA LETTERE ANIMATE (bianche su trasparente)
-   - letters-top:    contiene "GABRIELE" (entra dall'alto)
-   - letters-bottom: contiene "MADEO"    (entra dal basso)
+/* ══════════════════════════════════════════════════════
+   DISEGNA I CANVAS LETTERE ANIMATE
+   Due canvas: uno per GABRIELE (entra dall'alto),
+   uno per MADEO (entra dal basso).
+   Sono lettere bianche su sfondo trasparente.
+   Permettono di vedere le lettere mentre si muovono
+   prima che il mask canvas prenda il controllo.
+══════════════════════════════════════════════════════ */
+function drawLetters() {
+  const pad  = FS * 0.28;
+  const cH   = LINE_H + pad * 2;
+  const font = `900 ${FS}px "Bebas Neue", Impact, sans-serif`;
 
-   Queste due canvas si animano con GSAP in translateY.
-   Una volta in posizione, il mask canvas prende il controllo.
-══════════════════════════════════════════════════════════════ */
-function drawLetterCanvases() {
-  // Altezza di ogni canvas = solo la loro riga + margine
-  const padding = FONT_SIZE * 0.25;
-  const canvasH = LINE_H + padding * 2;
-
-  // ── TOP: GABRIELE ──
-  const cTop = document.getElementById('letters-top');
-  cTop.width  = W;
-  cTop.height = canvasH;
-  // Posiziona verticalmente: top corrisponde a START_Y_TOP - LINE_H - padding
-  cTop.style.top    = `${START_Y_TOP - LINE_H - padding}px`;
-  cTop.style.height = `${canvasH}px`;
-
-  const ctxT = cTop.getContext('2d');
-  ctxT.clearRect(0, 0, W, canvasH);
-  ctxT.font         = `900 ${FONT_SIZE}px "Bebas Neue", Impact, sans-serif`;
-  ctxT.textAlign    = 'center';
+  // ── GABRIELE (top canvas) ──
+  const cT = document.getElementById('letters-top');
+  cT.width = W; cT.height = cH;
+  cT.style.top    = `${Y_TOP - LINE_H - pad}px`;
+  cT.style.height = `${cH}px`;
+  const ctxT = cT.getContext('2d');
+  ctxT.clearRect(0, 0, W, cH);
+  ctxT.font = font;
+  ctxT.textAlign = 'center';
   ctxT.textBaseline = 'alphabetic';
-  ctxT.fillStyle    = '#fff';
-  ctxT.fillText('GABRIELE', W / 2, LINE_H + padding * 0.9);
+  ctxT.fillStyle = '#fff';
+  ctxT.fillText('GABRIELE', W / 2, LINE_H + pad * 0.88);
 
-  // ── BOTTOM: MADEO ──
-  const cBot = document.getElementById('letters-bottom');
-  cBot.width  = W;
-  cBot.height = canvasH;
-  cBot.style.top    = `${START_Y_BOTTOM - LINE_H - padding}px`;
-  cBot.style.height = `${canvasH}px`;
-
-  const ctxB = cBot.getContext('2d');
-  ctxB.clearRect(0, 0, W, canvasH);
-  ctxB.font         = `900 ${FONT_SIZE}px "Bebas Neue", Impact, sans-serif`;
-  ctxB.textAlign    = 'center';
+  // ── MADEO (bottom canvas) ──
+  const cB = document.getElementById('letters-bottom');
+  cB.width = W; cB.height = cH;
+  cB.style.top    = `${Y_BOT - LINE_H - pad}px`;
+  cB.style.height = `${cH}px`;
+  const ctxB = cB.getContext('2d');
+  ctxB.clearRect(0, 0, W, cH);
+  ctxB.font = font;
+  ctxB.textAlign = 'center';
   ctxB.textBaseline = 'alphabetic';
-  ctxB.fillStyle    = '#fff';
-  ctxB.fillText('MADEO', W / 2, LINE_H + padding * 0.9);
+  ctxB.fillStyle = '#fff';
+  ctxB.fillText('MADEO', W / 2, LINE_H + pad * 0.88);
 }
 
-/* ══════════════════════════════════════════════════════════════
-   BOOTSTRAP
-══════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   BOOTSTRAP — aspetta Bebas Neue, poi carica GSAP
+══════════════════════════════════════════════════════ */
 function bootstrap() {
   calcFont();
-  drawMaskCanvas();
-  drawLetterCanvases();
+  drawMask();
+  drawLetters();
 
   const s1 = document.createElement('script');
   s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
@@ -358,217 +404,169 @@ function bootstrap() {
 
 document.fonts.load('900 1px "Bebas Neue"').then(bootstrap).catch(bootstrap);
 
-/* ══════════════════════════════════════════════════════════════
-   GSAP ANIMATIONS
+/* ══════════════════════════════════════════════════════════════════
+   GSAP — SEQUENZA IDENTICA A GTA VI
 
-   SEQUENZA ESATTA GTA VI:
-
-   ATTO 0 (top della pagina)
-     Foto a schermo intero, zoomata (scale 1.18).
-     Lettere bianche: GABRIELE fuori schermo in ALTO,
-     MADEO fuori schermo in BASSO.
-     Canvas maschera: opacity 0.
-
-   ATTO 1 — scroll 0→0.22
-     Le due righe di testo scivolano verso il centro
-     da direzioni opposte (GABRIELE dall'alto, MADEO dal basso).
-     Foto: leggero zoom-out.
-     Appaiono come lettere bianche sopra la foto.
-
-   ATTO 2 — scroll 0.22→0.30
-     Le lettere bianche arrivano in posizione.
-     Il canvas maschera fa un crossfade opacity 0→1:
-     la foto compare DENTRO le lettere (sfocata fuori).
-     Le lettere bianche spariscono (opacity→0).
-     Vignette appare.
-
-   ATTO 3 — scroll 0.30→0.62
-     Fase stabile: il masking è attivo, bello da vedere.
-     La foto dentro le lettere è nitida, fuori è nascosta.
-     Lento zoom-out continua.
-
-   ATTO 4 — scroll 0.62→0.82
-     Tutto il gruppo (foto + canvas) scala verso il centro
-     rimpicciolandosi, come se la telecamera si allontanasse.
-     Effetto "zoom out + move to center".
-
-   ATTO 5 — scroll 0.82→0.96
-     Dissolvenza finale nel nero.
-══════════════════════════════════════════════════════════════ */
+   ┌─────────────────────────────────────────────────────────────┐
+   │ ATTO 0  (pagina top)                                        │
+   │   Foto a schermo intero, zoomata (scale 1.15).              │
+   │   Lettere bianche: GABRIELE a -55% H sopra, MADEO a +55% H │
+   │   Mask canvas: opacity 0 (foto libera e visibile)           │
+   ├─────────────────────────────────────────────────────────────┤
+   │ ATTO 1  scroll 0.00 → 0.22                                  │
+   │   GABRIELE scende dall'alto verso il centro.                │
+   │   MADEO sale dal basso verso il centro.                     │
+   │   Foto: zoom-out lento (scale 1.15 → 1.0).                  │
+   ├─────────────────────────────────────────────────────────────┤
+   │ ATTO 2  scroll 0.22 → 0.32                                  │
+   │   Mask canvas: opacity 0 → 1.                               │
+   │   Effetto: foto scompare tranne DENTRO le lettere.          │
+   │   Lettere bianche: opacity 1 → 0 (il mask le sostituisce).  │
+   │   Vignette appare per profondità cinematica.                │
+   ├─────────────────────────────────────────────────────────────┤
+   │ ATTO 3  scroll 0.32 → 0.60  (FASE STABILE)                 │
+   │   Nessuna animazione. L'effetto è fermo e visibile.         │
+   │   La foto traspare SOLO dentro le lettere.                  │
+   ├─────────────────────────────────────────────────────────────┤
+   │ ATTO 4  scroll 0.60 → 0.80                                  │
+   │   Mask canvas scala da 1.0 → 0.28 verso il centro.         │
+   │   Effetto "logo che si rimpicciolisce" identico a GTA VI.   │
+   │   La foto fuori dalle lettere è sempre nera → no bordi.     │
+   ├─────────────────────────────────────────────────────────────┤
+   │ ATTO 5  scroll 0.80 → 0.96                                  │
+   │   Tutto dissolve nel nero.                                  │
+   └─────────────────────────────────────────────────────────────┘
+══════════════════════════════════════════════════════════════════ */
 function initAnimations() {
   gsap.registerPlugin(ScrollTrigger);
 
   // ── STATI INIZIALI ──
-  gsap.set('#hero-bg',      { scale: 1.18, filter: 'blur(0px)', transformOrigin: 'center 20%' });
-  gsap.set('#title-canvas', { opacity: 0,  scale: 1, transformOrigin: 'center center' });
-  gsap.set('#vignette',     { opacity: 0 });
-
-  // Lettere bianche: partono fuori schermo
-  // GABRIELE: si sposta di -H (sopra lo schermo)
-  // MADEO:    si sposta di +H (sotto lo schermo)
-  gsap.set('#letters-top',    { y: -H * 0.55, opacity: 1 });
-  gsap.set('#letters-bottom', { y:  H * 0.55, opacity: 1 });
+  gsap.set('#hero-bg',       { scale: 1.15, opacity: 1, transformOrigin: 'center 30%' });
+  gsap.set('#mask-canvas',   { opacity: 0,  scale: 1,   transformOrigin: 'center center' });
+  gsap.set('#vignette',      { opacity: 0 });
+  gsap.set('#letters-top',   { y: -H * 0.55, opacity: 1 });
+  gsap.set('#letters-bottom',{ y:  H * 0.55, opacity: 1 });
 
   const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '#scroll-container',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 2.4,
+      scrub: 2.2,
     }
   });
 
-  /* ── ATTO 1: lettere scivolano verso il centro ── */
-  tl.to('#letters-top', {
-    y: 0,
-    ease: 'power2.out',
-    duration: 0.22
-  }, 0.00);
+  // ── ATTO 1: lettere convergono al centro ──
+  tl.to('#letters-top',    { y: 0, ease: 'power2.out', duration: 0.22 }, 0.00);
+  tl.to('#letters-bottom', { y: 0, ease: 'power2.out', duration: 0.22 }, 0.00);
+  // Zoom-out foto: da zoomata a naturale
+  tl.to('#hero-bg', { scale: 1.0, ease: 'none', duration: 0.65 }, 0.00);
 
-  tl.to('#letters-bottom', {
-    y: 0,
-    ease: 'power2.out',
-    duration: 0.22
-  }, 0.00);
+  // ── ATTO 2: crossfade bianco → maschera ──
+  tl.to('#mask-canvas',    { opacity: 1, ease: 'power2.inOut', duration: 0.10 }, 0.22);
+  tl.to('#vignette',       { opacity: 1, ease: 'power1.inOut', duration: 0.12 }, 0.23);
+  tl.to('#letters-top',    { opacity: 0, ease: 'power1.in',    duration: 0.08 }, 0.22);
+  tl.to('#letters-bottom', { opacity: 0, ease: 'power1.in',    duration: 0.08 }, 0.22);
 
-  // Leggero zoom-out foto durante tutta la sequenza
-  tl.to('#hero-bg', {
-    scale: 1.0,
-    ease: 'none',
-    duration: 0.62
-  }, 0.00);
+  // ── ATTO 3: stabile (0.32 → 0.60, nessuna animazione) ──
 
-  /* ── ATTO 2: crossfade lettere bianche → maschera ── */
-  // Canvas maschera appare
-  tl.to('#title-canvas', {
-    opacity: 1,
-    ease: 'power2.inOut',
-    duration: 0.10
-  }, 0.22);
-
-  // Vignette entra
-  tl.to('#vignette', {
-    opacity: 1,
-    ease: 'power1.inOut',
-    duration: 0.10
-  }, 0.23);
-
-  // Lettere bianche spariscono (canvas le sostituisce)
-  tl.to('#letters-top', {
-    opacity: 0,
-    ease: 'power1.in',
-    duration: 0.08
-  }, 0.22);
-
-  tl.to('#letters-bottom', {
-    opacity: 0,
-    ease: 'power1.in',
-    duration: 0.08
-  }, 0.22);
-
-  /* ── ATTO 3: fase stabile (0.32→0.62) — nessuna animazione ── */
-
-  /* ── ATTO 4: zoom-out del canvas verso il centro ──
-     Il canvas scala: la foto dentro le lettere rimpicciolisce
-     e si concentra al centro, esattamente come GTA VI.
-     La foto fuori (nascosta dal nero) rimane nera = nessun bordo visibile. */
-  tl.to('#title-canvas', {
-    scale: 0.30,
-    y: 0,
+  // ── ATTO 4: logo scala verso il centro (GTA VI style) ──
+  tl.to('#mask-canvas', {
+    scale: 0.28,
     ease: 'power2.inOut',
     duration: 0.20
-  }, 0.62);
-
-  // La foto stessa scala un po' per dare profondità
+  }, 0.60);
+  // La foto scala leggermente insieme per dare senso di profondità
   tl.to('#hero-bg', {
-    scale: 0.88,
+    scale: 0.92,
     ease: 'power2.inOut',
     duration: 0.20
-  }, 0.62);
+  }, 0.60);
 
-  /* ── ATTO 5: dissolvenza finale ── */
-  tl.to('#title-canvas', {
-    opacity: 0,
-    ease: 'power3.in',
-    duration: 0.14
-  }, 0.82);
+  // ── ATTO 5: dissolvenza finale nel nero ──
+  tl.to('#mask-canvas', { opacity: 0, ease: 'power3.in', duration: 0.16 }, 0.80);
+  tl.to('#hero-bg',     { opacity: 0, ease: 'power2.in', duration: 0.16 }, 0.81);
+  tl.to('#vignette',    { opacity: 0, ease: 'power1.in', duration: 0.14 }, 0.81);
 
-  tl.to('#hero-bg', {
-    opacity: 0,
-    ease: 'power2.in',
-    duration: 0.14
-  }, 0.83);
+  /* ════════════════════════════════════════════════════════════
+     SEZIONI TESTO — dissolvenza riga per riga
 
-  tl.to('#vignette', {
-    opacity: 0,
-    ease: 'power1.in',
-    duration: 0.12
-  }, 0.83);
+     Entrata: label → headline → riga1 → riga2 → riga3
+              ogni elemento sfalsato di 0.06 unità di scroll
+              (cascata verso il basso, stile GTA VI)
 
-  /* ════════════════════════════════════════════════════
-     SEZIONI DI TESTO
-     Ogni sezione entra lentamente dal basso e
-     resta a schermo a lungo prima di uscire verso l'alto.
-  ════════════════════════════════════════════════════ */
-  ['#sec1', '#sec2', '#sec3'].forEach((id) => {
-    const el = document.querySelector(id);
-    if (!el) return;
+     Uscita:  ordine inverso (riga3 → riga2 → riga1 → headline → label)
+              ogni elemento sfalsato di 0.05 unità di scroll
+              (collasso verso l'alto)
 
-    gsap.fromTo(el,
-      { opacity: 0, y: 90 },
-      {
-        opacity: 1, y: 0,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 95%',
-          end: 'top 28%',
-          scrub: 2.2
+     Tutto scrub-driven: scorrendo su l'animazione si inverte
+     esattamente, sia entrata che uscita.
+  ════════════════════════════════════════════════════════════ */
+  document.querySelectorAll('.text-section').forEach((section) => {
+    const inner   = section.querySelector('.inner');
+    const label   = section.querySelector('.label');
+    const headline = section.querySelector('.headline');
+    const lines   = Array.from(section.querySelectorAll('.p-line-inner'));
+    const allEls  = [label, headline, ...lines];
+
+    // ENTRATA — ogni elemento parte un po' dopo il precedente
+    allEls.forEach((el, i) => {
+      gsap.fromTo(el,
+        { opacity: 0, y: 36 },
+        {
+          opacity: 1, y: 0,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: inner,
+            start: `top ${92 - i * 5}%`,
+            end:   `top ${25 - i * 2}%`,
+            scrub: 1.6
+          }
         }
-      }
-    );
+      );
+    });
 
-    gsap.to(el, {
-      opacity: 0, y: -90,
-      ease: 'power3.in',
-      scrollTrigger: {
-        trigger: el,
-        start: 'bottom 75%',
-        end: 'bottom 5%',
-        scrub: 2.2
-      }
+    // USCITA — ordine inverso, sfalsato
+    [...allEls].reverse().forEach((el, i) => {
+      gsap.to(el, {
+        opacity: 0, y: -36,
+        ease: 'power3.in',
+        scrollTrigger: {
+          trigger: inner,
+          start: `bottom ${78 - i * 5}%`,
+          end:   `bottom ${5  - i * 2}%`,
+          scrub: 1.6
+        }
+      });
     });
   });
 
-  ['#div0','#div1','#div2'].forEach((id) => {
+  // Divisori
+  ['#div0','#div1','#div2'].forEach(id => {
     const el = document.querySelector(id);
     if (!el) return;
     gsap.to(el, {
       opacity: 1,
-      scrollTrigger: {
-        trigger: el,
-        start: 'top 85%',
-        end: 'top 55%',
-        scrub: 1.2
-      }
+      scrollTrigger: { trigger: el, start: 'top 85%', end: 'top 55%', scrub: 1.2 }
     });
   });
 
-  /* ── RESIZE ── */
-  let resizeTimer;
+  // Resize debounced
+  let rt;
   window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
+    clearTimeout(rt);
+    rt = setTimeout(() => {
       document.fonts.ready.then(() => {
         calcFont();
-        drawMaskCanvas();
-        drawLetterCanvases();
+        drawMask();
+        drawLetters();
+        gsap.set('#letters-top',    { y: -H * 0.55 });
+        gsap.set('#letters-bottom', { y:  H * 0.55 });
         ScrollTrigger.refresh();
       });
     }, 200);
   });
 }
 </script>
-
 </body>
 </html>
