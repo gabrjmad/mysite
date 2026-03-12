@@ -8,516 +8,266 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after {
-      margin: 0; padding: 0; box-sizing: border-box;
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    html, body {
+      background:#000;
+      color:#fff;
+      font-family:'Inter', sans-serif;
+      overflow-x:hidden;
+      overscroll-behavior:none;
     }
 
-    :root {
-      --black: #000;
-      --white: #fff;
-    }
-
-    html { scroll-behavior: auto; }
-
-    body {
-      background: var(--black);
-      color: var(--white);
-      font-family: 'Inter', sans-serif;
-      overflow-x: hidden;
-      overscroll-behavior: none;
-    }
-
-    /* ══════════════════════════════════════════
-       OVERLAY INTRO — schermata nera iniziale
-       Scompare con fade dopo load (come GTA6)
-    ══════════════════════════════════════════ */
     #intro-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--black);
-      z-index: 9999;
-      pointer-events: none;
+      position:fixed; inset:0;
+      background:#000;
+      z-index:9999;
+      pointer-events:none;
+      will-change:opacity;
     }
 
-    /* ══════════════════════════════════════════
-       SCROLL CONTAINER — 700vh per scrub hero
-    ══════════════════════════════════════════ */
     #scroll-container {
-      position: relative;
-      height: 700vh;
+      position:relative;
+      height:700vh;
     }
 
-    /* HERO STICKY */
     #hero {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
-      background: var(--black);
+      position:sticky; top:0;
+      width:100%; height:100vh;
+      overflow:hidden;
+      background:#000;
     }
 
-    /* ══════════════════════════════════════════
-       LAYER 1 — FOTO SFONDO HERO
-       Stessa tecnica GTA6: foto a pieno schermo
-       con leggero zoom in/out durante lo scroll
-    ══════════════════════════════════════════ */
     #hero-bg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center 25%;
-      z-index: 1;
-      will-change: transform, opacity, filter;
-      transform: scale(1.18);
-      transform-origin: center 25%;
-      filter: brightness(0.82) saturate(1.1) contrast(1.06);
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      object-position:center 30%;
+      z-index:1;
+      will-change:transform, filter, opacity;
+      transform:scale(1.08);
+      transform-origin:center 30%;
+      filter:brightness(0.75) saturate(0.85);
     }
 
-    /* ══════════════════════════════════════════
-       LAYER 2 — GRADIENTE LATERALE + BASSO
-       Come il sito Rockstar: borde sfumati
-    ══════════════════════════════════════════ */
-    #hero-gradient {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-      background:
-        linear-gradient(to right,
-          rgba(0,0,0,0.72) 0%,
-          transparent 22%,
-          transparent 78%,
-          rgba(0,0,0,0.72) 100%),
-        linear-gradient(to bottom,
-          rgba(0,0,0,0.15) 0%,
-          transparent 30%,
-          transparent 65%,
-          rgba(0,0,0,0.80) 100%);
+    #clip-wrapper {
+      position:absolute; inset:0;
+      width:100%; height:100%;
+      z-index:2;
+      will-change:transform, opacity;
+      transform:scale(6);
+      transform-origin:center 46%;
     }
 
-    /* ══════════════════════════════════════════
-       LAYER 3 — SVG MASCHERA (CUORE EFFETTO)
-       
-       Tecnica identica GTA6:
-       • <mask> SVG con il logo come path bianco
-       • L'immagine clippata appare SOLO dentro
-         la sagoma del logo/lettere
-       • Il <rect> nero copre il resto
-    ══════════════════════════════════════════ */
-    #mask-svg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 3;
-      opacity: 0;
-      will-change: opacity, transform;
-      transform-origin: center center;
-    }
-
-    /* ══════════════════════════════════════════
-       LAYER 4 — LOGO PNG ANIMATO (BIANCO)
-       Il logo "GABRIELE MADEO" con lettere
-       bianche entra dall'esterno dello schermo
-       e si posiziona al centro, poi si dissolve
-       nell'effetto maschera.
-    ══════════════════════════════════════════ */
-    #hero-logo {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 4;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      pointer-events: none;
-    }
-
-    #hero-logo img {
-      width: clamp(380px, 72vw, 980px);
-      max-width: 90%;
-      will-change: transform, opacity;
-      /* Il logo parte con le due parole separate
-         GABRIELE sopra lo schermo, MADEO sotto */
-      transform: none;
-      opacity: 0;
-      filter: drop-shadow(0 0 30px rgba(0,0,0,0.9));
-    }
-
-    /* Il testo GABRIELE dentro il logo entra dall'alto */
-    #logo-top {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%) translateY(-130vh);
-      width: clamp(380px, 72vw, 980px);
-      max-width: 90%;
-      z-index: 4;
-      will-change: transform, opacity;
-      filter: drop-shadow(0 0 20px rgba(0,0,0,0.9));
-    }
-
-    /* Il testo MADEO dentro il logo entra dal basso */
-    #logo-bot {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%) translateY(130vh);
-      width: clamp(380px, 72vw, 980px);
-      max-width: 90%;
-      z-index: 4;
-      will-change: transform, opacity;
-      filter: drop-shadow(0 0 20px rgba(0,0,0,0.9));
-    }
-
-    /* ══════════════════════════════════════════
-       LAYER 5 — VIGNETTE RADIALE
-    ══════════════════════════════════════════ */
     #vignette {
-      position: absolute;
-      inset: 0;
-      z-index: 5;
-      pointer-events: none;
-      background: radial-gradient(
-        ellipse at center,
-        transparent 5%,
-        rgba(0,0,0,0.28) 45%,
-        rgba(0,0,0,0.88) 100%
+      position:absolute; inset:0;
+      z-index:3;
+      pointer-events:none;
+      background:radial-gradient(
+        ellipse 130% 110% at 50% 50%,
+        transparent 0%,
+        rgba(0,0,0,0.15) 38%,
+        rgba(0,0,0,0.65) 75%,
+        rgba(0,0,0,0.90) 100%
       );
-      opacity: 0;
-      will-change: opacity;
+      opacity:0;
+      will-change:opacity;
     }
 
-    /* ══════════════════════════════════════════
-       CONTENT — Sezioni dopo l'hero
-    ══════════════════════════════════════════ */
     #content {
-      position: relative;
-      z-index: 10;
-      background: var(--black);
+      position:relative;
+      z-index:10;
+      background:#000;
     }
 
-    /* DIVISORE */
     .divider {
-      width: 1px;
-      height: 90px;
-      background: rgba(255,255,255,0.07);
-      margin: 0 auto;
-      opacity: 0;
+      width:1px; height:100px;
+      background:linear-gradient(to bottom, transparent, rgba(255,255,255,0.07), transparent);
+      margin:0 auto;
+      opacity:0;
     }
 
-    /* SEZIONE */
     .section {
-      min-height: 130vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 120px clamp(6vw, 14vw, 18vw);
+      min-height:140vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:140px clamp(6vw,14vw,20vw);
     }
 
     .section-inner {
-      max-width: 920px;
-      width: 100%;
-      text-align: center;
+      max-width:900px;
+      width:100%;
+      text-align:center;
     }
 
-    /* LABEL — "Chi sono", "Competenze"... */
-    .section-label {
-      display: block;
-      font-size: clamp(11px, 1.1vw, 13px);
-      letter-spacing: 0.65em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.22);
-      margin-bottom: 20px;
-      opacity: 0;
-      transform: translateY(22px);
-      will-change: opacity, transform;
+    .s-label {
+      display:block;
+      font-size:clamp(10px,1.1vw,13px);
+      letter-spacing:.65em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.20);
+      margin-bottom:22px;
+      will-change:opacity, transform;
     }
 
-    /* TITOLO GRANDE */
-    .section-title {
-      display: block;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(64px, 9.5vw, 118px);
-      letter-spacing: 0.02em;
-      line-height: 0.95;
-      margin-bottom: 36px;
-      opacity: 0;
-      transform: translateY(22px);
-      will-change: opacity, transform;
-      text-shadow: 0 6px 20px rgba(0,0,0,0.6);
+    .s-title {
+      display:block;
+      font-family:'Bebas Neue', sans-serif;
+      font-size:clamp(62px,9vw,115px);
+      letter-spacing:.025em;
+      line-height:.95;
+      margin-bottom:38px;
+      will-change:opacity, transform;
+      text-shadow:0 4px 18px rgba(0,0,0,.55);
     }
 
-    /* PARAGRAFO */
-    .section-body {
-      font-size: clamp(20px, 2.3vw, 27px);
-      font-weight: 300;
-      line-height: 1.8;
-      color: rgba(255,255,255,0.48);
-      max-width: 740px;
-      margin: 0 auto;
+    .s-body {
+      font-size:clamp(20px,2.2vw,27px);
+      font-weight:300;
+      line-height:1.82;
+      color:rgba(255,255,255,.45);
+      max-width:740px;
+      margin:0 auto;
     }
 
-    /* Ogni riga del paragrafo è animata individualmente */
-    .line-wrap {
-      display: block;
-      overflow: hidden;
-    }
-    .line-inner {
-      display: block;
-      opacity: 0;
-      transform: translateY(28px);
-      will-change: opacity, transform;
+    .line { display:block; overflow:hidden; }
+    .line-in {
+      display:block;
+      will-change:opacity, transform;
     }
 
-    /* LINK CONTATTI */
     .contact-links {
-      margin-top: 52px;
-      opacity: 0;
-      transform: translateY(28px);
-      will-change: opacity, transform;
+      margin-top:56px;
+      will-change:opacity, transform;
     }
     .contact-links a {
-      display: inline-block;
-      margin: 0 14px 12px;
-      color: rgba(255,255,255,0.38);
-      font-size: clamp(12px, 1.3vw, 15px);
-      letter-spacing: 0.42em;
-      text-transform: uppercase;
-      text-decoration: none;
-      transition: color 0.4s ease;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      padding-bottom: 3px;
+      display:inline-block;
+      margin:0 16px 12px;
+      color:rgba(255,255,255,.32);
+      font-size:clamp(11px,1.2vw,14px);
+      letter-spacing:.50em;
+      text-transform:uppercase;
+      text-decoration:none;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      padding-bottom:4px;
+      transition:color .35s ease, border-color .35s ease;
     }
     .contact-links a:hover {
-      color: rgba(255,255,255,0.90);
-      border-color: rgba(255,255,255,0.35);
+      color:rgba(255,255,255,.85);
+      border-color:rgba(255,255,255,.30);
     }
 
-    /* FOOTER */
     footer {
-      padding: 110px 0;
-      text-align: center;
-      font-family: 'Bebas Neue', sans-serif;
-      font-size: clamp(13px, 1.9vw, 21px);
-      letter-spacing: 0.40em;
-      color: rgba(255,255,255,0.10);
-      border-top: 1px solid rgba(255,255,255,0.04);
+      padding:120px 0;
+      text-align:center;
+      font-family:'Bebas Neue', sans-serif;
+      font-size:clamp(12px,1.8vw,20px);
+      letter-spacing:.40em;
+      color:rgba(255,255,255,.08);
+      border-top:1px solid rgba(255,255,255,.03);
     }
 
-    /* MOBILE */
-    @media (max-width: 768px) {
-      .section {
-        min-height: 100vh;
-        padding: 80px 7vw;
-      }
-      .section-title {
-        font-size: clamp(52px, 14vw, 88px);
-      }
-      #logo-top, #logo-bot {
-        width: 88vw;
-      }
+    @media(max-width:768px){
+      .section { min-height:100vh; padding:80px 7vw; }
+      .s-title  { font-size:clamp(50px,13vw,82px); }
     }
   </style>
 </head>
 <body>
 
-<!-- OVERLAY NERO INIZIALE — scompare al load -->
 <div id="intro-overlay"></div>
 
-<!-- HERO SCROLL -->
 <div id="scroll-container">
   <div id="hero">
 
-    <!-- FOTO SFONDO PIENO SCHERMO -->
     <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
 
-    <!-- GRADIENTI BORDI -->
-    <div id="hero-gradient"></div>
-
-    <!-- SVG MASCHERA: foto visibile SOLO nelle lettere
-         Stesso identico approccio del sito GTA6 Rockstar.
-         ─────────────────────────────────────────────────
-         STRUTTURA:
-         <mask id="logo-mask">
-           <rect bianco>  ← tutto nascosto di default
-           <image logo PNG> ← dove il logo è bianco/opaco
-                              la foto di sfondo appare
-         </mask>
-         
-         <rect applicato alla maschera> ← sfondo nero
-         <image bg applicata alla maschera> ← foto visibile
-                                               solo nelle lettere
-         ──────────────────────────────────────────────────
-         ASSET: image.jpg è il tuo logo "GABRIELE MADEO"
-         con lettere bianche su sfondo NERO PURO (#000000).
-         NON serve il PNG trasparente — serve sfondo NERO
-         e lettere BIANCHE.
-    -->
-    <svg id="mask-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"
-         xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <mask id="logo-mask" x="0" y="0" width="100%" height="100%">
-          <!-- Rettangolo nero: nasconde tutto di default -->
-          <rect x="0" y="0" width="100" height="100" fill="#000"/>
-          <!--
-            Il tuo logo con lettere BIANCHE su sfondo NERO.
-            Le zone bianche del PNG = zone dove la foto sarà visibile.
-            Le zone nere = zona coperta (non si vede nulla).
-            
-            ★ IMPORTANTE: rinomina la foto del tuo nome
-              con lettere bianche su sfondo NERO come: logo.jpg
-          -->
-          <image href="logo.jpg" x="0" y="0" width="100" height="100"
-                 preserveAspectRatio="xMidYMid meet"/>
-        </mask>
-      </defs>
-
-      <!-- Sfondo nero sotto la maschera -->
-      <rect x="0" y="0" width="100" height="100" fill="#000" mask="url(#logo-mask)"/>
-
-      <!-- FOTO clippata: visibile SOLO nelle lettere bianche -->
-      <image href="foto.jpg" x="0" y="0" width="100" height="100"
-             preserveAspectRatio="xMidYMid slice" mask="url(#logo-mask)"/>
-    </svg>
-
-    <!--
-      LOGO ANIMATO in due parti:
-      - logo-top: "GABRIELE" — entra dall'ALTO
-      - logo-bot: "MADEO"    — entra dal BASSO
-      
-      Questi sono due crop del tuo logo PNG.
-      ALTERNATIVA PIÙ SEMPLICE: usa due SVG <text>
-      con il font Bebas Neue se non hai i crop separati.
-      
-      ★ ASSET RICHIESTI:
-        logo-top.png  → solo la riga "GABRIELE" bianca su nero
-        logo-bot.png  → solo la riga "MADEO" bianca su nero
-        
-        OPPURE usa lo stesso logo.jpg diviso in CSS
-        con object-position (vedi commento sotto)
-    -->
-    <div id="logo-top-wrap" style="
-      position:absolute; left:0; right:0;
-      top:0; bottom:0; z-index:4;
-      display:flex; align-items:center; justify-content:center;
-      pointer-events:none;
-    ">
-      <!-- SVG con solo GABRIELE — entra dall'alto -->
-      <svg id="logo-top"
-           viewBox="0 0 900 200"
-           style="
-             position:absolute;
-             width: clamp(360px, 70vw, 940px);
-             height: auto;
-             transform: translateY(-130vh);
-             will-change: transform, opacity;
-             filter: drop-shadow(0 0 12px rgba(0,0,0,1));
-           "
+    <div id="clip-wrapper">
+      <svg viewBox="0 0 1920 1080"
+           preserveAspectRatio="xMidYMid slice"
+           style="position:absolute;inset:0;width:100%;height:100%;"
            xmlns="http://www.w3.org/2000/svg">
-        <text x="450" y="170"
-              font-family="'Bebas Neue', Impact, sans-serif"
-              font-size="180"
-              font-weight="900"
-              text-anchor="middle"
-              fill="#ffffff"
-              letter-spacing="8">GABRIELE</text>
+        <defs>
+          <mask id="letter-mask"
+                maskUnits="userSpaceOnUse"
+                x="0" y="0" width="1920" height="1080">
+            <rect width="1920" height="1080" fill="#000"/>
+            <image href="logo.jpg"
+                   x="60" y="290"
+                   width="1800" height="500"
+                   preserveAspectRatio="xMidYMid meet"/>
+          </mask>
+        </defs>
+        <rect width="1920" height="1080"
+              fill="#000" mask="url(#letter-mask)"/>
+        <image href="foto.jpg"
+               x="0" y="0"
+               width="1920" height="1080"
+               preserveAspectRatio="xMidYMid slice"
+               mask="url(#letter-mask)"/>
       </svg>
     </div>
 
-    <div id="logo-bot-wrap" style="
-      position:absolute; left:0; right:0;
-      top:0; bottom:0; z-index:4;
-      display:flex; align-items:center; justify-content:center;
-      pointer-events:none;
-    ">
-      <!-- SVG con solo MADEO — entra dal basso -->
-      <svg id="logo-bot"
-           viewBox="0 0 900 200"
-           style="
-             position:absolute;
-             width: clamp(300px, 56vw, 750px);
-             height: auto;
-             transform: translateY(130vh);
-             will-change: transform, opacity;
-             filter: drop-shadow(0 0 12px rgba(0,0,0,1));
-           "
-           xmlns="http://www.w3.org/2000/svg">
-        <text x="450" y="170"
-              font-family="'Bebas Neue', Impact, sans-serif"
-              font-size="180"
-              font-weight="900"
-              text-anchor="middle"
-              fill="#ffffff"
-              letter-spacing="12">MADEO</text>
-      </svg>
-    </div>
-
-    <!-- VIGNETTE -->
     <div id="vignette"></div>
   </div>
 </div>
 
-<!-- ══════════════════════════
-     SEZIONI CONTENUTO
-══════════════════════════ -->
 <div id="content">
-  <div class="divider" id="div-0"></div>
 
-  <section class="section" id="sec-1">
+  <div class="divider" id="d0"></div>
+
+  <section class="section" id="s1">
     <div class="section-inner">
-      <span class="section-label">Chi sono</span>
-      <span class="section-title">IT Systems Integrator</span>
-      <div class="section-body">
-        <span class="line-wrap"><span class="line-inner">In formazione all'ITS Umbria Academy di Foligno.</span></span>
-        <span class="line-wrap"><span class="line-inner">Transizione dal settore sanitario verso l'IT:</span></span>
-        <span class="line-wrap"><span class="line-inner">reti, cloud, sviluppo web e infrastrutture digitali.</span></span>
+      <span class="s-label">Chi sono</span>
+      <span class="s-title">IT Systems Integrator</span>
+      <div class="s-body">
+        <span class="line"><span class="line-in">In formazione all'ITS Umbria Academy di Foligno.</span></span>
+        <span class="line"><span class="line-in">Transizione dal settore sanitario verso l'IT:</span></span>
+        <span class="line"><span class="line-in">reti, cloud, sviluppo web e infrastrutture digitali.</span></span>
       </div>
     </div>
   </section>
 
-  <div class="divider" id="div-1"></div>
+  <div class="divider" id="d1"></div>
 
-  <section class="section" id="sec-2">
+  <section class="section" id="s2">
     <div class="section-inner">
-      <span class="section-label">Competenze</span>
-      <span class="section-title">Tech Stack</span>
-      <div class="section-body">
-        <span class="line-wrap"><span class="line-inner">Networking · Linux · Docker · Flask · React</span></span>
-        <span class="line-wrap"><span class="line-inner">MySQL · Active Directory · Cloud IaaS/SaaS</span></span>
-        <span class="line-wrap"><span class="line-inner">Containerizzazione e automazione.</span></span>
+      <span class="s-label">Competenze</span>
+      <span class="s-title">Tech Stack</span>
+      <div class="s-body">
+        <span class="line"><span class="line-in">Networking · Linux · Docker · Flask · React</span></span>
+        <span class="line"><span class="line-in">MySQL · Active Directory · Cloud IaaS/SaaS</span></span>
+        <span class="line"><span class="line-in">Containerizzazione e automazione.</span></span>
       </div>
     </div>
   </section>
 
-  <div class="divider" id="div-2"></div>
+  <div class="divider" id="d2"></div>
 
-  <section class="section" id="sec-3">
+  <section class="section" id="s3">
     <div class="section-inner">
-      <span class="section-label">Progetti</span>
-      <span class="section-title">Dal Codice al Deploy</span>
-      <div class="section-body">
-        <span class="line-wrap"><span class="line-inner">Web app full-stack, container Docker,</span></span>
-        <span class="line-wrap"><span class="line-inner">database MySQL e infrastrutture cloud —</span></span>
-        <span class="line-wrap"><span class="line-inner">ogni progetto deployato e scalabile.</span></span>
+      <span class="s-label">Progetti</span>
+      <span class="s-title">Dal Codice al Deploy</span>
+      <div class="s-body">
+        <span class="line"><span class="line-in">Web app full-stack, container Docker,</span></span>
+        <span class="line"><span class="line-in">database MySQL e infrastrutture cloud —</span></span>
+        <span class="line"><span class="line-in">ogni progetto deployato e scalabile.</span></span>
       </div>
     </div>
   </section>
 
-  <div class="divider" id="div-3"></div>
+  <div class="divider" id="d3"></div>
 
-  <section class="section" id="sec-4">
+  <section class="section" id="s4">
     <div class="section-inner">
-      <span class="section-label">Contatti</span>
-      <span class="section-title">In Connessione</span>
-      <div class="section-body">
-        <span class="line-wrap"><span class="line-inner">Disponibile per opportunità IT,</span></span>
-        <span class="line-wrap"><span class="line-inner">sistemi, networking e sviluppo.</span></span>
+      <span class="s-label">Contatti</span>
+      <span class="s-title">In Connessione</span>
+      <div class="s-body">
+        <span class="line"><span class="line-in">Disponibile per opportunità IT,</span></span>
+        <span class="line"><span class="line-in">sistemi, networking e sviluppo.</span></span>
       </div>
       <div class="contact-links">
-        <!-- ★ Sostituisci con i tuoi link veri -->
         <a href="mailto:tua@email.com">Email</a>
         <a href="https://github.com/tuousername" target="_blank" rel="noopener">GitHub</a>
         <a href="https://linkedin.com/in/tuousername" target="_blank" rel="noopener">LinkedIn</a>
@@ -528,24 +278,15 @@
   <footer>gabriele madeo &copy; 2026</footer>
 </div>
 
-<!-- GSAP + ScrollTrigger -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
 gsap.registerPlugin(ScrollTrigger);
 
-/* ══════════════════════════════════════════════════════
-   ATTENDI FONT + IMMAGINI poi avvia
-══════════════════════════════════════════════════════ */
-window.addEventListener('load', () => {
-  document.fonts.ready.then(initAnimations);
-});
+window.addEventListener('load', () => document.fonts.ready.then(init));
 
-function initAnimations() {
+function init() {
 
-  /* ────────────────────────────────────────────────────
-     INTRO OVERLAY — fade out al caricamento (come GTA6)
-  ──────────────────────────────────────────────────── */
   gsap.to('#intro-overlay', {
     opacity: 0,
     duration: 1.4,
@@ -555,212 +296,133 @@ function initAnimations() {
     }
   });
 
-  /* ────────────────────────────────────────────────────
-     STATO INIZIALE
-     • hero-bg: scalato +18%, origine in alto
-     • mask-svg: invisibile (opacity 0)
-     • logo-top: sopra lo schermo (-130vh)
-     • logo-bot: sotto lo schermo (+130vh)
-     • vignette: invisibile
-  ──────────────────────────────────────────────────── */
   gsap.set('#hero-bg', {
-    scale: 1.18,
-    transformOrigin: 'center 25%'
-  });
-
-  gsap.set('#mask-svg', {
-    opacity: 0,
-    scale: 1,
-    transformOrigin: 'center center'
-  });
-
-  gsap.set('#logo-top', {
-    y: '-130vh',
-    opacity: 1
-  });
-
-  gsap.set('#logo-bot', {
-    y: '130vh',
-    opacity: 1
+    scale: 1.08,
+    transformOrigin: 'center 30%',
+    filter: 'brightness(0.75) saturate(0.85)'
   });
 
   gsap.set('#vignette', { opacity: 0 });
 
-  /* ════════════════════════════════════════════════════
-     HERO TIMELINE — scrollTrigger scrub
-     
-     Fedele alla struttura GTA6 Rockstar:
-     
-     FASE 1  [0.00 → 0.28]
-       • GABRIELE scende dall'alto verso centro
-       • MADEO   sale  dal basso verso centro
-       • Foto sfondo zoom-out lento
-     
-     FASE 2  [0.28 → 0.40]
-       • SVG mask appare (foto visibile nelle lettere)
-       • Logo bianco sparisce (crossfade)
-       • Vignette appare
-     
-     FASE 3  [0.40 → 0.60]
-       • Stabile — effetto ben visibile
-     
-     FASE 4  [0.60 → 0.82]
-       • Logo/maschera si RIMPICCIOLISCE verso l'alto
-         (diventa il "logo piccolo" in cima come GTA6)
-       • Foto continua a rimpicciolirsi
-     
-     FASE 5  [0.82 → 1.00]
-       • Dissolvenza totale nel nero
-  ════════════════════════════════════════════════════ */
-  const heroTl = gsap.timeline({
+  const tl = gsap.timeline({
     scrollTrigger: {
       trigger: '#scroll-container',
       start: 'top top',
       end: 'bottom bottom',
-      scrub: 2.8,           // fluido, quasi identico a GTA6
+      scrub: 3.0,
       invalidateOnRefresh: true
     }
   });
 
-  /* FASE 1 — Lettere convergono */
-  heroTl
-    .to('#logo-top', {
-      y: '0vh',
-      ease: 'power3.out',
-      duration: 0.28
-    }, 0)
-    .to('#logo-bot', {
-      y: '0vh',
-      ease: 'power3.out',
-      duration: 0.28
-    }, 0)
-    .to('#hero-bg', {
-      scale: 1.02,
-      ease: 'none',
-      duration: 0.72
-    }, 0);
+  // FASE A — zoom-out: dalle lettere enormi al titolo intero
+  tl.fromTo('#clip-wrapper',
+    { scale: 6, transformOrigin: 'center 46%' },
+    { scale: 1, transformOrigin: 'center 46%',
+      ease: 'power2.out', duration: 0.50 },
+    0.00
+  );
 
-  /* FASE 2 — Crossfade mask */
-  heroTl
-    .to('#mask-svg', {
-      opacity: 1,
-      ease: 'power2.inOut',
-      duration: 0.12
-    }, 0.28)
-    .to('#vignette', {
-      opacity: 1,
-      ease: 'power2.inOut',
-      duration: 0.14
-    }, 0.30)
-    .to('#logo-top', {
-      opacity: 0,
-      ease: 'power2.in',
-      duration: 0.10
-    }, 0.28)
-    .to('#logo-bot', {
-      opacity: 0,
-      ease: 'power2.in',
-      duration: 0.10
-    }, 0.28);
+  tl.to('#hero-bg', {
+    scale: 1.0,
+    filter: 'brightness(0.88) saturate(1.05)',
+    ease: 'power2.out',
+    duration: 0.50
+  }, 0.00);
 
-  /* FASE 4 — Logo si rimpicciolisce al centro alto */
-  heroTl
-    .to('#mask-svg', {
-      scale: 0.22,
-      transformOrigin: 'center 42%',
-      ease: 'power3.inOut',
-      duration: 0.22
-    }, 0.60)
-    .to('#hero-bg', {
-      scale: 0.88,
-      ease: 'power3.inOut',
-      duration: 0.22
-    }, 0.60);
+  tl.to('#vignette', {
+    opacity: 1,
+    ease: 'power2.inOut',
+    duration: 0.25
+  }, 0.20);
 
-  /* FASE 5 — Dissolvenza nel nero */
-  heroTl
-    .to('#mask-svg', {
-      opacity: 0,
-      ease: 'power3.in',
-      duration: 0.18
-    }, 0.82)
-    .to('#hero-bg', {
-      opacity: 0,
-      ease: 'power3.in',
-      duration: 0.18
-    }, 0.83)
-    .to('#vignette', {
-      opacity: 0,
-      ease: 'power2.in',
-      duration: 0.16
-    }, 0.83);
+  // FASE C — logo si rimpicciolisce verso l'alto
+  tl.to('#clip-wrapper', {
+    scale: 0.15,
+    transformOrigin: 'center 46%',
+    ease: 'power3.inOut',
+    duration: 0.20
+  }, 0.62);
 
-  /* ════════════════════════════════════════════════════
-     SEZIONI — animazione identica a GTA6:
-     Ogni elemento appare in cascata (label→title→righe)
-     e sparisce in ordine INVERSO scrollando verso l'alto.
-     BIDIREZIONALE: funziona sia scendendo che risalendo.
-  ════════════════════════════════════════════════════ */
+  tl.to('#hero-bg', {
+    scale: 0.92,
+    ease: 'power3.inOut',
+    duration: 0.20
+  }, 0.62);
+
+  // FASE D — dissolve nel nero
+  tl.to('#clip-wrapper', {
+    opacity: 0,
+    ease: 'power3.in',
+    duration: 0.18
+  }, 0.82);
+
+  tl.to('#hero-bg', {
+    opacity: 0,
+    ease: 'power3.in',
+    duration: 0.18
+  }, 0.83);
+
+  tl.to('#vignette', {
+    opacity: 0,
+    ease: 'power2.in',
+    duration: 0.16
+  }, 0.83);
+
+  // SEZIONI — dissolvenza fluida bidirezionale
   document.querySelectorAll('.section').forEach((sec) => {
     const inner    = sec.querySelector('.section-inner');
-    const label    = sec.querySelector('.section-label');
-    const title    = sec.querySelector('.section-title');
-    const lines    = Array.from(sec.querySelectorAll('.line-inner'));
+    const label    = sec.querySelector('.s-label');
+    const title    = sec.querySelector('.s-title');
+    const lines    = Array.from(sec.querySelectorAll('.line-in'));
     const contacts = sec.querySelector('.contact-links');
-    const items    = [label, title, ...lines, contacts].filter(Boolean);
+    const all      = [label, title, ...lines, contacts].filter(Boolean);
 
-    /* ENTRATA - dal basso verso il centro, in cascata */
-    items.forEach((el, i) => {
+    all.forEach((el, i) => {
       gsap.fromTo(el,
-        { opacity: 0, y: 38 },
+        { opacity: 0, y: 45 },
         {
-          opacity: 1,
-          y: 0,
+          opacity: 1, y: 0,
           ease: 'power3.out',
           scrollTrigger: {
             trigger: inner,
-            start: `top ${90 - i * 4}%`,
-            end:   `top ${22 - i * 2}%`,
-            scrub: 1.8
+            start: `top ${95 - i * 3}%`,
+            end:   `top ${15 - i * 1.5}%`,
+            scrub: 2.5
           }
         }
       );
     });
 
-    /* USCITA - inversa (dal centro verso l'alto) */
-    [...items].reverse().forEach((el, i) => {
+    [...all].reverse().forEach((el, i) => {
       gsap.to(el, {
-        opacity: 0,
-        y: -38,
+        opacity: 0, y: -45,
         ease: 'power3.in',
         scrollTrigger: {
           trigger: inner,
-          start: `bottom ${80 - i * 5}%`,
-          end:   `bottom ${5  - i * 2}%`,
-          scrub: 1.8
+          start: `bottom ${88 - i * 4}%`,
+          end:   `bottom ${-5  - i * 2}%`,
+          scrub: 2.5
         }
       });
     });
   });
 
-  /* DIVISORI */
-  document.querySelectorAll('.divider').forEach((el) => {
+  document.querySelectorAll('.divider').forEach(el => {
     gsap.to(el, {
       opacity: 1,
       scrollTrigger: {
         trigger: el,
-        start: 'top 88%',
-        end:   'top 58%',
-        scrub: 1.5
+        start: 'top 90%',
+        end:   'top 50%',
+        scrub: 2.0
       }
     });
   });
 
-  /* RESIZE */
-  let resizeTimer;
+  let rt;
   window.addEventListener('resize', () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => ScrollTrigger.refresh(), 220);
+    clearTimeout(rt);
+    rt = setTimeout(() => ScrollTrigger.refresh(), 250);
   });
 }
 </script>
