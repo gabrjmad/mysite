@@ -8,139 +8,120 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html, body {
-      background:#000; color:#fff;
-      font-family:'Inter', sans-serif;
-      overflow-x:hidden; overscroll-behavior:none;
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html,body{
+      background:#000;color:#fff;
+      font-family:'Inter',sans-serif;
+      overflow-x:hidden;overscroll-behavior:none;
     }
 
-    /* overlay nero iniziale */
-    #intro-overlay {
-      position:fixed; inset:0; background:#000;
-      z-index:9999; pointer-events:none;
+    #intro-overlay{
+      position:fixed;inset:0;background:#000;
+      z-index:9999;pointer-events:none;
     }
 
-    /* HERO FISSO A TUTTO SCHERMO */
-    #hero {
-      position:fixed; inset:0;
-      width:100%; height:100vh;
-      overflow:hidden; background:#000; z-index:100;
+    /* HERO FISSO, CONTROLLATO SOLO DALLO SCROLL VIRTUALE */
+    #hero{
+      position:fixed;inset:0;
+      width:100%;height:100vh;
+      overflow:hidden;background:#000;z-index:100;
     }
 
-    /* foto statica: si vede solo dentro al logo */
-    #hero-bg {
-      position:absolute; inset:0;
-      width:100%; height:100%;
-      object-fit:cover;
-      object-position:center center;
-      z-index:1;
-      transform:scale(1.4);          /* molto zoomata all'inizio */
-      transform-origin:center center;
-      will-change:transform;
+    /* Questa foto è usata SOLO dentro la mask SVG */
+    #hero-bg{
+      display:none;
     }
 
-    /* wrapper che scala il logo (mask) */
-    #clip-wrapper {
-      position:absolute; inset:0;
-      width:100%; height:100%;
+    /* Wrapper che scala logo + foto dentro il logo */
+    #clip-wrapper{
+      position:absolute;inset:0;
+      width:100%;height:100%;
       z-index:2;
       will-change:transform;
-      transform:scale(6);             /* all'inizio sei DENTRO le lettere */
+      transform:scale(6);          /* all’inizio sei DENTRO una lettera */
       transform-origin:center center;
     }
 
-    #vignette {
-      position:absolute; inset:0; z-index:3;
+    /* Tutto nero, solo vignette sopra */
+    #vignette{
+      position:absolute;inset:0;z-index:3;
       pointer-events:none;
       background:radial-gradient(
         ellipse 140% 120% at 50% 50%,
         transparent 0%,
-        rgba(0,0,0,0.12) 35%,
+        rgba(0,0,0,0.10) 35%,
         rgba(0,0,0,0.58) 70%,
-        rgba(0,0,0,0.90) 100%
+        rgba(0,0,0,0.95) 100%
       );
-      opacity:0;
-      will-change:opacity;
+      opacity:0;will-change:opacity;
     }
 
-    /* CONTENUTO SOTTO: nascosto finché l'hero non finisce */
-    #content {
-      position:relative; z-index:10;
-      background:#000;
-      margin-top:100vh;      /* parte sotto l'hero fisso */
-      opacity:0;
-      pointer-events:none;
+    /* CONTENUTO SOTTO: comparirà solo dopo l’hero */
+    #content{
+      position:relative;z-index:10;
+      background:#000;margin-top:100vh;
+      opacity:0;pointer-events:none;
     }
 
-    .divider {
-      width:1px; height:90px;
+    .divider{
+      width:1px;height:90px;
       background:linear-gradient(to bottom,
-        transparent, rgba(255,255,255,0.06), transparent);
-      margin:0 auto; opacity:0;
+        transparent,rgba(255,255,255,0.06),transparent);
+      margin:0 auto;opacity:0;
     }
 
-    .section {
+    .section{
       min-height:120vh;
-      display:flex; align-items:center; justify-content:center;
+      display:flex;align-items:center;justify-content:center;
       padding:140px clamp(6vw,14vw,20vw);
     }
-
-    .section-inner { max-width:900px; width:100%; text-align:center; }
-
-    .s-label {
+    .section-inner{max-width:900px;width:100%;text-align:center}
+    .s-label{
       display:block;
       font-size:clamp(10px,1.1vw,13px);
-      letter-spacing:.65em; text-transform:uppercase;
-      color:rgba(255,255,255,.20); margin-bottom:22px;
+      letter-spacing:.65em;text-transform:uppercase;
+      color:rgba(255,255,255,.20);margin-bottom:22px;
     }
-
-    .s-title {
-      display:block;
-      font-family:'Bebas Neue', sans-serif;
+    .s-title{
+      display:block;font-family:'Bebas Neue',sans-serif;
       font-size:clamp(62px,9vw,115px);
-      letter-spacing:.025em; line-height:.95;
+      letter-spacing:.025em;line-height:.95;
       margin-bottom:38px;
       text-shadow:0 4px 18px rgba(0,0,0,.55);
     }
-
-    .s-body {
+    .s-body{
       font-size:clamp(20px,2.2vw,27px);
-      font-weight:300; line-height:1.82;
+      font-weight:300;line-height:1.82;
       color:rgba(255,255,255,.45);
-      max-width:740px; margin:0 auto;
+      max-width:740px;margin:0 auto;
     }
-
-    .line { display:block; overflow:hidden; }
-    .line-in { display:block; }
-
-    .contact-links { margin-top:56px; }
-    .contact-links a {
-      display:inline-block; margin:0 16px 12px;
+    .line{display:block;overflow:hidden}
+    .line-in{display:block}
+    .contact-links{margin-top:56px}
+    .contact-links a{
+      display:inline-block;margin:0 16px 12px;
       color:rgba(255,255,255,.32);
       font-size:clamp(11px,1.2vw,14px);
-      letter-spacing:.50em; text-transform:uppercase;
+      letter-spacing:.50em;text-transform:uppercase;
       text-decoration:none;
       border-bottom:1px solid rgba(255,255,255,.07);
       padding-bottom:4px;
-      transition:color .35s, border-color .35s;
+      transition:color .35s,border-color .35s;
     }
-    .contact-links a:hover {
+    .contact-links a:hover{
       color:rgba(255,255,255,.88);
       border-color:rgba(255,255,255,.30);
     }
-
-    footer {
-      padding:120px 0; text-align:center;
-      font-family:'Bebas Neue', sans-serif;
+    footer{
+      padding:120px 0;text-align:center;
+      font-family:'Bebas Neue',sans-serif;
       font-size:clamp(12px,1.8vw,20px);
-      letter-spacing:.40em; color:rgba(255,255,255,.08);
+      letter-spacing:.40em;color:rgba(255,255,255,.08);
       border-top:1px solid rgba(255,255,255,.03);
     }
-
     @media(max-width:768px){
-      .section { min-height:100vh; padding:80px 7vw; }
-      .s-title { font-size:clamp(50px,13vw,82px); }
+      .section{min-height:100vh;padding:80px 7vw}
+      .s-title{font-size:clamp(50px,13vw,82px)}
     }
   </style>
 </head>
@@ -148,31 +129,33 @@
 
 <div id="intro-overlay"></div>
 
-<!-- HERO FISSO -->
+<!-- HERO -->
 <div id="hero">
-  <img id="hero-bg" src="foto.jpg" alt="Gabriele Madeo"/>
-
-  <!-- SVG mask: nero fuori, foto solo dentro le lettere -->
+  <!-- Tutto nero: il nero viene dallo <rect fill="#000"> sotto -->
   <div id="clip-wrapper">
-    <svg viewBox="0 0 1920 1080"
-         preserveAspectRatio="xMidYMid slice"
+    <svg viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"
          style="position:absolute;inset:0;width:100%;height:100%;"
          xmlns="http://www.w3.org/2000/svg">
       <defs>
+        <!--
+          MASK:
+          - rect nero = tutto opaco
+          - logo.jpg con lettere BIANCHE = buchi
+        -->
         <mask id="m" maskUnits="userSpaceOnUse"
               x="0" y="0" width="1920" height="1080">
           <rect width="1920" height="1080" fill="#000"/>
-          <!-- logo.jpg: lettere BIANCHE su sfondo NERO -->
           <image href="logo.jpg"
                  x="60" y="265"
                  width="1800" height="550"
                  preserveAspectRatio="xMidYMid meet"/>
         </mask>
       </defs>
-      <!-- nero con BUCHI delle lettere -->
-      <rect width="1920" height="1080"
-            fill="#000" mask="url(#m)"/>
-      <!-- foto visibile solo nei buchi -->
+
+      <!-- Sfondo completamente NERO fuori dalle lettere -->
+      <rect width="1920" height="1080" fill="#000"/>
+
+      <!-- Foto visibile SOLO all'interno delle lettere -->
       <image id="mask-photo"
              href="foto.jpg"
              x="0" y="0" width="1920" height="1080"
@@ -184,7 +167,7 @@
   <div id="vignette"></div>
 </div>
 
-<!-- CONTENUTO (compare dopo l'hero) -->
+<!-- CONTENUTO -->
 <div id="content">
   <div class="divider" id="d0"></div>
 
@@ -264,125 +247,123 @@ function init() {
 
   gsap.set('#vignette', { opacity:0 });
 
-  let progress = 0;        // 0 → 1
+  let progress = 0;
   let heroDone = false;
-  const SPEED  = 0.0009;   // sensitività scroll
+  const SPEED  = 0.0009;
 
   const tl = gsap.timeline({ paused:true });
 
-  // Fase 1: logo enorme → logo intero
+  // 0 → 0.5: logo enorme → logo intero, foto si avvicina
   tl.fromTo('#clip-wrapper',
     { scale:6 },
-    { scale:1, ease:'power2.out', duration:0.45 }, 0.0);
+    { scale:1, ease:'power2.out', duration:0.5 }, 0.0);
 
-  // Zoom foto solo dentro le lettere (un po' meno)
   tl.fromTo('#mask-photo',
-    { scale:1.3, transformOrigin:'center center' },
+    { scale:1.4, transformOrigin:'center center' },
     { scale:1.0, transformOrigin:'center center',
-      ease:'power2.out', duration:0.45 }, 0.0);
+      ease:'power2.out', duration:0.5 }, 0.0);
 
-  tl.to('#vignette', {
+  tl.to('#vignette',{
     opacity:1, ease:'power2.inOut', duration:0.25
-  }, 0.2);
+  },0.2);
 
-  // Fase 2: logo normale → logo piccolo al centro
-  tl.to('#clip-wrapper', {
+  // 0.6 → 0.8: logo normale → logo piccolo al centro
+  tl.to('#clip-wrapper',{
     scale:0.16, transformOrigin:'center center',
-    ease:'power2.inOut', duration:0.20
-  }, 0.55);
-  tl.to('#mask-photo', {
+    ease:'power2.inOut', duration:0.2
+  },0.6);
+  tl.to('#mask-photo',{
     scale:0.9, transformOrigin:'center center',
-    ease:'power2.inOut', duration:0.20
-  }, 0.55);
+    ease:'power2.inOut', duration:0.2
+  },0.6);
 
-  // Fase 3: dissolve totale
-  tl.to('#clip-wrapper', { opacity:0, ease:'power2.in', duration:0.15 }, 0.80);
-  tl.to('#hero-bg',      { opacity:0, ease:'power2.in', duration:0.15 }, 0.82);
-  tl.to('#vignette',     { opacity:0, ease:'power2.in', duration:0.12 }, 0.82);
-  tl.to('#hero',         { opacity:0, ease:'power2.in', duration:0.12 }, 0.90);
+  // 0.8 → 1: dissolve
+  tl.to('#clip-wrapper',{opacity:0,ease:'power2.in',duration:0.15},0.8);
+  tl.to('#vignette',{opacity:0,ease:'power2.in',duration:0.12},0.82);
+  tl.to('#hero',{opacity:0,ease:'power2.in',duration:0.12},0.9);
 
-  function updateHero() { tl.progress(progress); }
+  function updateHero(){ tl.progress(progress); }
 
-  function finishHero() {
-    if (heroDone) return;
+  function finishHero(){
+    if(heroDone) return;
     heroDone = true;
     document.getElementById('hero').style.display = 'none';
     const content = document.getElementById('content');
     content.style.pointerEvents = 'auto';
-    gsap.to(content, { opacity:1, duration:0.4, ease:'power2.out' });
+    gsap.to(content,{opacity:1,duration:0.4,ease:'power2.out'});
     initSections();
   }
 
-  // blocca lo scroll nativo: solo le lettere si muovono
-  window.addEventListener('wheel', (e) => {
-    if (heroDone) return;
+  // Scroll bloccato finché l'hero non è finito
+  window.addEventListener('wheel', e=>{
+    if(heroDone) return;
     e.preventDefault();
-    progress = Math.min(1, Math.max(0, progress + e.deltaY * SPEED));
+    progress = Math.min(1,Math.max(0,progress + e.deltaY * SPEED));
     updateHero();
-    if (progress >= 1) finishHero();
-  }, { passive:false });
+    if(progress>=1) finishHero();
+  },{passive:false});
 
-  let touchY = 0;
-  window.addEventListener('touchstart', (e) => {
-    if (!heroDone) touchY = e.touches[0].clientY;
-  }, { passive:true });
+  let touchY=0;
+  window.addEventListener('touchstart',e=>{
+    if(!heroDone) touchY = e.touches[0].clientY;
+  },{passive:true});
 
-  window.addEventListener('touchmove', (e) => {
-    if (heroDone) return;
+  window.addEventListener('touchmove',e=>{
+    if(heroDone) return;
     e.preventDefault();
-    const dy = (touchY - e.touches[0].clientY) * SPEED * 2;
-    progress = Math.min(1, Math.max(0, progress + dy));
+    const dy = (touchY - e.touches[0].clientY)*SPEED*2;
+    progress = Math.min(1,Math.max(0,progress + dy));
     touchY = e.touches[0].clientY;
     updateHero();
-    if (progress >= 1) finishHero();
-  }, { passive:false });
+    if(progress>=1) finishHero();
+  },{passive:false});
 
-  window.addEventListener('keydown', (e) => {
-    if (heroDone) return;
-    if (!['ArrowDown','ArrowUp','PageDown','PageUp',' '].includes(e.key)) return;
+  window.addEventListener('keydown',e=>{
+    if(heroDone) return;
+    if(!['ArrowDown','ArrowUp','PageDown','PageUp',' '].includes(e.key)) return;
     e.preventDefault();
-    const dir = ['ArrowUp','PageUp'].includes(e.key) ? -1 : 1;
-    progress = Math.min(1, Math.max(0, progress + dir * 0.08));
+    const dir = ['ArrowUp','PageUp'].includes(e.key)?-1:1;
+    progress = Math.min(1,Math.max(0,progress + dir*0.08));
     updateHero();
-    if (progress >= 1) finishHero();
+    if(progress>=1) finishHero();
   });
 
-  function initSections() {
-    document.querySelectorAll('.section').forEach((sec) => {
-      const inner    = sec.querySelector('.section-inner');
-      const label    = sec.querySelector('.s-label');
-      const title    = sec.querySelector('.s-title');
-      const lines    = Array.from(sec.querySelectorAll('.line-in'));
-      const contacts = sec.querySelector('.contact-links');
-      const all      = [label, title, ...lines, contacts].filter(Boolean);
+  function initSections(){
+    document.querySelectorAll('.section').forEach(sec=>{
+      const inner=sec.querySelector('.section-inner');
+      const label=sec.querySelector('.s-label');
+      const title=sec.querySelector('.s-title');
+      const lines=Array.from(sec.querySelectorAll('.line-in'));
+      const contacts=sec.querySelector('.contact-links');
+      const all=[label,title,...lines,contacts].filter(Boolean);
 
-      all.forEach((el, i) => {
-        gsap.fromTo(el, { opacity:0, y:42 }, {
-          opacity:1, y:0, ease:'power3.out',
-          scrollTrigger: {
-            trigger: inner,
-            start: `top ${96 - i*3}%`,
-            end:   `top ${18 - i*1.5}%`,
-            scrub: 2.8
+      all.forEach((el,i)=>{
+        gsap.fromTo(el,{opacity:0,y:42},{
+          opacity:1,y:0,ease:'power3.out',
+          scrollTrigger:{
+            trigger:inner,
+            start:`top ${96-i*3}%`,
+            end:`top ${18-i*1.5}%`,
+            scrub:2.8
           }
         });
       });
 
-      [...all].reverse().forEach((el, i) => {
-        gsap.to(el, { opacity:0, y:-42, ease:'power3.in',
-          scrollTrigger: {
-            trigger: inner,
-            start: `bottom ${90 - i*4}%`,
-            end:   `bottom ${0  - i*2}%`,
-            scrub: 2.8
+      [...all].reverse().forEach((el,i)=>{
+        gsap.to(el,{opacity:0,y:-42,ease:'power3.in',
+          scrollTrigger:{
+            trigger:inner,
+            start:`bottom ${90-i*4}%`,
+            end:`bottom ${0-i*2}%`,
+            scrub:2.8
           }
         });
       });
     });
 
-    document.querySelectorAll('.divider').forEach(el => {
-      gsap.to(el, { opacity:1,
-        scrollTrigger: { trigger:el, start:'top 92%', end:'top 52%', scrub:2.0 }
+    document.querySelectorAll('.divider').forEach(el=>{
+      gsap.to(el,{opacity:1,
+        scrollTrigger:{trigger:el,start:'top 92%',end:'top 52%',scrub:2}
       });
     });
 
@@ -390,9 +371,9 @@ function init() {
   }
 
   let rt;
-  window.addEventListener('resize', () => {
+  window.addEventListener('resize',()=>{
     clearTimeout(rt);
-    rt = setTimeout(() => ScrollTrigger.refresh(), 250);
+    rt=setTimeout(()=>ScrollTrigger.refresh(),250);
   });
 }
 </script>
