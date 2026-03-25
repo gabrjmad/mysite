@@ -20,24 +20,24 @@
       z-index:9999;pointer-events:none;
     }
 
-    /* HERO: alto per scroll lungo, pinned */
+    /* HERO ALTO + PINNED, STILE GTA VI */
     #hero{
-      height:600vh; /* Spazio scroll per animazioni GTA-style */
+      height:600vh;
       background:#000;position:relative;
       z-index:100;
     }
 
-    #hero-bg{display:none;} /* Non usato */
-
-    /* Clip wrapper per mask */
     #clip-wrapper{
-      position:sticky;top:0;height:100vh;
-      width:100%;z-index:2;
+      position:sticky;top:0;
+      height:100vh;width:100%;
+      z-index:2;
       will-change:transform;
     }
 
     #hero-svg{
-      position:absolute;inset:0;width:100%;height:100vh;
+      position:absolute;inset:0;
+      width:100%;height:100vh;
+      display:block;
     }
 
     #vignette{
@@ -53,17 +53,31 @@
       opacity:0;will-change:opacity;
     }
 
-    /* TESTI HERO: invisibili iniziale, appaiono solo scroll (GTA-style) */
+    /* Titolo hero */
     #hero-text{
-      position:absolute;bottom:12vh;left:0;right:0;
-      text-align:center;opacity:0;
-      z-index:4;pointer-events:none;
+      position:absolute;
+      left:50%;top:55%;
+      transform:translate(-50%,-50%);
+      text-align:center;
+      opacity:0;
+      z-index:4;
+      pointer-events:none;
       font-family:'Bebas Neue',sans-serif;
-      font-size:clamp(48px,8vw,90px);letter-spacing:.05em;
+      font-size:clamp(68px,10vw,120px);
+      letter-spacing:.08em;
       text-shadow:0 4px 18px rgba(0,0,0,.55);
-      color:#fff;line-height:0.95;
+      color:#fff;line-height:0.9;
       padding:0 clamp(4vw,8vw,12vw);
-      max-width:1200px;margin:0 auto;
+      max-width:1200px;
+      will-change:transform,opacity;
+    }
+    #hero-text span.sub{
+      display:block;
+      font-family:'Inter',sans-serif;
+      font-size:0.25em;
+      font-weight:300;
+      letter-spacing:0.35em;
+      margin-top:0.7em;
     }
 
     /* CONTENUTO DOPO HERO */
@@ -106,6 +120,7 @@
     }
     .line{display:block;overflow:hidden}
     .line-in{display:block}
+
     .contact-links{margin-top:56px}
     .contact-links a{
       display:inline-block;margin:0 16px 12px;
@@ -121,6 +136,7 @@
       color:rgba(255,255,255,.88);
       border-color:rgba(255,255,255,.30);
     }
+
     footer{
       padding:120px 0;text-align:center;
       font-family:'Bebas Neue',sans-serif;
@@ -128,10 +144,11 @@
       letter-spacing:.40em;color:rgba(255,255,255,.08);
       border-top:1px solid rgba(255,255,255,.03);
     }
+
     @media(max-width:768px){
       .section{min-height:100vh;padding:80px 7vw}
       .s-title{font-size:clamp(50px,13vw,82px)}
-      #hero-text{font-size:clamp(40px,10vw,70px);bottom:8vh;}
+      #hero-text{font-size:clamp(54px,12vw,90px);}
     }
   </style>
 </head>
@@ -147,22 +164,48 @@
       <defs>
         <mask id="hero-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080">
           <rect width="1920" height="1080" fill="#000"/>
-          <image href="logo.jpg" x="60" y="265" width="1800" height="550" preserveAspectRatio="xMidYMid meet"/>
+          <!-- LOGO USATO COME MASCHERA -->
+          <image href="logo.jpg"
+                 x="60" y="265"
+                 width="1800" height="550"
+                 preserveAspectRatio="xMidYMid meet"/>
         </mask>
       </defs>
-      <rect width="1920" height="1080" fill="#000"/>
-      <image id="mask-photo" href="foto.jpg" x="0" y="0" width="1920" height="1080"
-             preserveAspectRatio="xMidYMid slice" mask="url(#hero-mask)"/>
+
+      <!-- FOTO PIENA, SENZA LETTERE (STATO INIZIALE) -->
+      <image id="photo-full"
+             href="foto.jpg"
+             x="0" y="0" width="1920" height="1080"
+             preserveAspectRatio="xMidYMid slice"/>
+
+      <!-- OSCURAMENTO GENERALE DELLA FOTO -->
+      <rect id="hero-dark"
+            width="1920" height="1080"
+            fill="#000" opacity="0"/>
+
+      <!-- FOTO VISIBILE SOLO DENTRO LE LETTERE -->
+      <image id="mask-photo"
+             href="foto.jpg"
+             x="0" y="0" width="1920" height="1080"
+             preserveAspectRatio="xMidYMid slice"
+             mask="url(#hero-mask)" opacity="0"/>
+
+      <!-- LETTERE BIANCHE FINALI -->
+      <image id="logo-white"
+             href="logo.jpg"
+             x="60" y="265"
+             width="1800" height="550"
+             preserveAspectRatio="xMidYMid meet"
+             opacity="0"/>
     </svg>
   </div>
+
   <div id="vignette"></div>
-  
-  <!-- Testi appaiono SOLO dopo scroll iniziale (GTA-style) -->
+
+  <!-- TITOLO HERO -->
   <div id="hero-text">
-    <div>ITS UMB RIA</div>
-    <div style="font-family:'Inter',sans-serif;font-size:0.28em;font-weight:300;letter-spacing:0.1em;margin-top:0.5em;">
-      Systems Integrator
-    </div>
+    GABRIELE MADEO
+    <span class="sub">IT SYSTEMS INTEGRATOR</span>
   </div>
 </div>
 
@@ -242,56 +285,69 @@ window.addEventListener('load', () => {
     onComplete:() => document.getElementById('intro-overlay').style.display='none'
   });
 
-  // ScrollTrigger per hero (GTA6 style: pinned, lungo scroll)
+  // HERO PINNED + ANIMAZIONI STILE GTA VI
   ScrollTrigger.create({
     trigger: "#hero",
     start: "top top",
-    end: "bottom top", // 600vh naturale
-    pin: "#clip-wrapper", // Pinna solo il wrapper
+    end: "bottom top",
+    pin: "#clip-wrapper",
     pinSpacing: true,
     scrub: true,
     anticipatePin: 1,
     onUpdate: (self) => {
-      const p = self.progress;
-      
-      // 0-0.3: vignette in (come ora)
-      gsap.to('#vignette', {opacity: Math.min(1, p / 0.3), duration: 0.1});
-      
-      // 0-0.5: zoom clip da 6x a 1x (close-up iniziale -> full logo)
-      gsap.to('#clip-wrapper', {
-        scale: 6 - (p * 5), // 6 -> 1
-        transformOrigin: "center center",
-        duration: 0.1
+      const p = self.progress; // 0 -> 1
+
+      // Vignette
+      const vign = gsap.utils.clamp(0,1,p/0.25);
+      gsap.to('#vignette',{opacity:vign,duration:0.1});
+
+      // 0-0.18: FOTO PIENA → FOTO OSCURATA + LETTERE FOTO
+      const t1 = gsap.utils.clamp(0,1,p/0.18);
+      gsap.to('#hero-dark',{opacity:t1,duration:0.1});
+      gsap.to('#mask-photo',{opacity:t1,duration:0.1});
+
+      // 0.18-0.5: ZOOM LETTERE (come GTA: logo si avvicina)
+      const tZoom = gsap.utils.clamp(0,1,(p-0.18)/0.32);
+      const scale = gsap.utils.interpolate(1.1,0.18,tZoom); // 1.1 -> 0.18
+      gsap.to('#clip-wrapper',{
+        scale: scale,
+        transformOrigin:"center center",
+        duration:0.1
       });
-      
-      // 0-0.5: foto si avvicina leggermente
-      gsap.to('#mask-photo', {
-        scale: 1.4 - (p * 0.4), // 1.4 -> 1
-        duration: 0.1
+
+      // 0.25-0.6: TIT0LO ENTRA, POI SI RIDUCE E SI CENTRA
+      const tTitleIn = gsap.utils.clamp(0,1,(p-0.25)/0.2);   // ingresso
+      const tTitleOut = gsap.utils.clamp(0,1,(p-0.45)/0.25); // rimpicciolimento
+      const titleScale = gsap.utils.interpolate(1.2,0.55,tTitleOut);
+      const titleY = gsap.utils.interpolate(0, -18,tTitleOut); // spostato un po' verso l'alto
+
+      gsap.to('#hero-text',{
+        opacity:tTitleIn,
+        scale:titleScale,
+        yPercent:titleY,
+        duration:0.1,
+        transformOrigin:"center center"
       });
-      
-      // 0.6-0.85: testi appaiono solo qui (GTA-style reveal dopo foto full)
-      if (p > 0.6) {
-        gsap.to('#hero-text', {
-          opacity: Math.min(1, (p - 0.6) / 0.25),
-          y: 20 * (1 - (p - 0.6) / 0.25),
-          duration: 0.1
-        });
-      } else {
-        gsap.to('#hero-text', {opacity: 0, y: 20, duration: 0.1});
-      }
-      
-      // 0.85-1: dissolve hero
-      if (p > 0.85) {
-        const diss = (p - 0.85) / 0.15;
-        gsap.to('#clip-wrapper', {opacity: 1 - diss, duration: 0.1});
-        gsap.to('#vignette', {opacity: 1 - diss * 0.8, duration: 0.1});
-        gsap.to('#hero-text', {opacity: 1 - diss, duration: 0.1});
+
+      // 0.5-0.8: FOTO NELLE LETTERE → LETTERE BIANCHE
+      const tWhite = gsap.utils.clamp(0,1,(p-0.5)/0.3);
+      gsap.to('#mask-photo',{opacity:1-tWhite,duration:0.1});
+      gsap.to('#logo-white',{opacity:tWhite,duration:0.1});
+
+      // 0.8-1: DISSOLVE FINALE HERO
+      if(p>0.8){
+        const d = (p-0.8)/0.2;
+        const inv = 1-d;
+        gsap.to('#clip-wrapper',{opacity:inv,duration:0.1});
+        gsap.to('#vignette',{opacity:inv*0.9,duration:0.1});
+        gsap.to('#hero-text',{opacity:inv,duration:0.1});
+      }else{
+        gsap.to('#clip-wrapper',{opacity:1,duration:0.1});
       }
     }
   });
 
-  // Sezioni content (come prima, ma refresh dopo hero)
+  // SEZIONI: PARAGRAFI FLUIDI (entrano e si dissolvono con lo scroll)
   document.querySelectorAll('.section').forEach(sec => {
     const inner = sec.querySelector('.section-inner');
     const label = sec.querySelector('.s-label');
@@ -300,33 +356,49 @@ window.addEventListener('load', () => {
     const contacts = sec.querySelector('.contact-links');
     const all = [label, title, ...lines, contacts].filter(Boolean);
 
+    // INGRESSO FLUIDO
     all.forEach((el, i) => {
-      gsap.fromTo(el, {opacity:0, y:42}, {
-        opacity:1, y:0, ease:'power3.out',
-        scrollTrigger: {
-          trigger: inner,
-          start: `top ${96 - i*3}%`,
-          end: `top ${18 - i*1.5}%`,
-          scrub: 2.8
+      gsap.fromTo(el,
+        {opacity:0, y:40},
+        {
+          opacity:1, y:0,
+          ease:'power3.out',
+          scrollTrigger:{
+            trigger:inner,
+            start:`top ${85 - i*3}%`,
+            end:`top ${45 - i*2}%`,
+            scrub:true   // legato direttamente allo scroll, 60fps fluido
+          }
         }
-      });
+      );
     });
 
-    [...all].reverse().forEach((el, i) => {
-      gsap.to(el, {opacity:0, y:-42, ease:'power3.in',
-        scrollTrigger: {
-          trigger: inner,
-          start: `bottom ${90 - i*4}%`,
-          end: `bottom ${0 - i*2}%`,
-          scrub: 2.8
+    // DISSOLVE (NON A SCATTO)
+    all.forEach((el, i) => {
+      gsap.to(el,{
+        opacity:0,
+        y:-30,
+        ease:'power3.in',
+        scrollTrigger:{
+          trigger:inner,
+          start:`bottom ${60 - i*4}%`,
+          end:`bottom ${5 - i*2}%`,
+          scrub:true
         }
       });
     });
   });
 
+  // DIVIDER
   document.querySelectorAll('.divider').forEach(el => {
-    gsap.to(el, {opacity:1,
-      scrollTrigger: {trigger: el, start:'top 92%', end:'top 52%', scrub:2}
+    gsap.to(el,{
+      opacity:1,
+      scrollTrigger:{
+        trigger:el,
+        start:'top 92%',
+        end:'top 52%',
+        scrub:true
+      }
     });
   });
 
