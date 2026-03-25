@@ -20,7 +20,7 @@
       z-index:9999;pointer-events:none;
     }
 
-    /* HERO ALTO + PINNED, STILE GTA VI */
+    /* HERO ALTO + PINNED */
     #hero{
       height:600vh;
       background:#000;position:relative;
@@ -31,7 +31,7 @@
       position:sticky;top:0;
       height:100vh;width:100%;
       z-index:2;
-      will-change:transform;
+      will-change:transform,opacity;
     }
 
     #hero-svg{
@@ -56,7 +56,7 @@
     /* Titolo hero */
     #hero-text{
       position:absolute;
-      left:50%;top:55%;
+      left:50%;top:20%; /* posizione finale: centro in alto */
       transform:translate(-50%,-50%);
       text-align:center;
       opacity:0;
@@ -104,6 +104,7 @@
       font-size:clamp(10px,1.1vw,13px);
       letter-spacing:.65em;text-transform:uppercase;
       color:rgba(255,255,255,.20);margin-bottom:22px;
+      will-change:transform,opacity,filter;
     }
     .s-title{
       display:block;font-family:'Bebas Neue',sans-serif;
@@ -111,6 +112,7 @@
       letter-spacing:.025em;line-height:.95;
       margin-bottom:38px;
       text-shadow:0 4px 18px rgba(0,0,0,.55);
+      will-change:transform,opacity,filter;
     }
     .s-body{
       font-size:clamp(20px,2.2vw,27px);
@@ -119,7 +121,10 @@
       max-width:740px;margin:0 auto;
     }
     .line{display:block;overflow:hidden}
-    .line-in{display:block}
+    .line-in{
+      display:block;
+      will-change:transform,opacity,filter;
+    }
 
     .contact-links{margin-top:56px}
     .contact-links a{
@@ -285,7 +290,7 @@ window.addEventListener('load', () => {
     onComplete:() => document.getElementById('intro-overlay').style.display='none'
   });
 
-  // HERO PINNED + ANIMAZIONI STILE GTA VI
+  // HERO PINNED + ANIMAZIONI
   ScrollTrigger.create({
     trigger: "#hero",
     start: "top top",
@@ -306,25 +311,26 @@ window.addEventListener('load', () => {
       gsap.to('#hero-dark',{opacity:t1,duration:0.1});
       gsap.to('#mask-photo',{opacity:t1,duration:0.1});
 
-      // 0.18-0.5: ZOOM LETTERE (come GTA: logo si avvicina)
+      // 0.18-0.5: ZOOM LETTERE + SPOSTAMENTO VERSO ALTO (LOGO/TITOLO IN ALTO)
       const tZoom = gsap.utils.clamp(0,1,(p-0.18)/0.32);
-      const scale = gsap.utils.interpolate(1.1,0.18,tZoom); // 1.1 -> 0.18
+      const scale = gsap.utils.interpolate(1.1,0.2,tZoom); // 1.1 -> 0.2
+      const yMove = gsap.utils.interpolate(0,-18,tZoom);  // sposta in alto
+
       gsap.to('#clip-wrapper',{
         scale: scale,
-        transformOrigin:"center center",
+        yPercent: yMove,
+        transformOrigin:"50% 15%", // centro orizzontale, alto verticale
         duration:0.1
       });
 
-      // 0.25-0.6: TIT0LO ENTRA, POI SI RIDUCE E SI CENTRA
-      const tTitleIn = gsap.utils.clamp(0,1,(p-0.25)/0.2);   // ingresso
-      const tTitleOut = gsap.utils.clamp(0,1,(p-0.45)/0.25); // rimpicciolimento
-      const titleScale = gsap.utils.interpolate(1.2,0.55,tTitleOut);
-      const titleY = gsap.utils.interpolate(0, -18,tTitleOut); // spostato un po' verso l'alto
+      // 0.25-0.6: TITOLO ENTRA E SI RIDUCE MA RESTA IN ALTO
+      const tTitleIn  = gsap.utils.clamp(0,1,(p-0.25)/0.2);   // ingresso
+      const tTitleOut = gsap.utils.clamp(0,1,(p-0.45)/0.25);  // riduzione
+      const titleScale = gsap.utils.interpolate(1.2,0.75,tTitleOut);
 
       gsap.to('#hero-text',{
         opacity:tTitleIn,
         scale:titleScale,
-        yPercent:titleY,
         duration:0.1,
         transformOrigin:"center center"
       });
@@ -334,7 +340,7 @@ window.addEventListener('load', () => {
       gsap.to('#mask-photo',{opacity:1-tWhite,duration:0.1});
       gsap.to('#logo-white',{opacity:tWhite,duration:0.1});
 
-      // 0.8-1: DISSOLVE FINALE HERO
+      // 0.8-1: DISSOLVE FINALE HERO (MA LOGO/TITOLO RESTANO FINO A FINE HERO)
       if(p>0.8){
         const d = (p-0.8)/0.2;
         const inv = 1-d;
@@ -347,7 +353,7 @@ window.addEventListener('load', () => {
     }
   });
 
-  // SEZIONI: PARAGRAFI FLUIDI (entrano e si dissolvono con lo scroll)
+  // SEZIONI: TESTO CON "OMBRA"/SCIA (blur morbido in/out)
   document.querySelectorAll('.section').forEach(sec => {
     const inner = sec.querySelector('.section-inner');
     const label = sec.querySelector('.s-label');
@@ -356,28 +362,29 @@ window.addEventListener('load', () => {
     const contacts = sec.querySelector('.contact-links');
     const all = [label, title, ...lines, contacts].filter(Boolean);
 
-    // INGRESSO FLUIDO
+    // INGRESSO FLUIDO CON BLUR (ombra che si chiude)
     all.forEach((el, i) => {
       gsap.fromTo(el,
-        {opacity:0, y:40},
+        {opacity:0, y:40, filter:'blur(14px)'},
         {
-          opacity:1, y:0,
+          opacity:1, y:0, filter:'blur(0px)',
           ease:'power3.out',
           scrollTrigger:{
             trigger:inner,
             start:`top ${85 - i*3}%`,
             end:`top ${45 - i*2}%`,
-            scrub:true   // legato direttamente allo scroll, 60fps fluido
+            scrub:true   // legato direttamente allo scroll
           }
         }
       );
     });
 
-    // DISSOLVE (NON A SCATTO)
+    // USCITA CON SCIA/OMBRA (blur che aumenta + leggera salita)
     all.forEach((el, i) => {
       gsap.to(el,{
         opacity:0,
         y:-30,
+        filter:'blur(14px)',
         ease:'power3.in',
         scrollTrigger:{
           trigger:inner,
