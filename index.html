@@ -4,15 +4,23 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gabriele Madeo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- FONT: Montserrat per il titolo (look più vicino a GTA VI) + Inter per il corpo -->
+  //fonts.googleapis.com">
+  //fonts.gstatic.com" crossorigin>
+  //fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Inter:wght@300;400;500&display=swap"
+    rel="stylesheet">
+
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
     html,body{
       background:#000;color:#fff;
       font-family:'Inter',sans-serif;
       overflow-x:hidden;
+      text-rendering:geometricPrecision;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
     #intro-overlay{
@@ -20,7 +28,7 @@
       z-index:9999;pointer-events:none;
     }
 
-    /* HERO ALTO + PINNED */
+    /* HERO SCROLL */
     #hero{
       height:600vh;
       background:#000;position:relative;
@@ -53,31 +61,58 @@
       opacity:0;will-change:opacity;
     }
 
-    /* Titolo hero */
+    /* WRAPPER TITOLO FISSO SEMPRE IN ALTO AL CENTRO */
+    #hero-title-wrap{
+      position:fixed;
+      top:0;
+      left:50%;
+      transform:translateX(-50%);
+      width:100%;
+      z-index:50;
+      pointer-events:none;
+      padding-top:20px;
+    }
+
+    /* Titolo hero stile GTA VI-like */
     #hero-text{
-      position:absolute;
-      left:50%;top:20%; /* posizione finale: centro in alto */
-      transform:translate(-50%,-50%);
+      position:relative;
+      margin:0 auto;
       text-align:center;
       opacity:0;
-      z-index:4;
-      pointer-events:none;
-      font-family:'Bebas Neue',sans-serif;
-      font-size:clamp(68px,10vw,120px);
-      letter-spacing:.08em;
-      text-shadow:0 4px 18px rgba(0,0,0,.55);
-      color:#fff;line-height:0.9;
+      font-family:'Montserrat',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      font-weight:800;
+      font-size:clamp(44px,7vw,88px);
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      line-height:0.95;
       padding:0 clamp(4vw,8vw,12vw);
       max-width:1200px;
-      will-change:transform,opacity;
+      will-change:transform,opacity,filter;
+
+      /* effetto colore tipo logo: gradiente + outline chiaro */
+      background:linear-gradient(120deg,#ffffff,#ffe9ff,#ffc3f0);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      -webkit-text-stroke:0.9px rgba(255,255,255,0.9);
+      text-shadow:0 0 26px rgba(0,0,0,0.85);
+
+      filter:drop-shadow(0 0 20px rgba(0,0,0,0.75));
     }
+
     #hero-text span.sub{
       display:block;
+      margin-top:0.85em;
       font-family:'Inter',sans-serif;
-      font-size:0.25em;
       font-weight:300;
-      letter-spacing:0.35em;
-      margin-top:0.7em;
+      font-size:0.26em;
+      letter-spacing:0.4em;
+      color:rgba(255,255,255,0.8);
+      -webkit-text-stroke:0;
+      text-shadow:none;
+      background:none;
+      -webkit-background-clip:border-box;
+      background-clip:border-box;
     }
 
     /* CONTENUTO DOPO HERO */
@@ -89,7 +124,7 @@
     .divider{
       width:1px;height:90px;
       background:linear-gradient(to bottom,
-        transparent,rgba(255,255,255,0.06),transparent);
+        transparent,rgba(255,255,255,0.12),transparent);
       margin:0 auto;opacity:0;
     }
 
@@ -98,26 +133,35 @@
       display:flex;align-items:center;justify-content:center;
       padding:140px clamp(6vw,14vw,20vw);
     }
-    .section-inner{max-width:900px;width:100%;text-align:center}
+    .section-inner{
+      max-width:900px;width:100%;text-align:center;
+      position:relative;
+    }
+
     .s-label{
       display:block;
       font-size:clamp(10px,1.1vw,13px);
-      letter-spacing:.65em;text-transform:uppercase;
-      color:rgba(255,255,255,.20);margin-bottom:22px;
+      letter-spacing:.65em;
+      text-transform:uppercase;
+      color:rgba(255,255,255,.24);
+      margin-bottom:22px;
       will-change:transform,opacity,filter;
     }
     .s-title{
-      display:block;font-family:'Bebas Neue',sans-serif;
-      font-size:clamp(62px,9vw,115px);
-      letter-spacing:.025em;line-height:.95;
+      display:block;
+      font-family:'Montserrat',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      font-weight:800;
+      font-size:clamp(54px,7.5vw,96px);
+      letter-spacing:.06em;
+      line-height:.95;
       margin-bottom:38px;
-      text-shadow:0 4px 18px rgba(0,0,0,.55);
+      text-shadow:0 4px 18px rgba(0,0,0,.75);
       will-change:transform,opacity,filter;
     }
     .s-body{
       font-size:clamp(20px,2.2vw,27px);
       font-weight:300;line-height:1.82;
-      color:rgba(255,255,255,.45);
+      color:rgba(255,255,255,.52);
       max-width:740px;margin:0 auto;
     }
     .line{display:block;overflow:hidden}
@@ -133,27 +177,33 @@
       font-size:clamp(11px,1.2vw,14px);
       letter-spacing:.50em;text-transform:uppercase;
       text-decoration:none;
-      border-bottom:1px solid rgba(255,255,255,.07);
+      border-bottom:1px solid rgba(255,255,255,.12);
       padding-bottom:4px;
       transition:color .35s,border-color .35s;
     }
     .contact-links a:hover{
-      color:rgba(255,255,255,.88);
-      border-color:rgba(255,255,255,.30);
+      color:rgba(255,255,255,.9);
+      border-color:rgba(255,255,255,.45);
     }
 
     footer{
       padding:120px 0;text-align:center;
-      font-family:'Bebas Neue',sans-serif;
+      font-family:'Montserrat',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      font-weight:600;
       font-size:clamp(12px,1.8vw,20px);
-      letter-spacing:.40em;color:rgba(255,255,255,.08);
-      border-top:1px solid rgba(255,255,255,.03);
+      letter-spacing:.40em;color:rgba(255,255,255,.12);
+      border-top:1px solid rgba(255,255,255,.06);
     }
 
     @media(max-width:768px){
       .section{min-height:100vh;padding:80px 7vw}
-      .s-title{font-size:clamp(50px,13vw,82px)}
-      #hero-text{font-size:clamp(54px,12vw,90px);}
+      .s-title{font-size:clamp(42px,11vw,72px)}
+      #hero-text{
+        font-size:clamp(38px,10.5vw,72px);
+        letter-spacing:.14em;
+        padding:0 8vw;
+      }
+      #hero-title-wrap{padding-top:14px;}
     }
   </style>
 </head>
@@ -206,8 +256,10 @@
   </div>
 
   <div id="vignette"></div>
+</div>
 
-  <!-- TITOLO HERO -->
+<!-- TITOLO SEMPRE FISSO IN ALTO -->
+<div id="hero-title-wrap">
   <div id="hero-text">
     GABRIELE MADEO
     <span class="sub">IT SYSTEMS INTEGRATOR</span>
@@ -285,12 +337,13 @@
 gsap.registerPlugin(ScrollTrigger);
 
 window.addEventListener('load', () => {
+  // fade iniziale
   gsap.to('#intro-overlay', {
     opacity:0, duration:1.2, ease:'power2.inOut',
     onComplete:() => document.getElementById('intro-overlay').style.display='none'
   });
 
-  // HERO PINNED + ANIMAZIONI
+  // HERO PINNED + ANIMAZIONI TIPO GTA
   ScrollTrigger.create({
     trigger: "#hero",
     start: "top top",
@@ -304,96 +357,102 @@ window.addEventListener('load', () => {
 
       // Vignette
       const vign = gsap.utils.clamp(0,1,p/0.25);
-      gsap.to('#vignette',{opacity:vign,duration:0.1});
+      gsap.to('#vignette',{opacity:vign,duration:0.12,ease:'linear'});
 
       // 0-0.18: FOTO PIENA → FOTO OSCURATA + LETTERE FOTO
       const t1 = gsap.utils.clamp(0,1,p/0.18);
-      gsap.to('#hero-dark',{opacity:t1,duration:0.1});
-      gsap.to('#mask-photo',{opacity:t1,duration:0.1});
+      gsap.to('#hero-dark',{opacity:t1,duration:0.12,ease:'linear'});
+      gsap.to('#mask-photo',{opacity:t1,duration:0.12,ease:'linear'});
 
-      // 0.18-0.5: ZOOM LETTERE + SPOSTAMENTO VERSO ALTO (LOGO/TITOLO IN ALTO)
+      // 0.18-0.5: ZOOM LETTERE + SPOSTAMENTO VERSO ALTO
       const tZoom = gsap.utils.clamp(0,1,(p-0.18)/0.32);
-      const scale = gsap.utils.interpolate(1.1,0.2,tZoom); // 1.1 -> 0.2
-      const yMove = gsap.utils.interpolate(0,-18,tZoom);  // sposta in alto
+      const scale = gsap.utils.interpolate(1.08,0.25,tZoom);
+      const yMove = gsap.utils.interpolate(0,-16,tZoom);
 
       gsap.to('#clip-wrapper',{
         scale: scale,
         yPercent: yMove,
-        transformOrigin:"50% 15%", // centro orizzontale, alto verticale
-        duration:0.1
+        transformOrigin:"50% 18%",
+        duration:0.12,
+        ease:'power2.out'
       });
 
-      // 0.25-0.6: TITOLO ENTRA E SI RIDUCE MA RESTA IN ALTO
-      const tTitleIn  = gsap.utils.clamp(0,1,(p-0.25)/0.2);   // ingresso
-      const tTitleOut = gsap.utils.clamp(0,1,(p-0.45)/0.25);  // riduzione
-      const titleScale = gsap.utils.interpolate(1.2,0.75,tTitleOut);
+      // TITOLO: ENTRA DAL CENTRO E SI ASSENTA IN ALTO, MA RESTA SEMPRE VISIBILE
+      const tTitle = gsap.utils.clamp(0,1,(p-0.22)/0.2);
+      const titleScale = gsap.utils.interpolate(1.25,0.86,tTitle);
+      const titleY = gsap.utils.interpolate(28,8,tTitle); // in vh
 
       gsap.to('#hero-text',{
-        opacity:tTitleIn,
+        opacity:tTitle,
         scale:titleScale,
-        duration:0.1,
+        y:titleY + 'vh',
+        duration:0.15,
+        ease:'power3.out',
         transformOrigin:"center center"
       });
 
       // 0.5-0.8: FOTO NELLE LETTERE → LETTERE BIANCHE
       const tWhite = gsap.utils.clamp(0,1,(p-0.5)/0.3);
-      gsap.to('#mask-photo',{opacity:1-tWhite,duration:0.1});
-      gsap.to('#logo-white',{opacity:tWhite,duration:0.1});
+      gsap.to('#mask-photo',{opacity:1-tWhite,duration:0.15,ease:'linear'});
+      gsap.to('#logo-white',{opacity:tWhite,duration:0.15,ease:'linear'});
 
-      // 0.8-1: DISSOLVE FINALE HERO (MA LOGO/TITOLO RESTANO FINO A FINE HERO)
+      // 0.8-1: DISSOLVE HERO (MA TITOLO RESTA)
       if(p>0.8){
         const d = (p-0.8)/0.2;
         const inv = 1-d;
-        gsap.to('#clip-wrapper',{opacity:inv,duration:0.1});
-        gsap.to('#vignette',{opacity:inv*0.9,duration:0.1});
-        gsap.to('#hero-text',{opacity:inv,duration:0.1});
+        gsap.to('#clip-wrapper',{opacity:inv,duration:0.15,ease:'linear'});
+        gsap.to('#vignette',{opacity:inv*0.9,duration:0.15,ease:'linear'});
       }else{
-        gsap.to('#clip-wrapper',{opacity:1,duration:0.1});
+        gsap.to('#clip-wrapper',{opacity:1,duration:0.15,ease:'linear'});
       }
     }
   });
 
-  // SEZIONI: TESTO CON "OMBRA"/SCIA (blur morbido in/out)
+  // SEZIONI: timeline unica per entrata + uscita, molto fluida
   document.querySelectorAll('.section').forEach(sec => {
     const inner = sec.querySelector('.section-inner');
     const label = sec.querySelector('.s-label');
     const title = sec.querySelector('.s-title');
     const lines = Array.from(sec.querySelectorAll('.line-in'));
     const contacts = sec.querySelector('.contact-links');
+
     const all = [label, title, ...lines, contacts].filter(Boolean);
 
-    // INGRESSO FLUIDO CON BLUR (ombra che si chiude)
-    all.forEach((el, i) => {
-      gsap.fromTo(el,
-        {opacity:0, y:40, filter:'blur(14px)'},
-        {
-          opacity:1, y:0, filter:'blur(0px)',
-          ease:'power3.out',
-          scrollTrigger:{
-            trigger:inner,
-            start:`top ${85 - i*3}%`,
-            end:`top ${45 - i*2}%`,
-            scrub:true   // legato direttamente allo scroll
-          }
-        }
-      );
+    // stato iniziale
+    gsap.set(all,{
+      opacity:0,
+      y:40,
+      filter:'blur(18px)'
     });
 
-    // USCITA CON SCIA/OMBRA (blur che aumenta + leggera salita)
-    all.forEach((el, i) => {
-      gsap.to(el,{
-        opacity:0,
-        y:-30,
-        filter:'blur(14px)',
-        ease:'power3.in',
-        scrollTrigger:{
-          trigger:inner,
-          start:`bottom ${60 - i*4}%`,
-          end:`bottom ${5 - i*2}%`,
-          scrub:true
-        }
-      });
+    const tl = gsap.timeline({
+      scrollTrigger:{
+        trigger:inner,
+        start:"top 75%",
+        end:"bottom 25%",
+        scrub:true
+      }
     });
+
+    // 0 -> ~0.45: ENTRATA CON SCIA MORBIDA
+    tl.to(all,{
+      opacity:1,
+      y:0,
+      filter:'blur(0px)',
+      stagger:{each:0.08, from:"start"},
+      ease:'power3.out',
+      duration:0.45
+    },0);
+
+    // ~0.5 -> 1: USCITA CON DISSOLVENZA E BLUR VERSO L'ALTO
+    tl.to(all,{
+      opacity:0,
+      y:-32,
+      filter:'blur(16px)',
+      stagger:{each:0.06, from:"start"},
+      ease:'power3.in',
+      duration:0.4
+    },0.55);
   });
 
   // DIVIDER
