@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gabriele Madeo</title>
 
-  <!-- FONT: Pricedown per il titolo stile GTA, Inter per il resto -->
+  <!-- FONT -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -23,15 +23,11 @@
       -moz-osx-font-smoothing:grayscale;
     }
 
-    #intro-overlay{
-      position:fixed;inset:0;background:#000;
-      z-index:9999;pointer-events:none;
-    }
-
-    /* HERO SCROLL */
+    /* blocco hero molto alto per lo scroll */
     #hero{
       height:600vh;
-      background:#000;position:relative;
+      background:#000;
+      position:relative;
       z-index:100;
     }
 
@@ -40,6 +36,7 @@
       height:100vh;width:100%;
       z-index:2;
       will-change:transform,opacity;
+      overflow:hidden; /* niente fuori schermo */
     }
 
     #hero-svg{
@@ -61,14 +58,21 @@
       opacity:0;will-change:opacity;
     }
 
-    /* TITOLO STILE GTA6, FISSO IN ALTO CENTRO */
+    #intro-overlay{
+      position:fixed;inset:0;background:#000;
+      z-index:9999;pointer-events:none;
+    }
+
+    /* TITOLO FISSO IN ALTO CENTRO (UNICO) */
     #hero-title-wrap{
       position:fixed;
-      top:40px;
+      top:clamp(20px,5vh,40px);
       left:50%;
       transform:translateX(-50%);
       z-index:60;
       pointer-events:none;
+      max-width:100%;
+      padding-inline:clamp(8px,3vw,24px);
     }
 
     #hero-text{
@@ -76,7 +80,7 @@
       font-weight:400;
       text-transform:lowercase;
       letter-spacing:.04em;
-      font-size:clamp(72px, 11vw, 150px);
+      font-size:clamp(46px,9vw,120px);
       line-height:.82;
       text-align:center;
       color:#fff;
@@ -84,8 +88,15 @@
         0 0 18px rgba(0,0,0,.85),
         0 6px 22px rgba(0,0,0,.95);
       opacity:0;
-      transform:translateY(-40px) scale(0.9);
+      transform:translateY(-40px) scale(1.4); /* parte grande come su gta6 */
+      transform-origin:center top;
       will-change:transform,opacity;
+      white-space:normal;
+      word-break:keep-all;
+    }
+
+    #hero-text span{
+      display:block;
     }
 
     /* CONTENUTO DOPO HERO */
@@ -103,8 +114,11 @@
 
     .section{
       min-height:120vh;
-      display:flex;align-items:center;justify-content:center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
       padding:140px clamp(6vw,14vw,20vw);
+      overflow:hidden; /* niente testo fuori schermo */
     }
     .section-inner{
       max-width:900px;width:100%;text-align:center;
@@ -125,15 +139,16 @@
       display:block;
       font-family:'Inter',sans-serif;
       font-weight:500;
-      font-size:clamp(54px,7.5vw,96px);
+      font-size:clamp(38px,6vw,72px);
       letter-spacing:.06em;
-      line-height:.95;
-      margin-bottom:38px;
+      line-height:1.02;
+      margin-bottom:32px;
       text-shadow:0 4px 18px rgba(0,0,0,.75);
       will-change:transform,opacity,filter;
+      word-wrap:break-word;
     }
     .s-body{
-      font-size:clamp(20px,2.2vw,27px);
+      font-size:clamp(18px,2.1vw,24px);
       font-weight:300;line-height:1.82;
       color:rgba(255,255,255,.52);
       max-width:740px;margin:0 auto;
@@ -144,7 +159,7 @@
       will-change:transform,opacity,filter;
     }
 
-    .contact-links{margin-top:56px}
+    .contact-links{margin-top:40px}
     .contact-links a{
       display:inline-block;margin:0 16px 12px;
       color:rgba(255,255,255,.32);
@@ -170,12 +185,17 @@
     }
 
     @media(max-width:768px){
-      .section{min-height:100vh;padding:80px 7vw}
-      .s-title{font-size:clamp(42px,11vw,72px)}
       #hero-text{
-        font-size:clamp(60px,14vw,110px);
+        font-size:clamp(40px,11vw,80px);
+        transform:translateY(-28px) scale(1.3);
       }
-      #hero-title-wrap{top:24px;}
+      .section{
+        min-height:100vh;
+        padding:80px 7vw;
+      }
+      .s-title{
+        font-size:clamp(30px,9vw,52px);
+      }
     }
   </style>
 </head>
@@ -183,33 +203,28 @@
 
 <div id="intro-overlay"></div>
 
-<!-- HERO PINNED -->
 <div id="hero">
   <div id="clip-wrapper">
     <svg id="hero-svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"
          xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <!-- MASK CON LE TUE PAROLE: LETTERE TRASPARENTI SULLA FOTO -->
-        <mask id="hero-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080">
-          <!-- sfondo nero = nascosto -->
+        <!-- MASK: lettere bianche = foto visibile (trasparente) -->
+        <mask id="hero-mask" x="0" y="0" width="1920" height="1080">
           <rect width="1920" height="1080" fill="black"/>
-
-          <!-- testo bianco = BUCO: fa vedere la foto sotto -->
-          <text x="50%" y="35%"
+          <text x="50%" y="38%"
                 text-anchor="middle"
                 fill="white"
                 font-family="Pricedown Bl, sans-serif"
-                font-size="220"
+                font-size="260"
                 letter-spacing="8"
                 dominant-baseline="middle">
             gabriele
           </text>
-
-          <text x="50%" y="55%"
+          <text x="50%" y="62%"
                 text-anchor="middle"
                 fill="white"
                 font-family="Pricedown Bl, sans-serif"
-                font-size="220"
+                font-size="260"
                 letter-spacing="8"
                 dominant-baseline="middle">
             madeo
@@ -217,18 +232,18 @@
         </mask>
       </defs>
 
-      <!-- FOTO PIENA SOTTO (stato iniziale) -->
+      <!-- FOTO PIENA -->
       <image id="photo-full"
              href="foto.jpg"
              x="0" y="0" width="1920" height="1080"
              preserveAspectRatio="xMidYMid slice"/>
 
-      <!-- OSCURAMENTO GENERALE DELLA FOTO -->
+      <!-- OSCURAMENTO -->
       <rect id="hero-dark"
             width="1920" height="1080"
             fill="#000" opacity="0"/>
 
-      <!-- FOTO VISIBILE SOLO DENTRO LE LETTERE (lettere trasparenti) -->
+      <!-- FOTO SOLO NELLE LETTERE (TRASPARENTE) -->
       <g mask="url(#hero-mask)">
         <image id="mask-photo"
                href="foto.jpg"
@@ -237,25 +252,24 @@
                opacity="0"/>
       </g>
 
-      <!-- VERSIONE LETTERE BIANCHE FINALI (senza foto) -->
+      <!-- LETTERE BIANCHE FINALI -->
       <text id="logo-white"
-            x="50%" y="35%"
+            x="50%" y="38%"
             text-anchor="middle"
             fill="white"
             font-family="Pricedown Bl, sans-serif"
-            font-size="220"
+            font-size="260"
             letter-spacing="8"
             dominant-baseline="middle"
             opacity="0">
         gabriele
       </text>
-
       <text id="logo-white-2"
-            x="50%" y="55%"
+            x="50%" y="62%"
             text-anchor="middle"
             fill="white"
             font-family="Pricedown Bl, sans-serif"
-            font-size="220"
+            font-size="260"
             letter-spacing="8"
             dominant-baseline="middle"
             opacity="0">
@@ -267,18 +281,18 @@
   <div id="vignette"></div>
 </div>
 
-<!-- TITOLO FISSO IN ALTO (STESSO TESTO DEL LOGO) -->
+<!-- TITOLO FISSO (UNICO) -->
 <div id="hero-title-wrap">
   <div id="hero-text">
-    gabriele<br>madeo
+    <span>gabriele</span>
+    <span>madeo</span>
   </div>
 </div>
 
-<!-- CONTENUTO -->
 <div id="content">
-  <div class="divider" id="d0"></div>
+  <div class="divider"></div>
 
-  <section class="section" id="s1">
+  <section class="section">
     <div class="section-inner">
       <span class="s-label">Chi sono</span>
       <span class="s-title">IT Systems Integrator</span>
@@ -290,9 +304,9 @@
     </div>
   </section>
 
-  <div class="divider" id="d1"></div>
+  <div class="divider"></div>
 
-  <section class="section" id="s2">
+  <section class="section">
     <div class="section-inner">
       <span class="s-label">Competenze</span>
       <span class="s-title">Tech Stack</span>
@@ -304,9 +318,9 @@
     </div>
   </section>
 
-  <div class="divider" id="d2"></div>
+  <div class="divider"></div>
 
-  <section class="section" id="s3">
+  <section class="section">
     <div class="section-inner">
       <span class="s-label">Progetti</span>
       <span class="s-title">Dal Codice al Deploy</span>
@@ -318,9 +332,9 @@
     </div>
   </section>
 
-  <div class="divider" id="d3"></div>
+  <div class="divider"></div>
 
-  <section class="section" id="s4">
+  <section class="section">
     <div class="section-inner">
       <span class="s-label">Contatti</span>
       <span class="s-title">In Connessione</span>
@@ -345,23 +359,22 @@
 gsap.registerPlugin(ScrollTrigger);
 
 window.addEventListener('load', () => {
-  // fade iniziale
   gsap.to('#intro-overlay', {
     opacity:0, duration:1.2, ease:'power2.inOut',
     onComplete:() => document.getElementById('intro-overlay').style.display='none'
   });
 
-  // ingresso morbido del titolo fisso, tipo GTA6
+  // titolo: entra grande e si stabilizza
   gsap.to('#hero-text',{
     opacity:1,
     y:0,
     scale:1,
-    duration:1.2,
+    duration:1.4,
     ease:'power3.out',
-    delay:0.3
+    delay:0.25
   });
 
-  // leggero movimento del titolo mentre si scorre il blocco hero
+  // “respiro” leggero durante lo scroll del solo hero
   gsap.to('#hero-text',{
     scrollTrigger:{
       trigger:'#hero',
@@ -370,11 +383,11 @@ window.addEventListener('load', () => {
       scrub:true
     },
     yPercent:-4,
-    scale:0.96,
+    scale:0.9,    // da molto grande a un po' più piccolo
     ease:'none'
   });
 
-  // HERO PINNED + ANIMAZIONI TIPO GTA
+  // HERO: zoom iniziale molto grande -> piccolo, come GTA6
   ScrollTrigger.create({
     trigger: "#hero",
     start: "top top",
@@ -384,37 +397,32 @@ window.addEventListener('load', () => {
     scrub: true,
     anticipatePin: 1,
     onUpdate: (self) => {
-      const p = self.progress; // 0 -> 1
+      const p = self.progress;
 
-      // Vignette
       const vign = gsap.utils.clamp(0,1,p/0.25);
       gsap.to('#vignette',{opacity:vign,duration:0.12,ease:'linear'});
 
-      // 0-0.18: FOTO PIENA → OSCURATA + LETTERE TRASPARENTI
       const t1 = gsap.utils.clamp(0,1,p/0.18);
       gsap.to('#hero-dark',{opacity:t1,duration:0.12,ease:'linear'});
       gsap.to('#mask-photo',{opacity:t1,duration:0.12,ease:'linear'});
 
-      // 0.18-0.5: ZOOM OUT E SPOSTAMENTO VERSO ALTO
-      const tZoom = gsap.utils.clamp(0,1,(p-0.18)/0.32);
-      const scale = gsap.utils.interpolate(1.08,0.25,tZoom);
-      const yMove = gsap.utils.interpolate(0,-16,tZoom);
+      const tZoom = gsap.utils.clamp(0,1,(p-0.10)/0.40);
+      const scale = gsap.utils.interpolate(1.6,0.25,tZoom); // parte super zoom
+      const yMove = gsap.utils.interpolate(12,-16,tZoom);
 
       gsap.to('#clip-wrapper',{
         scale: scale,
         yPercent: yMove,
-        transformOrigin:"50% 18%",
+        transformOrigin:"50% 30%",
         duration:0.12,
         ease:'power2.out'
       });
 
-      // 0.5-0.8: LETTERE TRASPARENTI → LETTERE BIANCHE
       const tWhite = gsap.utils.clamp(0,1,(p-0.5)/0.3);
       gsap.to('#mask-photo',{opacity:1-tWhite,duration:0.15,ease:'linear'});
       gsap.to('#logo-white',{opacity:tWhite,duration:0.15,ease:'linear'});
       gsap.to('#logo-white-2',{opacity:tWhite,duration:0.15,ease:'linear'});
 
-      // 0.8-1: DISSOLVE HERO (TITOLO FISSO RESTA)
       if(p>0.8){
         const d = (p-0.8)/0.2;
         const inv = 1-d;
@@ -426,7 +434,7 @@ window.addEventListener('load', () => {
     }
   });
 
-  // SEZIONI: timeline unica entrata/uscita (dissolvenza fluida)
+  // SEZIONI: entrata/uscita morbida, nessun overflow
   document.querySelectorAll('.section').forEach(sec => {
     const inner = sec.querySelector('.section-inner');
     const label = sec.querySelector('.s-label');
@@ -450,7 +458,6 @@ window.addEventListener('load', () => {
       }
     });
 
-    // entrata
     tl.to(all,{
       opacity:1,
       y:0,
@@ -460,7 +467,6 @@ window.addEventListener('load', () => {
       duration:0.45
     },0);
 
-    // uscita
     tl.to(all,{
       opacity:0,
       y:-32,
@@ -471,7 +477,6 @@ window.addEventListener('load', () => {
     },0.55);
   });
 
-  // DIVIDER
   document.querySelectorAll('.divider').forEach(el => {
     gsap.to(el,{
       opacity:1,
