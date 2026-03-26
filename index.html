@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Gabriele Madeo</title>
 
-  <!-- FONT: Montserrat per il titolo (look più vicino a GTA VI) + Inter per il corpo -->
-  //fonts.googleapis.com">
-  //fonts.gstatic.com" crossorigin>
-  //fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Inter:wght@300;400;500&display=swap"
-    rel="stylesheet">
+  <!-- FONT: Pricedown per il titolo stile GTA, Inter per il resto -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/pricedown" rel="stylesheet">
 
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -61,58 +61,31 @@
       opacity:0;will-change:opacity;
     }
 
-    /* WRAPPER TITOLO FISSO SEMPRE IN ALTO AL CENTRO */
+    /* TITOLO STILE GTA6, FISSO IN ALTO CENTRO */
     #hero-title-wrap{
       position:fixed;
-      top:0;
+      top:40px;
       left:50%;
       transform:translateX(-50%);
-      width:100%;
-      z-index:50;
+      z-index:60;
       pointer-events:none;
-      padding-top:20px;
     }
 
-    /* Titolo hero stile GTA VI-like */
     #hero-text{
-      position:relative;
-      margin:0 auto;
+      font-family:'Pricedown Bl', system-ui, sans-serif;
+      font-weight:400;
+      text-transform:lowercase;
+      letter-spacing:.04em;
+      font-size:clamp(72px, 11vw, 150px);
+      line-height:.82;
       text-align:center;
+      color:#fff;
+      text-shadow:
+        0 0 18px rgba(0,0,0,.85),
+        0 6px 22px rgba(0,0,0,.95);
       opacity:0;
-      font-family:'Montserrat',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-      font-weight:800;
-      font-size:clamp(44px,7vw,88px);
-      letter-spacing:.16em;
-      text-transform:uppercase;
-      line-height:0.95;
-      padding:0 clamp(4vw,8vw,12vw);
-      max-width:1200px;
-      will-change:transform,opacity,filter;
-
-      /* effetto colore tipo logo: gradiente + outline chiaro */
-      background:linear-gradient(120deg,#ffffff,#ffe9ff,#ffc3f0);
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-      -webkit-text-stroke:0.9px rgba(255,255,255,0.9);
-      text-shadow:0 0 26px rgba(0,0,0,0.85);
-
-      filter:drop-shadow(0 0 20px rgba(0,0,0,0.75));
-    }
-
-    #hero-text span.sub{
-      display:block;
-      margin-top:0.85em;
-      font-family:'Inter',sans-serif;
-      font-weight:300;
-      font-size:0.26em;
-      letter-spacing:0.4em;
-      color:rgba(255,255,255,0.8);
-      -webkit-text-stroke:0;
-      text-shadow:none;
-      background:none;
-      -webkit-background-clip:border-box;
-      background-clip:border-box;
+      transform:translateY(-40px) scale(0.9);
+      will-change:transform,opacity;
     }
 
     /* CONTENUTO DOPO HERO */
@@ -136,6 +109,7 @@
     .section-inner{
       max-width:900px;width:100%;text-align:center;
       position:relative;
+      transform:translateZ(0);
     }
 
     .s-label{
@@ -149,8 +123,8 @@
     }
     .s-title{
       display:block;
-      font-family:'Montserrat',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-      font-weight:800;
+      font-family:'Inter',sans-serif;
+      font-weight:500;
       font-size:clamp(54px,7.5vw,96px);
       letter-spacing:.06em;
       line-height:.95;
@@ -188,8 +162,8 @@
 
     footer{
       padding:120px 0;text-align:center;
-      font-family:'Montserrat',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-      font-weight:600;
+      font-family:'Inter',sans-serif;
+      font-weight:500;
       font-size:clamp(12px,1.8vw,20px);
       letter-spacing:.40em;color:rgba(255,255,255,.12);
       border-top:1px solid rgba(255,255,255,.06);
@@ -199,11 +173,9 @@
       .section{min-height:100vh;padding:80px 7vw}
       .s-title{font-size:clamp(42px,11vw,72px)}
       #hero-text{
-        font-size:clamp(38px,10.5vw,72px);
-        letter-spacing:.14em;
-        padding:0 8vw;
+        font-size:clamp(60px,14vw,110px);
       }
-      #hero-title-wrap{padding-top:14px;}
+      #hero-title-wrap{top:24px;}
     }
   </style>
 </head>
@@ -217,17 +189,35 @@
     <svg id="hero-svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"
          xmlns="http://www.w3.org/2000/svg">
       <defs>
+        <!-- MASK CON LE TUE PAROLE: LETTERE TRASPARENTI SULLA FOTO -->
         <mask id="hero-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080">
-          <rect width="1920" height="1080" fill="#000"/>
-          <!-- LOGO USATO COME MASCHERA -->
-          <image href="logo.jpg"
-                 x="60" y="265"
-                 width="1800" height="550"
-                 preserveAspectRatio="xMidYMid meet"/>
+          <!-- sfondo nero = nascosto -->
+          <rect width="1920" height="1080" fill="black"/>
+
+          <!-- testo bianco = BUCO: fa vedere la foto sotto -->
+          <text x="50%" y="35%"
+                text-anchor="middle"
+                fill="white"
+                font-family="Pricedown Bl, sans-serif"
+                font-size="220"
+                letter-spacing="8"
+                dominant-baseline="middle">
+            gabriele
+          </text>
+
+          <text x="50%" y="55%"
+                text-anchor="middle"
+                fill="white"
+                font-family="Pricedown Bl, sans-serif"
+                font-size="220"
+                letter-spacing="8"
+                dominant-baseline="middle">
+            madeo
+          </text>
         </mask>
       </defs>
 
-      <!-- FOTO PIENA, SENZA LETTERE (STATO INIZIALE) -->
+      <!-- FOTO PIENA SOTTO (stato iniziale) -->
       <image id="photo-full"
              href="foto.jpg"
              x="0" y="0" width="1920" height="1080"
@@ -238,31 +228,49 @@
             width="1920" height="1080"
             fill="#000" opacity="0"/>
 
-      <!-- FOTO VISIBILE SOLO DENTRO LE LETTERE -->
-      <image id="mask-photo"
-             href="foto.jpg"
-             x="0" y="0" width="1920" height="1080"
-             preserveAspectRatio="xMidYMid slice"
-             mask="url(#hero-mask)" opacity="0"/>
+      <!-- FOTO VISIBILE SOLO DENTRO LE LETTERE (lettere trasparenti) -->
+      <g mask="url(#hero-mask)">
+        <image id="mask-photo"
+               href="foto.jpg"
+               x="0" y="0" width="1920" height="1080"
+               preserveAspectRatio="xMidYMid slice"
+               opacity="0"/>
+      </g>
 
-      <!-- LETTERE BIANCHE FINALI -->
-      <image id="logo-white"
-             href="logo.jpg"
-             x="60" y="265"
-             width="1800" height="550"
-             preserveAspectRatio="xMidYMid meet"
-             opacity="0"/>
+      <!-- VERSIONE LETTERE BIANCHE FINALI (senza foto) -->
+      <text id="logo-white"
+            x="50%" y="35%"
+            text-anchor="middle"
+            fill="white"
+            font-family="Pricedown Bl, sans-serif"
+            font-size="220"
+            letter-spacing="8"
+            dominant-baseline="middle"
+            opacity="0">
+        gabriele
+      </text>
+
+      <text id="logo-white-2"
+            x="50%" y="55%"
+            text-anchor="middle"
+            fill="white"
+            font-family="Pricedown Bl, sans-serif"
+            font-size="220"
+            letter-spacing="8"
+            dominant-baseline="middle"
+            opacity="0">
+        madeo
+      </text>
     </svg>
   </div>
 
   <div id="vignette"></div>
 </div>
 
-<!-- TITOLO SEMPRE FISSO IN ALTO -->
+<!-- TITOLO FISSO IN ALTO (STESSO TESTO DEL LOGO) -->
 <div id="hero-title-wrap">
   <div id="hero-text">
-    GABRIELE MADEO
-    <span class="sub">IT SYSTEMS INTEGRATOR</span>
+    gabriele<br>madeo
   </div>
 </div>
 
@@ -343,6 +351,29 @@ window.addEventListener('load', () => {
     onComplete:() => document.getElementById('intro-overlay').style.display='none'
   });
 
+  // ingresso morbido del titolo fisso, tipo GTA6
+  gsap.to('#hero-text',{
+    opacity:1,
+    y:0,
+    scale:1,
+    duration:1.2,
+    ease:'power3.out',
+    delay:0.3
+  });
+
+  // leggero movimento del titolo mentre si scorre il blocco hero
+  gsap.to('#hero-text',{
+    scrollTrigger:{
+      trigger:'#hero',
+      start:'top top',
+      end:'bottom top',
+      scrub:true
+    },
+    yPercent:-4,
+    scale:0.96,
+    ease:'none'
+  });
+
   // HERO PINNED + ANIMAZIONI TIPO GTA
   ScrollTrigger.create({
     trigger: "#hero",
@@ -359,12 +390,12 @@ window.addEventListener('load', () => {
       const vign = gsap.utils.clamp(0,1,p/0.25);
       gsap.to('#vignette',{opacity:vign,duration:0.12,ease:'linear'});
 
-      // 0-0.18: FOTO PIENA → FOTO OSCURATA + LETTERE FOTO
+      // 0-0.18: FOTO PIENA → OSCURATA + LETTERE TRASPARENTI
       const t1 = gsap.utils.clamp(0,1,p/0.18);
       gsap.to('#hero-dark',{opacity:t1,duration:0.12,ease:'linear'});
       gsap.to('#mask-photo',{opacity:t1,duration:0.12,ease:'linear'});
 
-      // 0.18-0.5: ZOOM LETTERE + SPOSTAMENTO VERSO ALTO
+      // 0.18-0.5: ZOOM OUT E SPOSTAMENTO VERSO ALTO
       const tZoom = gsap.utils.clamp(0,1,(p-0.18)/0.32);
       const scale = gsap.utils.interpolate(1.08,0.25,tZoom);
       const yMove = gsap.utils.interpolate(0,-16,tZoom);
@@ -377,26 +408,13 @@ window.addEventListener('load', () => {
         ease:'power2.out'
       });
 
-      // TITOLO: ENTRA DAL CENTRO E SI ASSENTA IN ALTO, MA RESTA SEMPRE VISIBILE
-      const tTitle = gsap.utils.clamp(0,1,(p-0.22)/0.2);
-      const titleScale = gsap.utils.interpolate(1.25,0.86,tTitle);
-      const titleY = gsap.utils.interpolate(28,8,tTitle); // in vh
-
-      gsap.to('#hero-text',{
-        opacity:tTitle,
-        scale:titleScale,
-        y:titleY + 'vh',
-        duration:0.15,
-        ease:'power3.out',
-        transformOrigin:"center center"
-      });
-
-      // 0.5-0.8: FOTO NELLE LETTERE → LETTERE BIANCHE
+      // 0.5-0.8: LETTERE TRASPARENTI → LETTERE BIANCHE
       const tWhite = gsap.utils.clamp(0,1,(p-0.5)/0.3);
       gsap.to('#mask-photo',{opacity:1-tWhite,duration:0.15,ease:'linear'});
       gsap.to('#logo-white',{opacity:tWhite,duration:0.15,ease:'linear'});
+      gsap.to('#logo-white-2',{opacity:tWhite,duration:0.15,ease:'linear'});
 
-      // 0.8-1: DISSOLVE HERO (MA TITOLO RESTA)
+      // 0.8-1: DISSOLVE HERO (TITOLO FISSO RESTA)
       if(p>0.8){
         const d = (p-0.8)/0.2;
         const inv = 1-d;
@@ -408,48 +426,46 @@ window.addEventListener('load', () => {
     }
   });
 
-  // SEZIONI: timeline unica per entrata + uscita, molto fluida
+  // SEZIONI: timeline unica entrata/uscita (dissolvenza fluida)
   document.querySelectorAll('.section').forEach(sec => {
     const inner = sec.querySelector('.section-inner');
     const label = sec.querySelector('.s-label');
     const title = sec.querySelector('.s-title');
     const lines = Array.from(sec.querySelectorAll('.line-in'));
     const contacts = sec.querySelector('.contact-links');
-
     const all = [label, title, ...lines, contacts].filter(Boolean);
 
-    // stato iniziale
     gsap.set(all,{
       opacity:0,
       y:40,
-      filter:'blur(18px)'
+      filter:'blur(14px)'
     });
 
     const tl = gsap.timeline({
       scrollTrigger:{
         trigger:inner,
-        start:"top 75%",
-        end:"bottom 25%",
+        start:"top 80%",
+        end:"bottom 20%",
         scrub:true
       }
     });
 
-    // 0 -> ~0.45: ENTRATA CON SCIA MORBIDA
+    // entrata
     tl.to(all,{
       opacity:1,
       y:0,
       filter:'blur(0px)',
-      stagger:{each:0.08, from:"start"},
+      stagger:{each:0.08, from:'start'},
       ease:'power3.out',
       duration:0.45
     },0);
 
-    // ~0.5 -> 1: USCITA CON DISSOLVENZA E BLUR VERSO L'ALTO
+    // uscita
     tl.to(all,{
       opacity:0,
       y:-32,
       filter:'blur(16px)',
-      stagger:{each:0.06, from:"start"},
+      stagger:{each:0.06, from:'start'},
       ease:'power3.in',
       duration:0.4
     },0.55);
