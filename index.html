@@ -26,40 +26,38 @@
     }
 
     /* ── SECTIONS ── */
-    section {
-      position: relative;
-      width: 100vw;
-      overflow: hidden;
-    }
+    section { position: relative; width: 100vw; overflow: hidden; }
 
-    /* ── HERO (3D CSS logo + tunnel) ── */
+    /* ── HERO (logo + tunnel) ── */
     #hero {
       height: 100vh;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      perspective: 1400px;
-      background: radial-gradient(ellipse at 50% 60%, #000 0%, #000 100%);
-      position: relative;
+      gap: 8vh;
+      perspective: 1600px;
+      background: #000;
     }
 
-    #tunnel {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      transform-style: preserve-3d;
-      perspective: 2000px;
+    /* LOGO CONTAINER */
+    #logo-container {
+      position: relative;
+      height: 50vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     #logo-stage {
       transform-style: preserve-3d;
       position: relative;
       display: inline-block;
-      transition: transform 0.1s ease;
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     .logo-face {
-      font-size: clamp(2rem, 6vw, 5.5rem);
+      font-size: clamp(2.2rem, 7vw, 6rem);
       font-weight: 900;
       letter-spacing: 0.07em;
       text-transform: uppercase;
@@ -72,43 +70,58 @@
       position: relative;
       color: #00ffff;
       text-shadow:
-        0 0 10px rgba(0,255,255,1),
-        0 0 30px rgba(0,255,255,0.6),
-        0 0 70px rgba(0,200,255,0.3);
+        0 0 12px rgba(0,255,255,1),
+        0 0 35px rgba(0,255,255,0.7),
+        0 0 80px rgba(0,200,255,0.4);
     }
 
-    /* tunnel walls */
+    /* TUNNEL BOX */
+    #tunnel-box {
+      position: relative;
+      width: 100%;
+      height: 45vh;
+      perspective: 2200px;
+      opacity: 0;
+      transform: scale(1.1);
+      transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    #tunnel-box.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
     .tunnel-wall {
       position: absolute;
-      width: 100vw; height: 100vh;
-      background: linear-gradient(90deg, transparent 49%, rgba(0,255,255,0.03) 50%, transparent 51%);
-      transform-origin: center center;
+      background: #000;
       will-change: transform;
+      box-shadow: inset 0 0 100px rgba(0,255,255,0.02);
     }
-    .tunnel-wall.left { transform: rotateY(-90deg) translateZ(-500px); }
-    .tunnel-wall.right { transform: rotateY(90deg) translateZ(-500px); }
-    .tunnel-wall.top { transform: rotateX(90deg) translateZ(-500px); }
-    .tunnel-wall.bottom { transform: rotateX(-90deg) translateZ(-500px); }
+    .tunnel-wall.front,
+    .tunnel-wall.back {
+      width: 100%; height: 100%;
+    }
+    .tunnel-wall.left,
+    .tunnel-wall.right {
+      width: 100%; height: 100%;
+    }
+    .tunnel-wall.top,
+    .tunnel-wall.bottom {
+      width: 100%; height: 100%;
+    }
+
+    .tunnel-wall.front  { transform: rotateY(  0deg) translateZ( -450px); }
+    .tunnel-wall.back   { transform: rotateY(180deg) translateZ( -450px); }
+    .tunnel-wall.right  { transform: rotateY( 90deg) translateZ( -450px); }
+    .tunnel-wall.left   { transform: rotateY(-90deg) translateZ( -450px); }
+    .tunnel-wall.top    { transform: rotateX( 90deg) translateZ( -450px); }
+    .tunnel-wall.bottom { transform: rotateX(-90deg) translateZ( -450px); }
 
     /* hero sub-line */
     #hero-sub {
-      position: absolute;
-      bottom: 12%;
-      left: 50%;
-      transform: translateX(-50%);
       font-size: 0.8rem;
       letter-spacing: 0.35em;
       text-transform: uppercase;
-      opacity: 0.35;
-    }
-
-    /* ── PORTAL ── */
-    #portal {
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #000;
+      opacity: 0.4;
     }
 
     /* ── ICE SECTION ── */
@@ -125,17 +138,15 @@
       transform: translate(-50%,-50%) scale(0.82);
       opacity: 0;
       pointer-events: none;
-      background: rgba(0,0,0,0.95);
-      border: 1px solid rgba(0,255,255,0.35);
+      background: rgba(0,0,0,0.97);
+      border: 1px solid rgba(0,255,255,0.4);
       border-radius: 20px;
       padding: 2.4rem 2.8rem;
       width: min(400px, 92vw);
       z-index: 5000;
-      backdrop-filter: blur(18px);
-      box-shadow: 0 0 70px rgba(0,255,255,0.2);
-      transition:
-        transform 0.38s cubic-bezier(.34,1.56,.64,1),
-        opacity   0.25s ease;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 80px rgba(0,255,255,0.25);
+      transition: transform 0.38s cubic-bezier(.34,1.56,.64,1), opacity 0.25s ease;
     }
     #info-panel.open {
       transform: translate(-50%,-50%) scale(1);
@@ -151,7 +162,7 @@
     #info-panel p {
       line-height: 1.75;
       font-size: 0.91rem;
-      opacity: 0.82;
+      opacity: 0.85;
       white-space: pre-line;
     }
     #close-panel {
@@ -159,7 +170,7 @@
       top: 1rem; right: 1.3rem;
       font-size: 1.05rem;
       cursor: pointer;
-      opacity: 0.55;
+      opacity: 0.6;
       transition: opacity 0.2s;
     }
     #close-panel:hover { opacity: 1; }
@@ -178,32 +189,33 @@
 </head>
 <body>
 
-  <!-- CURSOR SMOKE -->
+  <!-- SMOKE -->
   <canvas id="smoke-canvas"></canvas>
 
   <!-- INFO PANEL -->
   <div id="info-panel">
     <span id="close-panel">✕</span>
     <h3 id="panel-title"></h3>
-    <p  id="panel-body"></p>
+    <p id="panel-body"></p>
   </div>
 
-  <!-- S1 · HERO + TUNNEL -->
+  <!-- HERO: LOGO + TUNNEL -->
   <section id="hero">
-    <div id="tunnel">
+    <div id="logo-container">
+      <div id="logo-stage"></div>
+    </div>
+    <div id="tunnel-box">
+      <div class="tunnel-wall front"></div>
+      <div class="tunnel-wall back"></div>
       <div class="tunnel-wall left"></div>
       <div class="tunnel-wall right"></div>
       <div class="tunnel-wall top"></div>
       <div class="tunnel-wall bottom"></div>
     </div>
-    <div id="logo-stage"></div>
     <p id="hero-sub">Designer &amp; Developer · Milano</p>
   </section>
 
-  <!-- S2 · PORTAL -->
-  <section id="portal"></section>
-
-  <!-- S3 · ICE OBJECTS -->
+  <!-- ICE CRYSTALS -->
   <section id="ice"></section>
 
   <footer>© 2026 GABRIELE MADEO — All rights reserved</footer>
@@ -213,7 +225,7 @@
 
   <script>
   /* ====================================================
-     A. CURSOR SMOKE (solo particelle, no ring)
+     A. SMOKE PARTICLES
   ==================================================== */
   const sc     = document.getElementById('smoke-canvas');
   const ctx    = sc.getContext('2d');
@@ -221,7 +233,7 @@
   const pool = [];
 
   class SP {
-    constructor(x,y){
+    constructor(x,y){ 
       this.x  = x + (Math.random()-.5)*8;
       this.y  = y + (Math.random()-.5)*8;
       this.r  = 4 + Math.random()*10;
@@ -243,10 +255,7 @@
     dead(){ return this.a<=0; }
   }
 
-  function scResize(){
-    sc.width  = window.innerWidth;
-    sc.height = window.innerHeight;
-  }
+  function scResize(){ sc.width=window.innerWidth; sc.height=window.innerHeight; }
   scResize(); window.addEventListener('resize', scResize);
 
   function smokeLoop(){
@@ -263,27 +272,24 @@
     mx=e.clientX; my=e.clientY;
     for(let i=0;i<6;i++) pool.push(new SP(mx,my));
   });
-  document.addEventListener('touchmove', e=>{
-    const t=e.touches[0];
-    for(let i=0;i<6;i++) pool.push(new SP(t.clientX,t.clientY));
-  },{passive:true});
 
 
   /* ====================================================
-     B. SCROLL TUNNEL + LOGO ROTATION
+     B. LOGO — HOVER ONLY + SCROLL TUNNEL
   ==================================================== */
   const LABEL  = 'GABRIELE MADEO';
   const stage  = document.getElementById('logo-stage');
-  const tunnel = document.getElementById('tunnel');
+  const logoContainer = document.getElementById('logo-container');
+  const tunnelBox = document.getElementById('tunnel-box');
 
-  /* CSS 3D logo layers */
-  for(let i=28; i>=1; i--){
+  /* Build 3D logo */
+  for(let i=32; i>=1; i--){
     const el = document.createElement('div');
     el.className = 'logo-face';
     el.textContent = LABEL;
-    const t = i/28;
-    el.style.transform = `translateZ(${-i*2.8}px)`;
-    el.style.color = `rgba(0,${Math.floor(200-t*180)},${Math.floor(240-t*200)},${1-t*0.72})`;
+    const t = i/32;
+    el.style.transform = `translateZ(${-i*3}px)`;
+    el.style.color = `rgba(0,${Math.floor(200-t*180)},${Math.floor(240-t*200)},${1-t*0.75})`;
     stage.appendChild(el);
   }
   const front = document.createElement('div');
@@ -291,47 +297,60 @@
   front.textContent = LABEL;
   stage.appendChild(front);
 
-  /* scroll-driven tunnel + logo spin */
-  let scrY=0;
+  /* Logo rotation states */
+  let logoRx=0, logoRy=0;
+  let targetRx=0, targetRy=0;
+  let isHovering = false;
+
+  /* Mouse hover interaction */
+  logoContainer.addEventListener('mouseenter', ()=>{
+    isHovering = true;
+  });
+  logoContainer.addEventListener('mouseleave', ()=>{
+    isHovering = false;
+    targetRx = 0; targetRy = 0;
+  });
+  document.addEventListener('mousemove', e=>{
+    if(isHovering){
+      targetRy = ((e.clientX/window.innerWidth)*2-1)*35;
+      targetRx = -((e.clientY/window.innerHeight)*2-1)*25;
+    }
+  });
+
+  /* Smooth logo rotation */
+  (function animLogo(){
+    logoRx += (targetRx - logoRx) * 0.08;
+    logoRy += (targetRy - logoRy) * 0.08;
+    stage.style.transform = `rotateX(${logoRx.toFixed(1)}deg) rotateY(${logoRy.toFixed(1)}deg)`;
+    requestAnimationFrame(animLogo);
+  })();
+
+  /* Scroll tunnel activation */
+  let scrollProg = 0;
   function onScroll(){
-    scrY = window.scrollY;
-    const prog = Math.min(1, scrY / window.innerHeight);
+    const heroRect = document.getElementById('hero').getBoundingClientRect();
+    scrollProg = Math.max(0, Math.min(1, 1 - heroRect.top / window.innerHeight));
     
-    /* tunnel rotation */
-    const tunSpin = prog * -360;
-    tunnel.style.transform = `rotateY(${tunSpin}deg)`;
+    /* Tunnel fade-in + depth */
+    const tunnelScale = 1 + scrollProg * 0.3;
+    const tunnelDepth = 450 + scrollProg * 600;
+    tunnelBox.style.opacity = scrollProg;
+    tunnelBox.style.transform = `scale(${tunnelScale})`;
     
-    /* logo spin */
-    const logoSpin = prog * 720;
-    stage.style.transform = `rotateY(${logoSpin}deg)`;
-    
-    /* tunnel depth */
-    const dep = 500 + prog * 800;
     document.querySelectorAll('.tunnel-wall').forEach(wall=>{
-      wall.style.transform = wall.classList.contains('left') || wall.classList.contains('right')
-        ? `rotateY(${wall.classList.contains('left') ? '-90' : '90'}deg) translateZ(${-dep}px)`
-        : `rotateX(${wall.classList.contains('top') ? '90' : '-90'}deg) translateZ(${-dep}px)`;
+      const zOffset = wall.classList.contains('front') || 
+                     wall.classList.contains('back')  ||
+                     wall.classList.contains('left')  ||
+                     wall.classList.contains('right') ? -tunnelDepth : -tunnelDepth;
+      wall.style.transform = wall.classList[0] + '(' + zOffset + 'px)';
     });
   }
   window.addEventListener('scroll', onScroll, {passive:true});
   onScroll();
 
-  /* mouse parallax (lighter) */
-  let lrx=0,lry=0, lrxt=0,lryt=0;
-  document.addEventListener('mousemove', e=>{
-    lryt = ((e.clientX/window.innerWidth)*2-1)*12;
-    lrxt = -((e.clientY/window.innerHeight)*2-1)*8;
-  });
-  (function animLogo(){
-    lrx += (lrxt-lrx)*0.065;
-    lry += (lryt-lry)*0.065;
-    stage.style.transform += ` rotateX(${lrx}deg) rotateY(${lry}deg)`;
-    requestAnimationFrame(animLogo);
-  })();
-
 
   /* ====================================================
-     C. ICE CRYSTALS — INTERATTIVI + PARTICELLE CONTINUOUS
+     C. ICE CRYSTALS (interattivi)
   ==================================================== */
   const iceSec = document.getElementById('ice');
 
@@ -350,51 +369,48 @@
   const pl2=new THREE.PointLight(0x0044ff,8,20); pl2.position.set(-5,-3, 3); iceScene.add(pl2);
   const pl3=new THREE.PointLight(0xffffff,4,15); pl3.position.set( 0, 6,-4); iceScene.add(pl3);
 
-  /* Ice data */
+  /* Crystals */
   const ICE_DATA = [
-    { t:'CHI SONO',    b:'Designer & Sviluppatore con passione per esperienze 3D immersive, motion design e interazioni digitali creative.', col:0x00ffff },
-    { t:'COSA FACCIO', b:'Realizzo siti web interattivi in WebGL, animazioni GSAP, installazioni digitali e identità di brand in movimento.', col:0x0088ff },
-    { t:'PORTFOLIO',   b:'50+ progetti in 5 anni: landing page animate, esperienze AR/VR e identità visive per brand internazionali.', col:0x00ccaa },
-    { t:'CONTATTI',    b:'gabriele@madeo.design\n+39 333 123 4567\nMilano, Italia', col:0x4499ff },
-    { t:'SKILLS',      b:'Three.js · GSAP · React · WebGL\nAfter Effects · Blender · Cinema 4D · Motion Design', col:0x00aadd },
+    { t:'CHI SONO', b:'Designer & Sviluppatore con passione per 3D e motion design.', col:0x00ffff },
+    { t:'PROGETTI', b:'Siti interattivi WebGL e animazioni per brand.', col:0x0088ff },
+    { t:'CONTATTI', b:'gabriele@madeo.design | Milano', col:0x00ccaa },
   ];
 
   const crystals=[];
   ICE_DATA.forEach((d,i)=>{
     const G   = new THREE.Group();
-    const geo = new THREE.OctahedronGeometry(0.95+Math.random()*0.45, 1);
+    const geo = new THREE.OctahedronGeometry(1.1+Math.random()*0.5, 1);
     const mat = new THREE.MeshPhongMaterial({
-      color:d.col, transparent:true, opacity:0.28, shininess:160, specular:0xffffff });
+      color:d.col, transparent:true, opacity:0.3, shininess:180, specular:0xffffff });
     const wm  = new THREE.MeshBasicMaterial({
-      color:d.col, wireframe:true, transparent:true, opacity:0.65 });
+      color:d.col, wireframe:true, transparent:true, opacity:0.7 });
     G.add(new THREE.Mesh(geo,mat));
     G.add(new THREE.Mesh(geo.clone(),wm));
-    const a=(i/ICE_DATA.length)*Math.PI*2;
-    G.position.set(Math.cos(a)*4, Math.sin(a)*2.2, (Math.random()-.5)*2.5);
+    const a=(i/ICE_DATA.length)*Math.PI*1.8;
+    G.position.set(Math.cos(a)*4.5, Math.sin(a)*2.5, (Math.random()-.5)*3);
     G.userData = {...d, baseY:G.position.y, phase:Math.random()*Math.PI*2, hover:0 };
     iceScene.add(G);
     crystals.push(G);
   });
 
-  /* Continuous particle field (più dense) */
-  const pPos=new Float32Array(800*3);
-  for(let i=0;i<800;i++){
-    pPos[i*3]  =(Math.random()-.5)*22;
-    pPos[i*3+1]=(Math.random()-.5)*16;
-    pPos[i*3+2]=(Math.random()-.5)*16;
+  /* Continuous particles */
+  const pPos=new Float32Array(1000*3);
+  for(let i=0;i<1000;i++){
+    pPos[i*3]  =(Math.random()-.5)*25;
+    pPos[i*3+1]=(Math.random()-.5)*18;
+    pPos[i*3+2]=(Math.random()-.5)*18;
   }
   const pGeo=new THREE.BufferGeometry();
   pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
   iceScene.add(new THREE.Points(pGeo,
-    new THREE.PointsMaterial({color:0x00ffff,size:0.06,transparent:true,opacity:0.55})));
+    new THREE.PointsMaterial({color:0x00ffff,size:0.065,transparent:true,opacity:0.6})));
 
-  /* Raycaster per hover */
+  /* Raycaster hover/click */
   const ray=new THREE.Raycaster();
   const mp2=new THREE.Vector2();
   const iceMeshes=crystals.map(c=>c.children[0]);
   const mouseOver = new Set();
 
-  /* Click → info panel */
   iceRen.domElement.addEventListener('click', e=>{
     const r=iceSec.getBoundingClientRect();
     mp2.x= ((e.clientX-r.left)/r.width )*2-1;
@@ -409,7 +425,6 @@
     }
   });
 
-  /* Mouse hover → glow + scale */
   iceRen.domElement.addEventListener('mousemove', e=>{
     const r=iceSec.getBoundingClientRect();
     mp2.x= ((e.clientX-r.left)/r.width )*2-1;
@@ -417,48 +432,44 @@
     ray.setFromCamera(mp2,iceCam);
     const hits=ray.intersectObjects(iceMeshes);
     mouseOver.forEach(i=>{
-      crystals[i].children[0].material.opacity = 0.28;
-      crystals[i].children[1].material.opacity = 0.65;
+      crystals[i].children[0].material.opacity = 0.3;
+      crystals[i].children[1].material.opacity = 0.7;
       crystals[i].scale.setScalar(1);
     });
     mouseOver.clear();
     if(hits.length){
       const idx = iceMeshes.indexOf(hits[0].object);
       mouseOver.add(idx);
-      crystals[idx].children[0].material.opacity = 0.55;
-      crystals[idx].children[1].material.opacity = 0.95;
-      crystals[idx].scale.setScalar(1.35);
-      /* extra smoke */
-      for(let i=0;i<12;i++) pool.push(new SP(e.clientX,e.clientY));
+      crystals[idx].children[0].material.opacity = 0.6;
+      crystals[idx].children[1].material.opacity = 1;
+      crystals[idx].scale.setScalar(1.4);
     }
   });
 
-  document.getElementById('close-panel').addEventListener('click',()=>
-    document.getElementById('info-panel').classList.remove('open'));
+  document.getElementById('close-panel').onclick=()=>document.getElementById('info-panel').classList.remove('open');
 
-  /* Animation loop */
+  /* Ice animation */
   const clk=new THREE.Clock();
   const camT={x:0,y:0};
   document.addEventListener('mousemove',e=>{
-    camT.x=(e.clientX/window.innerWidth*2-1)*0.7;
-    camT.y=-(e.clientY/window.innerHeight*2-1)*0.5;
+    camT.x=(e.clientX/window.innerWidth*2-1)*0.8;
+    camT.y=-(e.clientY/window.innerHeight*2-1)*0.6;
   });
 
   (function animIce(){
     requestAnimationFrame(animIce);
     const t=clk.getElapsedTime();
-    crystals.forEach((c,i)=>{
-      c.rotation.x+=0.004;
-      c.rotation.y+=0.006;
-      c.position.y=c.userData.baseY+Math.sin(t*0.6+c.userData.phase)*0.42;
+    crystals.forEach(c=>{
+      c.rotation.x+=0.005;
+      c.rotation.y+=0.007;
+      c.position.y=c.userData.baseY+Math.sin(t*0.7+c.userData.phase)*0.5;
     });
-    iceCam.position.x+=(camT.x-iceCam.position.x)*0.035;
-    iceCam.position.y+=(camT.y-iceCam.position.y)*0.035;
+    iceCam.position.x+=(camT.x-iceCam.position.x)*0.04;
+    iceCam.position.y+=(camT.y-iceCam.position.y)*0.04;
     iceCam.lookAt(0,0,0);
     iceRen.render(iceScene,iceCam);
   })();
 
-  /* Resize */
   window.addEventListener('resize',()=>{
     scResize();
     iceCam.aspect=window.innerWidth/window.innerHeight;
