@@ -6,185 +6,134 @@
   <title>GABRIELE MADEO</title>
   <style>
     /* ── BASE ── */
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: #000;
-      color: #fff;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      overflow-x: hidden;
-      cursor: none;
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    html{scroll-behavior:smooth;}
+    body{
+      background:#000;
+      color:#fff;
+      font-family:'Helvetica Neue',Arial,sans-serif;
+      overflow-x:hidden;
+      cursor:none;
+      position:relative;
     }
 
-    /* ── SMOKE CANVAS ── */
-    #smoke-canvas {
-      position: fixed;
-      top: 0; left: 0;
-      pointer-events: none;
-      z-index: 99999;
-      mix-blend-mode: screen;
+    /* ── SMOKE ── */
+    #smoke-canvas{
+      position:fixed;top:0;left:0;pointer-events:none;z-index:99999;
+      mix-blend-mode:screen;
     }
 
     /* ── SECTIONS ── */
-    section { position: relative; width: 100vw; overflow: hidden; }
+    section{position:relative;width:100vw;overflow:hidden;}
 
-    /* ── HERO (logo + tunnel) ── */
-    #hero {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8vh;
-      perspective: 1600px;
-      background: #000;
+    /* ── HERO ── */
+    #hero{
+      height:100vh;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:12vh;
+      background:#000;
     }
 
-    /* LOGO CONTAINER */
-    #logo-container {
-      position: relative;
-      height: 50vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #logo-stage {
-      transform-style: preserve-3d;
-      position: relative;
-      display: inline-block;
-      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .logo-face {
-      font-size: clamp(2.2rem, 7vw, 6rem);
-      font-weight: 900;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      white-space: nowrap;
-      user-select: none;
-      position: absolute;
-      top: 0; left: 0;
-    }
-    .logo-face.front {
-      position: relative;
-      color: #00ffff;
+    /* LOGO STATICO */
+    #logo-title{
+      font-size:clamp(4rem,12vw,10rem);
+      font-weight:900;
+      letter-spacing:-0.02em;
+      text-transform:uppercase;
+      color:#00ffff;
       text-shadow:
-        0 0 12px rgba(0,255,255,1),
-        0 0 35px rgba(0,255,255,0.7),
-        0 0 80px rgba(0,200,255,0.4);
+        0 0 20px rgba(0,255,255,1),
+        0 0 50px rgba(0,255,255,0.8),
+        0 0 120px rgba(0,200,255,0.5);
+      user-select:none;
+      position:relative;
+      z-index:10;
     }
 
-    /* TUNNEL BOX */
-    #tunnel-box {
-      position: relative;
-      width: 100%;
-      height: 45vh;
-      perspective: 2200px;
-      opacity: 0;
-      transform: scale(1.1);
-      transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+    /* SOAP BUBBLES */
+    #bubbles-container{
+      position:relative;width:100%;height:60vh;
+      overflow:hidden;
     }
-    #tunnel-box.active {
-      opacity: 1;
-      transform: scale(1);
+    .soap-bubble{
+      position:absolute;
+      border-radius:50%;
+      background:radial-gradient(circle at 30% 30%,
+        rgba(0,255,255,0.4) 0%,
+        rgba(0,200,255,0.2) 50%,
+        rgba(0,150,200,0.1) 75%,
+        transparent 100%);
+      border:1px solid rgba(0,255,255,0.3);
+      backdrop-filter:blur(8px);
+      pointer-events:none;
+      animation:float linear infinite;
+      box-shadow:
+        0 0 20px rgba(0,255,255,0.2),
+        inset 0 0 20px rgba(255,255,255,0.1);
     }
-
-    .tunnel-wall {
-      position: absolute;
-      background: #000;
-      will-change: transform;
-      box-shadow: inset 0 0 100px rgba(0,255,255,0.02);
-    }
-    .tunnel-wall.front,
-    .tunnel-wall.back {
-      width: 100%; height: 100%;
-    }
-    .tunnel-wall.left,
-    .tunnel-wall.right {
-      width: 100%; height: 100%;
-    }
-    .tunnel-wall.top,
-    .tunnel-wall.bottom {
-      width: 100%; height: 100%;
+    @keyframes float{
+      0%{transform:translateY(100vh) scale(0.3);}
+      100%{transform:translateY(-20vh) scale(1.2);}
     }
 
-    .tunnel-wall.front  { transform: rotateY(  0deg) translateZ( -450px); }
-    .tunnel-wall.back   { transform: rotateY(180deg) translateZ( -450px); }
-    .tunnel-wall.right  { transform: rotateY( 90deg) translateZ( -450px); }
-    .tunnel-wall.left   { transform: rotateY(-90deg) translateZ( -450px); }
-    .tunnel-wall.top    { transform: rotateX( 90deg) translateZ( -450px); }
-    .tunnel-wall.bottom { transform: rotateX(-90deg) translateZ( -450px); }
-
-    /* hero sub-line */
-    #hero-sub {
-      font-size: 0.8rem;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
-      opacity: 0.4;
+    /* TUNNEL PORTAL */
+    #portal{
+      height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      background:#000;
+      position:relative;
+    }
+    #portal-door{
+      position:absolute;width:220px;height:320px;
+      border:2px solid rgba(0,255,255,0.25);
+      border-radius:110px 110px 0 0;
+      background:radial-gradient(ellipse at 50% 35%,
+        rgba(0,180,255,0.08) 0%, transparent 70%);
+      box-shadow:
+        0 0 60px rgba(0,180,255,0.15),
+        inset 0 0 50px rgba(0,180,255,0.08);
+      top:50%;left:50%;
+      transform:translate(-50%,-50%);
+      transition:transform 1.5s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .portal-letter{
+      position:absolute;
+      font-size:2.2rem;
+      font-weight:800;
+      color:#00ffff;
+      text-shadow:0 0 12px rgba(0,255,255,0.7);
+      pointer-events:none;
+      top:0;left:0;
+      will-change:transform,opacity;
+      transition:opacity 0.4s ease;
     }
 
-    /* ── ICE SECTION ── */
-    #ice {
-      height: 100vh;
-      background: #000;
-    }
-    #ice canvas { display: block; }
+    /* ICE */
+    #ice{height:100vh;background:#000;}
+    #ice canvas{display:block;}
 
-    /* ── INFO PANEL ── */
-    #info-panel {
-      position: fixed;
-      top: 50%; left: 50%;
-      transform: translate(-50%,-50%) scale(0.82);
-      opacity: 0;
-      pointer-events: none;
-      background: rgba(0,0,0,0.97);
-      border: 1px solid rgba(0,255,255,0.4);
-      border-radius: 20px;
-      padding: 2.4rem 2.8rem;
-      width: min(400px, 92vw);
-      z-index: 5000;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 0 80px rgba(0,255,255,0.25);
-      transition: transform 0.38s cubic-bezier(.34,1.56,.64,1), opacity 0.25s ease;
+    /* INFO PANEL */
+    #info-panel{
+      position:fixed;top:50%;left:50%;
+      transform:translate(-50%,-50%) scale(0.85);opacity:0;
+      pointer-events:none;
+      background:rgba(0,0,0,0.96);
+      border:1px solid rgba(0,255,255,0.4);
+      border-radius:24px;
+      padding:2.6rem 3rem;width:min(420px,92vw);
+      z-index:5000;
+      backdrop-filter:blur(22px);
+      box-shadow:0 0 90px rgba(0,255,255,0.3);
+      transition:transform 0.4s cubic-bezier(.34,1.56,.64,1),opacity 0.3s ease;
     }
-    #info-panel.open {
-      transform: translate(-50%,-50%) scale(1);
-      opacity: 1;
-      pointer-events: auto;
-    }
-    #info-panel h3 {
-      color: #00ffff;
-      font-size: 1.15rem;
-      letter-spacing: 0.12em;
-      margin-bottom: 1rem;
-    }
-    #info-panel p {
-      line-height: 1.75;
-      font-size: 0.91rem;
-      opacity: 0.85;
-      white-space: pre-line;
-    }
-    #close-panel {
-      position: absolute;
-      top: 1rem; right: 1.3rem;
-      font-size: 1.05rem;
-      cursor: pointer;
-      opacity: 0.6;
-      transition: opacity 0.2s;
-    }
-    #close-panel:hover { opacity: 1; }
+    #info-panel.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto;}
+    #info-panel h3{color:#00ffff;font-size:1.2rem;letter-spacing:0.15em;margin-bottom:1.2rem;}
+    #info-panel p{line-height:1.75;font-size:0.92rem;opacity:0.88;white-space:pre-line;}
+    #close-panel{position:absolute;top:1.2rem;right:1.4rem;font-size:1.1rem;cursor:pointer;opacity:0.65;transition:opacity 0.2s;}
+    #close-panel:hover{opacity:1;}
 
-    /* ── FOOTER ── */
-    footer {
-      text-align: center;
-      padding: 3.5rem 1rem;
-      font-size: 0.78rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      opacity: 0.25;
-      background: #000;
-    }
+    /* FOOTER */
+    footer{text-align:center;padding:4rem 1rem;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;opacity:0.3;background:#000;}
   </style>
 </head>
 <body>
@@ -199,284 +148,238 @@
     <p id="panel-body"></p>
   </div>
 
-  <!-- HERO: LOGO + TUNNEL -->
+  <!-- HERO -->
   <section id="hero">
-    <div id="logo-container">
-      <div id="logo-stage"></div>
-    </div>
-    <div id="tunnel-box">
-      <div class="tunnel-wall front"></div>
-      <div class="tunnel-wall back"></div>
-      <div class="tunnel-wall left"></div>
-      <div class="tunnel-wall right"></div>
-      <div class="tunnel-wall top"></div>
-      <div class="tunnel-wall bottom"></div>
-    </div>
-    <p id="hero-sub">Designer &amp; Developer · Milano</p>
+    <h1 id="logo-title">GABRIELE MADEO</h1>
+    <div id="bubbles-container"></div>
   </section>
 
-  <!-- ICE CRYSTALS -->
+  <!-- PORTAL TUNNEL -->
+  <section id="portal">
+    <div id="portal-door"></div>
+  </section>
+
+  <!-- ICE -->
   <section id="ice"></section>
 
-  <footer>© 2026 GABRIELE MADEO — All rights reserved</footer>
+  <footer>© 2026 GABRIELE MADEO</footer>
 
-  <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
-  /* ====================================================
-     A. SMOKE PARTICLES
-  ==================================================== */
-  const sc     = document.getElementById('smoke-canvas');
-  const ctx    = sc.getContext('2d');
-  let   mx = -300, my = -300;
-  const pool = [];
+  /* ── SMOKE ── */
+  const sc= document.getElementById('smoke-canvas'), ctx=sc.getContext('2d'), pool=[];
+  let mx=-300,my=-300;
+  class SP{constructor(x,y){this.x=x+(Math.random()-.5)*8;this.y=y+(Math.random()-.5)*8;this.r=4+Math.random()*10;this.vx=(Math.random()-.5)*1.4;this.vy=-(0.5+Math.random()*1.6);this.a=0.18+Math.random()*0.28;this.da=0.011+Math.random()*0.009;this.c=Math.random()>.45?'0,230,255':'160,160,220';}tick(){this.x+=this.vx;this.y+=this.vy;this.r+=0.45;this.a-=this.da;}draw(){if(this.a<=0)return;const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);g.addColorStop(0,`rgba(${this.c},${this.a})`);g.addColorStop(1,`rgba(${this.c},0)`);ctx.beginPath();ctx.fillStyle=g;ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fill();}dead(){return this.a<=0;}}
+  function scResize(){sc.width=window.innerWidth;sc.height=window.innerHeight;}scResize();window.addEventListener('resize',scResize);
+  function smokeLoop(){ctx.clearRect(0,0,sc.width,sc.height);for(let i=pool.length-1;i>=0;i--){pool[i].tick();pool[i].draw();if(pool[i].dead())pool.splice(i,1);}requestAnimationFrame(smokeLoop);}smokeLoop();
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;for(let i=0;i<6;i++)pool.push(new SP(mx,my));});
 
-  class SP {
-    constructor(x,y){ 
-      this.x  = x + (Math.random()-.5)*8;
-      this.y  = y + (Math.random()-.5)*8;
-      this.r  = 4 + Math.random()*10;
-      this.vx = (Math.random()-.5)*1.4;
-      this.vy = -(0.5 + Math.random()*1.6);
-      this.a  = 0.18 + Math.random()*0.28;
-      this.da = 0.011 + Math.random()*0.009;
-      this.c  = Math.random()>.45 ? '0,230,255' : '160,160,220';
+  /* ── SOAP BUBBLES ── */
+  const bubblesContainer = document.getElementById('bubbles-container');
+  const bubbles = [];
+  class Bubble{
+    constructor(){
+      this.el = document.createElement('div');
+      this.el.className = 'soap-bubble';
+      this.size = 40 + Math.random() * 80;
+      this.el.style.width = this.size + 'px';
+      this.el.style.height = this.el.style.width;
+      this.speed = 0.4 + Math.random() * 0.6;
+      this.x = Math.random() * window.innerWidth;
+      this.y = window.innerHeight + 50;
+      this.vy = -this.speed;
+      this.vx = (Math.random() - 0.5) * 0.8;
+      this.life = 1;
+      this.targetX = this.x;
+      bubblesContainer.appendChild(this.el);
     }
-    tick(){ this.x+=this.vx; this.y+=this.vy; this.r+=0.45; this.a-=this.da; }
-    draw(){
-      if(this.a<=0) return;
-      const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);
-      g.addColorStop(0,`rgba(${this.c},${this.a})`);
-      g.addColorStop(1,`rgba(${this.c},0)`);
-      ctx.beginPath(); ctx.fillStyle = g;
-      ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fill();
+    update(){
+      /* mouse repulsion */
+      const dx = mx - this.x;
+      const dy = my - this.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist < 150 && dist > 0){
+        const force = (150 - dist) / 150 * 0.4;
+        this.vx += (dx / dist) * force;
+        this.vy += (dy / dist) * force * 0.5;
+      }
+      
+      /* physics */
+      this.vy *= 0.99; /* drag */
+      this.vx *= 0.96;
+      this.x += this.vx;
+      this.y += this.vy;
+      this.life -= 0.002;
+      
+      /* bounce edges */
+      if(this.x < this.size/2){this.x = this.size/2; this.vx *= -0.6;}
+      if(this.x > window.innerWidth - this.size/2){this.x = window.innerWidth - this.size/2; this.vx *= -0.6;}
+      
+      /* render */
+      const scale = Math.max(0.2, this.life);
+      this.el.style.transform = `translate(${this.x - this.size/2}px, ${this.y - this.size/2}px) scale(${scale})`;
+      this.el.style.opacity = this.life;
+      
+      return this.y > -100 && this.life > 0;
     }
-    dead(){ return this.a<=0; }
+    destroy(){this.el.remove();bubbles.splice(bubbles.indexOf(this),1);}
   }
 
-  function scResize(){ sc.width=window.innerWidth; sc.height=window.innerHeight; }
-  scResize(); window.addEventListener('resize', scResize);
+  /* spawn bubbles */
+  function spawnBubble(){if(Math.random()<0.35)bubbles.push(new Bubble());}
+  setInterval(spawnBubble, 120);
 
-  function smokeLoop(){
-    ctx.clearRect(0,0,sc.width,sc.height);
-    for(let i=pool.length-1;i>=0;i--){
-      pool[i].tick(); pool[i].draw();
-      if(pool[i].dead()) pool.splice(i,1);
+  /* update loop */
+  function bubbleLoop(){
+    for(let i=bubbles.length-1;i>=0;i--){
+      if(!bubbles[i].update())bubbles[i].destroy();
     }
-    requestAnimationFrame(smokeLoop);
+    requestAnimationFrame(bubbleLoop);
   }
-  smokeLoop();
+  bubbleLoop();
 
-  document.addEventListener('mousemove', e=>{
-    mx=e.clientX; my=e.clientY;
-    for(let i=0;i<6;i++) pool.push(new SP(mx,my));
-  });
+  /* ── PORTAL TUNNEL (mohitvirli style) ── */
+  const portalSec = document.getElementById('portal');
+  const portalDoor = document.getElementById('portal-door');
+  const TEXT = 'GABRIELE MADEO'.split('');
+  const letters = [];
 
-
-  /* ====================================================
-     B. LOGO — HOVER ONLY + SCROLL TUNNEL
-  ==================================================== */
-  const LABEL  = 'GABRIELE MADEO';
-  const stage  = document.getElementById('logo-stage');
-  const logoContainer = document.getElementById('logo-container');
-  const tunnelBox = document.getElementById('tunnel-box');
-
-  /* Build 3D logo */
-  for(let i=32; i>=1; i--){
+  TEXT.forEach((char,i)=>{
     const el = document.createElement('div');
-    el.className = 'logo-face';
-    el.textContent = LABEL;
-    const t = i/32;
-    el.style.transform = `translateZ(${-i*3}px)`;
-    el.style.color = `rgba(0,${Math.floor(200-t*180)},${Math.floor(240-t*200)},${1-t*0.75})`;
-    stage.appendChild(el);
-  }
-  const front = document.createElement('div');
-  front.className = 'logo-face front';
-  front.textContent = LABEL;
-  stage.appendChild(front);
-
-  /* Logo rotation states */
-  let logoRx=0, logoRy=0;
-  let targetRx=0, targetRy=0;
-  let isHovering = false;
-
-  /* Mouse hover interaction */
-  logoContainer.addEventListener('mouseenter', ()=>{
-    isHovering = true;
-  });
-  logoContainer.addEventListener('mouseleave', ()=>{
-    isHovering = false;
-    targetRx = 0; targetRy = 0;
-  });
-  document.addEventListener('mousemove', e=>{
-    if(isHovering){
-      targetRy = ((e.clientX/window.innerWidth)*2-1)*35;
-      targetRx = -((e.clientY/window.innerHeight)*2-1)*25;
-    }
+    el.className = 'portal-letter';
+    el.textContent = char;
+    el.style.left = `${50 + (i-TEXT.length/2)*3}%`;
+    portalSec.appendChild(el);
+    letters.push(el);
   });
 
-  /* Smooth logo rotation */
-  (function animLogo(){
-    logoRx += (targetRx - logoRx) * 0.08;
-    logoRy += (targetRy - logoRy) * 0.08;
-    stage.style.transform = `rotateX(${logoRx.toFixed(1)}deg) rotateY(${logoRy.toFixed(1)}deg)`;
-    requestAnimationFrame(animLogo);
-  })();
-
-  /* Scroll tunnel activation */
-  let scrollProg = 0;
-  function onScroll(){
-    const heroRect = document.getElementById('hero').getBoundingClientRect();
-    scrollProg = Math.max(0, Math.min(1, 1 - heroRect.top / window.innerHeight));
+  function portalScroll(){
+    const r = portalSec.getBoundingClientRect();
+    const prog = Math.max(0,Math.min(1,(window.innerHeight - r.top)/(window.innerHeight)));
     
-    /* Tunnel fade-in + depth */
-    const tunnelScale = 1 + scrollProg * 0.3;
-    const tunnelDepth = 450 + scrollProg * 600;
-    tunnelBox.style.opacity = scrollProg;
-    tunnelBox.style.transform = `scale(${tunnelScale})`;
-    
-    document.querySelectorAll('.tunnel-wall').forEach(wall=>{
-      const zOffset = wall.classList.contains('front') || 
-                     wall.classList.contains('back')  ||
-                     wall.classList.contains('left')  ||
-                     wall.classList.contains('right') ? -tunnelDepth : -tunnelDepth;
-      wall.style.transform = wall.classList[0] + '(' + zOffset + 'px)';
+    /* letters explode */
+    letters.forEach((el,i)=>{
+      const p = prog;
+      const angle = (i / TEXT.length) * Math.PI * 2 + p * Math.PI * 4;
+      const radius = 120 + p * 280;
+      const x = 50 + Math.cos(angle) * radius / 2;
+      const y = 50 + Math.sin(angle) * radius / 3;
+      const rot = p * 720 + i * 60;
+      el.style.transform = `translate(${x}%,${y}%) rotate(${rot}deg)`;
+      el.style.opacity = 1 - p * 0.8;
     });
+    
+    /* door opens */
+    const doorProg = Math.max(0,(prog-0.3)/0.7);
+    const doorScale = 1 + doorProg * 8;
+    portalDoor.style.transform = `translate(-50%,-50%) scale(${doorScale}) rotateX(${doorProg * 90}deg)`;
   }
-  window.addEventListener('scroll', onScroll, {passive:true});
-  onScroll();
+  window.addEventListener('scroll',portalScroll,{passive:true});
+  portalScroll();
 
-
-  /* ====================================================
-     C. ICE CRYSTALS (interattivi)
-  ==================================================== */
-  const iceSec = document.getElementById('ice');
-
-  const iceScene = new THREE.Scene();
-  const iceCam   = new THREE.PerspectiveCamera(55, window.innerWidth/window.innerHeight, 0.1, 100);
-  iceCam.position.set(0, 0, 9);
-
-  const iceRen = new THREE.WebGLRenderer({ antialias:true, alpha:true });
-  iceRen.setSize(window.innerWidth, window.innerHeight);
-  iceRen.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  /* ── ICE CRYSTALS ── */
+  const iceSec=document.getElementById('ice');
+  const iceScene=new THREE.Scene();
+  const iceCam=new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,0.1,100);
+  iceCam.position.set(0,0,10);
+  const iceRen=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  iceRen.setSize(window.innerWidth,window.innerHeight);
+  iceRen.setPixelRatio(Math.min(window.devicePixelRatio,2));
   iceSec.appendChild(iceRen.domElement);
 
-  /* Lights */
-  iceScene.add(new THREE.AmbientLight(0x001122, 8));
-  const pl1=new THREE.PointLight(0x00ffff,12,30); pl1.position.set( 5, 5, 5); iceScene.add(pl1);
-  const pl2=new THREE.PointLight(0x0044ff,8,20); pl2.position.set(-5,-3, 3); iceScene.add(pl2);
-  const pl3=new THREE.PointLight(0xffffff,4,15); pl3.position.set( 0, 6,-4); iceScene.add(pl3);
+  /* lights */
+  iceScene.add(new THREE.AmbientLight(0x001133,10));
+  iceScene.add(new THREE.PointLight(0x00ffff,15,35));
+  iceScene.add(new THREE.PointLight(0x0066ff,10,25));
 
-  /* Crystals */
-  const ICE_DATA = [
-    { t:'CHI SONO', b:'Designer & Sviluppatore con passione per 3D e motion design.', col:0x00ffff },
-    { t:'PROGETTI', b:'Siti interattivi WebGL e animazioni per brand.', col:0x0088ff },
-    { t:'CONTATTI', b:'gabriele@madeo.design | Milano', col:0x00ccaa },
+  /* crystals */
+  const CRYSTALS=[
+    {t:'CHI SONO',b:'Designer & Developer specializzato in WebGL e motion design.',c:0x00ffff},
+    {t:'PROGETTI',b:'Siti interattivi e esperienze 3D per brand.',c:0x0088ff},
+    {t:'CONTATTI',b:'gabriele@madeo.design\nMilano, Italia',c:0x00ccaa}
   ];
-
   const crystals=[];
-  ICE_DATA.forEach((d,i)=>{
-    const G   = new THREE.Group();
-    const geo = new THREE.OctahedronGeometry(1.1+Math.random()*0.5, 1);
-    const mat = new THREE.MeshPhongMaterial({
-      color:d.col, transparent:true, opacity:0.3, shininess:180, specular:0xffffff });
-    const wm  = new THREE.MeshBasicMaterial({
-      color:d.col, wireframe:true, transparent:true, opacity:0.7 });
-    G.add(new THREE.Mesh(geo,mat));
-    G.add(new THREE.Mesh(geo.clone(),wm));
-    const a=(i/ICE_DATA.length)*Math.PI*1.8;
-    G.position.set(Math.cos(a)*4.5, Math.sin(a)*2.5, (Math.random()-.5)*3);
-    G.userData = {...d, baseY:G.position.y, phase:Math.random()*Math.PI*2, hover:0 };
-    iceScene.add(G);
-    crystals.push(G);
+  CRYSTALS.forEach((d,i)=>{
+    const g=new THREE.Group();
+    const geo=new THREE.OctahedronGeometry(1.2+Math.random()*0.6,1);
+    const mat=new THREE.MeshPhongMaterial({color:d.c,transparent:true,opacity:0.32,shininess:200});
+    const wire=new THREE.MeshBasicMaterial({color:d.c,wireframe:true,transparent:true,opacity:0.75});
+    g.add(new THREE.Mesh(geo,mat));
+    g.add(new THREE.Mesh(geo.clone(),wire));
+    const a=i*2.1;
+    g.position.set(Math.cos(a)*5,Math.sin(a)*3,(Math.random()-.5)*3);
+    g.userData={...d};
+    iceScene.add(g);
+    crystals.push(g);
   });
 
-  /* Continuous particles */
-  const pPos=new Float32Array(1000*3);
-  for(let i=0;i<1000;i++){
-    pPos[i*3]  =(Math.random()-.5)*25;
-    pPos[i*3+1]=(Math.random()-.5)*18;
-    pPos[i*3+2]=(Math.random()-.5)*18;
+  /* particles */
+  const pcount=1200;
+  const ppos=new Float32Array(pcount*3);
+  for(let i=0;i<pcount;i++){
+    ppos[i*3]=(Math.random()-.5)*30;
+    ppos[i*3+1]=(Math.random()-.5)*20;
+    ppos[i*3+2]=(Math.random()-.5)*20;
   }
-  const pGeo=new THREE.BufferGeometry();
-  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
-  iceScene.add(new THREE.Points(pGeo,
-    new THREE.PointsMaterial({color:0x00ffff,size:0.065,transparent:true,opacity:0.6})));
+  const pgeo=new THREE.BufferGeometry();
+  pgeo.setAttribute('position',new THREE.BufferAttribute(ppos,3));
+  iceScene.add(new THREE.Points(pgeo,new THREE.PointsMaterial({color:0x00ffff,size:0.07,transparent:true,opacity:0.65})));
 
-  /* Raycaster hover/click */
-  const ray=new THREE.Raycaster();
-  const mp2=new THREE.Vector2();
-  const iceMeshes=crystals.map(c=>c.children[0]);
-  const mouseOver = new Set();
+  /* raycaster */
+  const ray=new THREE.Raycaster(),mp2=new THREE.Vector2();
+  const meshes=crystals.map(c=>c.children[0]);
+  const hoverSet=new Set();
 
-  iceRen.domElement.addEventListener('click', e=>{
+  /* click */
+  iceRen.domElement.onclick=e=>{
     const r=iceSec.getBoundingClientRect();
-    mp2.x= ((e.clientX-r.left)/r.width )*2-1;
-    mp2.y=-((e.clientY-r.top )/r.height)*2+1;
+    mp2.x=((e.clientX-r.left)/r.width)*2-1;
+    mp2.y=-((e.clientY-r.top)/r.height)*2+1;
     ray.setFromCamera(mp2,iceCam);
-    const hits=ray.intersectObjects(iceMeshes);
+    const hits=ray.intersectObjects(meshes);
     if(hits.length){
       const d=hits[0].object.parent.userData;
       document.getElementById('panel-title').textContent=d.t;
-      document.getElementById('panel-body').textContent =d.b;
+      document.getElementById('panel-body').textContent=d.b;
       document.getElementById('info-panel').classList.add('open');
     }
-  });
+  };
 
-  iceRen.domElement.addEventListener('mousemove', e=>{
+  /* hover */
+  iceRen.domElement.onmousemove=e=>{
     const r=iceSec.getBoundingClientRect();
-    mp2.x= ((e.clientX-r.left)/r.width )*2-1;
-    mp2.y=-((e.clientY-r.top )/r.height)*2+1;
+    mp2.x=((e.clientX-r.left)/r.width)*2-1;
+    mp2.y=-((e.clientY-r.top)/r.height)*2+1;
     ray.setFromCamera(mp2,iceCam);
-    const hits=ray.intersectObjects(iceMeshes);
-    mouseOver.forEach(i=>{
-      crystals[i].children[0].material.opacity = 0.3;
-      crystals[i].children[1].material.opacity = 0.7;
-      crystals[i].scale.setScalar(1);
-    });
-    mouseOver.clear();
+    const hits=ray.intersectObjects(meshes);
+    hoverSet.forEach(i=>{crystals[i].scale.setScalar(1);});
+    hoverSet.clear();
     if(hits.length){
-      const idx = iceMeshes.indexOf(hits[0].object);
-      mouseOver.add(idx);
-      crystals[idx].children[0].material.opacity = 0.6;
-      crystals[idx].children[1].material.opacity = 1;
-      crystals[idx].scale.setScalar(1.4);
+      const i=meshes.indexOf(hits[0].object);
+      hoverSet.add(i);
+      crystals[i].scale.setScalar(1.45);
     }
-  });
+  };
 
   document.getElementById('close-panel').onclick=()=>document.getElementById('info-panel').classList.remove('open');
 
-  /* Ice animation */
+  /* anim */
   const clk=new THREE.Clock();
-  const camT={x:0,y:0};
-  document.addEventListener('mousemove',e=>{
-    camT.x=(e.clientX/window.innerWidth*2-1)*0.8;
-    camT.y=-(e.clientY/window.innerHeight*2-1)*0.6;
-  });
-
-  (function animIce(){
-    requestAnimationFrame(animIce);
+  (function loop(){
+    requestAnimationFrame(loop);
     const t=clk.getElapsedTime();
-    crystals.forEach(c=>{
-      c.rotation.x+=0.005;
-      c.rotation.y+=0.007;
-      c.position.y=c.userData.baseY+Math.sin(t*0.7+c.userData.phase)*0.5;
-    });
-    iceCam.position.x+=(camT.x-iceCam.position.x)*0.04;
-    iceCam.position.y+=(camT.y-iceCam.position.y)*0.04;
+    crystals.forEach(c=>{c.rotation.x+=0.006;c.rotation.y+=0.008;c.position.y+=Math.sin(t*0.8)*0.01;});
     iceCam.lookAt(0,0,0);
     iceRen.render(iceScene,iceCam);
   })();
 
-  window.addEventListener('resize',()=>{
+  window.onresize=()=>{
     scResize();
     iceCam.aspect=window.innerWidth/window.innerHeight;
     iceCam.updateProjectionMatrix();
     iceRen.setSize(window.innerWidth,window.innerHeight);
-    onScroll();
-  });
+  };
   </script>
 </body>
 </html>
