@@ -2,20 +2,546 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>GABRIELE MADEO – 3D Interactive Site</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
+  <title>GABRIELE MADEO</title>
+  <style>
+    /* ── BASE ── */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: #000;
+      color: #fff;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ── */
+    #cursor-dot {
+      position: fixed;
+      width: 10px; height: 10px;
+      background: #00ffff;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99999;
+      top: 0; left: 0;
+      transform: translate(-50%,-50%);
+      transition: transform 0.05s ease;
+      mix-blend-mode: screen;
+    }
+    #cursor-ring {
+      position: fixed;
+      width: 36px; height: 36px;
+      border: 1.5px solid rgba(0,255,255,0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99998;
+      top: 0; left: 0;
+      transform: translate(-50%,-50%);
+      transition: transform 0.12s ease, width 0.2s, height 0.2s;
+    }
+
+    /* ── SMOKE CANVAS ── */
+    #smoke-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 99997;
+      mix-blend-mode: screen;
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      position: relative;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    /* ── HERO (3D LOGO) ── */
+    #hero {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1200px;
+      background: radial-gradient(ellipse at 50% 60%, #001020 0%, #000 65%);
+    }
+
+    #logo-stage {
+      transform-style: preserve-3d;
+      position: relative;
+      display: inline-block;
+    }
+
+    .logo-face {
+      font-size: clamp(2rem, 5.5vw, 5rem);
+      font-weight: 900;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      user-select: none;
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .logo-face.front {
+      position: relative;
+      color: #00ffff;
+      text-shadow:
+        0 0 10px rgba(0,255,255,1),
+        0 0 30px rgba(0,255,255,0.6),
+        0 0 70px rgba(0,200,255,0.3);
+    }
+
+    /* hero sub-line */
+    #hero-sub {
+      position: absolute;
+      bottom: 12%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      opacity: 0.35;
+      animation: fadeup 1.8s ease both;
+    }
+    @keyframes fadeup {
+      from { opacity:0; transform: translateX(-50%) translateY(12px); }
+      to   { opacity:0.35; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* ── PORTAL / DOOR ── */
+    #portal {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+
+    #portal-door {
+      position: absolute;
+      width: 190px; height: 290px;
+      border: 1.5px solid rgba(0,255,255,0.35);
+      border-radius: 95px 95px 0 0;
+      background: radial-gradient(ellipse at 50% 40%,
+        rgba(0,180,255,0.07) 0%, transparent 70%);
+      box-shadow:
+        0 0 50px rgba(0,180,255,0.12),
+        inset 0 0 40px rgba(0,180,255,0.06);
+      top: 50%;
+      left: 50%;
+      transform-origin: center center;
+      transform: translate(-50%,-50%);
+    }
+
+    .p-letter {
+      position: absolute;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #00ffff;
+      text-shadow: 0 0 8px rgba(0,255,255,0.65);
+      pointer-events: none;
+      top: 0; left: 0;
+      will-change: transform, opacity;
+    }
+
+    /* ── ICE SECTION ── */
+    #ice {
+      height: 100vh;
+      background: radial-gradient(ellipse at 50% 50%,
+        #000d1a 0%, #000 80%);
+    }
+    #ice canvas { display: block; }
+
+    /* ── INFO PANEL ── */
+    #info-panel {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%) scale(0.82);
+      opacity: 0;
+      pointer-events: none;
+      background: rgba(0,8,22,0.94);
+      border: 1px solid rgba(0,200,255,0.35);
+      border-radius: 20px;
+      padding: 2.4rem 2.8rem;
+      width: min(400px, 92vw);
+      z-index: 5000;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 0 70px rgba(0,160,255,0.2);
+      transition:
+        transform 0.38s cubic-bezier(.34,1.56,.64,1),
+        opacity   0.25s ease;
+    }
+    #info-panel.open {
+      transform: translate(-50%,-50%) scale(1);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #info-panel h3 {
+      color: #00ffff;
+      font-size: 1.15rem;
+      letter-spacing: 0.12em;
+      margin-bottom: 1rem;
+    }
+    #info-panel p {
+      line-height: 1.75;
+      font-size: 0.91rem;
+      opacity: 0.82;
+      white-space: pre-line;
+    }
+    #close-panel {
+      position: absolute;
+      top: 1rem; right: 1.3rem;
+      font-size: 1.05rem;
+      cursor: pointer;
+      opacity: 0.55;
+      transition: opacity 0.2s;
+    }
+    #close-panel:hover { opacity: 1; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.25;
+      background: #000;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- -------------- HERO (solo il logo 3D) -------------- -->
+  <!-- CURSOR -->
+  <div id="cursor-dot"></div>
+  <div id="cursor-ring"></div>
+  <canvas id="smoke-canvas"></canvas>
+
+  <!-- INFO PANEL (ice objects) -->
+  <div id="info-panel">
+    <span id="close-panel">✕</span>
+    <h3 id="panel-title"></h3>
+    <p  id="panel-body"></p>
+  </div>
+
+  <!-- S1 · HERO (3D CSS logo) -->
   <section id="hero">
-    <div id="container"></div>   <!-- qui verrà disegnato il logo 3D -->
+    <div id="logo-stage"></div>
+    <p id="hero-sub">Designer &amp; Developer · Milano</p>
   </section>
 
-  <!-- Three.js & GSAP da CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="script.js"></script>
+  <!-- S2 · PORTAL (letter explosion + door zoom) -->
+  <section id="portal">
+    <div id="portal-door"></div>
+  </section>
+
+  <!-- S3 · ICE OBJECTS (Three.js) -->
+  <section id="ice"></section>
+
+  <footer>© 2026 GABRIELE MADEO — All rights reserved</footer>
+
+  <!-- Three.js r128 (includes all needed classes in main bundle) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+  /* ====================================================
+     A. CURSOR + CANVAS SMOKE
+  ==================================================== */
+  const dot    = document.getElementById('cursor-dot');
+  const ring   = document.getElementById('cursor-ring');
+  const sc     = document.getElementById('smoke-canvas');
+  const ctx    = sc.getContext('2d');
+  let   mx = -300, my = -300;
+  let   rx = -300, ry = -300;           // ring lags behind
+
+  function scResize(){
+    sc.width  = window.innerWidth;
+    sc.height = window.innerHeight;
+  }
+  scResize();
+  window.addEventListener('resize', scResize);
+
+  /* Smoke particle pool */
+  const pool = [];
+  class SP {
+    constructor(x,y){
+      this.x  = x + (Math.random()-.5)*8;
+      this.y  = y + (Math.random()-.5)*8;
+      this.r  = 4 + Math.random()*10;
+      this.vx = (Math.random()-.5)*1.4;
+      this.vy = -(0.5 + Math.random()*1.6);
+      this.a  = 0.18 + Math.random()*0.28;
+      this.da = 0.011 + Math.random()*0.009;
+      this.c  = Math.random()>.45 ? '0,230,255' : '160,160,220';
+    }
+    tick(){
+      this.x+=this.vx; this.y+=this.vy;
+      this.r+=0.45;    this.a-=this.da;
+    }
+    draw(){
+      if(this.a<=0) return;
+      const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);
+      g.addColorStop(0,`rgba(${this.c},${this.a})`);
+      g.addColorStop(1,`rgba(${this.c},0)`);
+      ctx.beginPath();
+      ctx.fillStyle = g;
+      ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
+      ctx.fill();
+    }
+    dead(){ return this.a<=0; }
+  }
+
+  function smokeLoop(){
+    ctx.clearRect(0,0,sc.width,sc.height);
+    for(let i=pool.length-1;i>=0;i--){
+      pool[i].tick(); pool[i].draw();
+      if(pool[i].dead()) pool.splice(i,1);
+    }
+    /* smooth ring follow */
+    rx += (mx-rx)*0.10;
+    ry += (my-ry)*0.10;
+    ring.style.left = rx+'px';
+    ring.style.top  = ry+'px';
+    requestAnimationFrame(smokeLoop);
+  }
+  smokeLoop();
+
+  document.addEventListener('mousemove', e=>{
+    mx=e.clientX; my=e.clientY;
+    dot.style.left=mx+'px'; dot.style.top=my+'px';
+    for(let i=0;i<4;i++) pool.push(new SP(mx,my));
+  });
+  document.addEventListener('touchmove', e=>{
+    const t=e.touches[0];
+    for(let i=0;i<4;i++) pool.push(new SP(t.clientX,t.clientY));
+  },{passive:true});
+
+
+  /* ====================================================
+     B. CSS 3D LOGO   (no FontLoader — pure CSS depth)
+  ==================================================== */
+  const stage  = document.getElementById('logo-stage');
+  const LABEL  = 'GABRIELE MADEO';
+  const DEPTH  = 28;
+
+  /* back layers first (highest Z-index renders on top) */
+  for(let i=DEPTH; i>=1; i--){
+    const el = document.createElement('div');
+    el.className = 'logo-face';
+    el.textContent = LABEL;
+    const t = i/DEPTH;
+    el.style.transform = `translateZ(${-i*2.8}px)`;
+    el.style.color = `rgba(0,${Math.floor(200-t*180)},${Math.floor(240-t*200)},${1-t*0.72})`;
+    stage.appendChild(el);
+  }
+  /* front face */
+  const front = document.createElement('div');
+  front.className = 'logo-face front';
+  front.textContent = LABEL;
+  stage.appendChild(front);
+
+  /* mouse-driven rotation */
+  let lrx=0,lry=0, lrxt=0,lryt=0;
+  document.addEventListener('mousemove', e=>{
+    lryt = ((e.clientX/window.innerWidth)*2-1)*22;
+    lrxt = -((e.clientY/window.innerHeight)*2-1)*16;
+  });
+  /* touch support */
+  document.addEventListener('touchmove', e=>{
+    const t=e.touches[0];
+    lryt = ((t.clientX/window.innerWidth)*2-1)*22;
+    lrxt = -((t.clientY/window.innerHeight)*2-1)*16;
+  },{passive:true});
+
+  (function animLogo(){
+    lrx += (lrxt-lrx)*0.065;
+    lry += (lryt-lry)*0.065;
+    stage.style.transform = `rotateX(${lrx}deg) rotateY(${lry}deg)`;
+    requestAnimationFrame(animLogo);
+  })();
+
+
+  /* ====================================================
+     C. PORTAL — scroll-driven letter explosion + door zoom
+  ==================================================== */
+  const portalSec  = document.getElementById('portal');
+  const portalDoor = document.getElementById('portal-door');
+
+  /* build letter elements */
+  const CHARS = [...LABEL]; // includes the space
+  const letEls = [];
+
+  CHARS.forEach((ch, i)=>{
+    const el = document.createElement('div');
+    el.className = 'p-letter';
+    el.textContent = ch === ' ' ? '\u00A0' : ch;
+    el.style.top  = '0';
+    el.style.left = '0';
+    portalSec.appendChild(el);
+    letEls.push(el);
+  });
+
+  /* each letter's random "exploded" polar position */
+  const EPOS = CHARS.map(()=>({
+    angle  : Math.random()*Math.PI*2,
+    radius : 130 + Math.random()*200,
+    spin   : (Math.random()-.5)*540,
+  }));
+
+  /* final assembled positions — centred text line */
+  const CHAR_W = 30;           // px per character (approx)
+  const totalW = CHARS.length * CHAR_W;
+  function finalX(i){ return window.innerWidth/2  - totalW/2 + i*CHAR_W; }
+  function finalY()  { return window.innerHeight/2 - 18; }
+
+  function onScroll(){
+    const r    = portalSec.getBoundingClientRect();
+    const h    = portalSec.offsetHeight;
+    /* prog: 0 = section top hits viewport bottom, 1 = section scrolled out */
+    const prog = Math.max(0, Math.min(1,
+      (window.innerHeight - r.top) / (window.innerHeight + h - window.innerHeight)));
+
+    /* 0→0.55 : letters converge      0.55→1 : door zooms, letters vanish */
+    const conv = Math.min(1, prog/0.55);
+    const zoom = Math.max(0, (prog-0.55)/0.45);
+
+    letEls.forEach((el, i)=>{
+      const ep = EPOS[i];
+      const ex = window.innerWidth/2  + Math.cos(ep.angle)*ep.radius;
+      const ey = window.innerHeight/2 + Math.sin(ep.angle)*ep.radius;
+      const fx = finalX(i);
+      const fy = finalY();
+      const x  = ex + (fx-ex)*conv;
+      const y  = ey + (fy-ey)*conv;
+      const rot = ep.spin*(1-conv);
+      const op  = (0.25 + 0.75*conv) * Math.max(0, 1 - zoom*2);
+      el.style.transform = `translate(${x}px,${y}px) rotate(${rot}deg)`;
+      el.style.opacity   = op;
+    });
+
+    /* door zooms and fades as you "enter" */
+    const ds = 1 + zoom*14;
+    portalDoor.style.transform = `translate(-50%,-50%) scale(${ds})`;
+    portalDoor.style.opacity   = Math.max(0, 1 - zoom*1.2);
+  }
+
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+  onScroll();
+
+
+  /* ====================================================
+     D. THREE.JS ICE OBJECTS
+  ==================================================== */
+  const iceSec = document.getElementById('ice');
+
+  const iceScene = new THREE.Scene();
+  const iceCam   = new THREE.PerspectiveCamera(
+    55, window.innerWidth/window.innerHeight, 0.1, 100);
+  iceCam.position.set(0, 0, 9);
+
+  const iceRen = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  iceRen.setSize(window.innerWidth, window.innerHeight);
+  iceRen.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  iceSec.appendChild(iceRen.domElement);
+
+  /* Lights */
+  iceScene.add(new THREE.AmbientLight(0x0a1a2a, 6));
+  const pl1=new THREE.PointLight(0x00ffff,6,30); pl1.position.set( 5, 5, 5); iceScene.add(pl1);
+  const pl2=new THREE.PointLight(0x0044ff,4,20); pl2.position.set(-5,-3, 3); iceScene.add(pl2);
+  const pl3=new THREE.PointLight(0xffffff,2,15); pl3.position.set( 0, 6,-4); iceScene.add(pl3);
+
+  /* Data */
+  const ICE_DATA = [
+    { t:'CHI SONO',    b:'Designer & Sviluppatore con passione per esperienze 3D immersive, motion design e interazioni digitali creative.', col:0x00ffff },
+    { t:'COSA FACCIO', b:'Realizzo siti web interattivi in WebGL, animazioni GSAP, installazioni digitali e identità di brand in movimento.', col:0x0088ff },
+    { t:'PORTFOLIO',   b:'50+ progetti in 5 anni: landing page animate, esperienze AR/VR e identità visive per brand internazionali.', col:0x00ccaa },
+    { t:'CONTATTI',    b:'gabriele@madeo.design\n+39 333 123 4567\nMilano, Italia', col:0x4499ff },
+    { t:'SKILLS',      b:'Three.js · GSAP · React · WebGL\nAfter Effects · Blender · Cinema 4D · Motion Design', col:0x00aadd },
+  ];
+
+  const crystals=[];
+  ICE_DATA.forEach((d,i)=>{
+    const G   = new THREE.Group();
+    const geo = new THREE.OctahedronGeometry(0.85+Math.random()*0.35, 0);
+    const mat = new THREE.MeshPhongMaterial({
+      color:d.col, transparent:true, opacity:0.22, shininess:140, specular:0xffffff });
+    const wm  = new THREE.MeshBasicMaterial({
+      color:d.col, wireframe:true, transparent:true, opacity:0.55 });
+    G.add(new THREE.Mesh(geo,mat));
+    G.add(new THREE.Mesh(geo.clone(),wm));
+    const a=(i/ICE_DATA.length)*Math.PI*2;
+    G.position.set(Math.cos(a)*3.6, Math.sin(a)*1.8, (Math.random()-.5)*2);
+    G.userData = {...d, baseY:G.position.y, phase:Math.random()*Math.PI*2 };
+    iceScene.add(G);
+    crystals.push(G);
+  });
+
+  /* Particle field */
+  const pPos=new Float32Array(350*3);
+  for(let i=0;i<350;i++){
+    pPos[i*3]  =(Math.random()-.5)*18;
+    pPos[i*3+1]=(Math.random()-.5)*12;
+    pPos[i*3+2]=(Math.random()-.5)*12;
+  }
+  const pGeo=new THREE.BufferGeometry();
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  iceScene.add(new THREE.Points(pGeo,
+    new THREE.PointsMaterial({color:0x00ffff,size:0.04,transparent:true,opacity:0.45})));
+
+  /* Click → info panel */
+  const ray=new THREE.Raycaster();
+  const mp2=new THREE.Vector2();
+  const iceMeshes=crystals.map(c=>c.children[0]);
+
+  iceRen.domElement.addEventListener('click', e=>{
+    const r=iceSec.getBoundingClientRect();
+    mp2.x= ((e.clientX-r.left)/r.width )*2-1;
+    mp2.y=-((e.clientY-r.top )/r.height)*2+1;
+    ray.setFromCamera(mp2,iceCam);
+    const hits=ray.intersectObjects(iceMeshes);
+    if(hits.length){
+      const d=hits[0].object.parent.userData;
+      document.getElementById('panel-title').textContent=d.t;
+      document.getElementById('panel-body').textContent =d.b;
+      document.getElementById('info-panel').classList.add('open');
+    }
+  });
+  document.getElementById('close-panel').addEventListener('click',()=>
+    document.getElementById('info-panel').classList.remove('open'));
+
+  /* Mouse parallax */
+  const camT={x:0,y:0};
+  document.addEventListener('mousemove',e=>{
+    camT.x=(e.clientX/window.innerWidth*2-1)*0.7;
+    camT.y=-(e.clientY/window.innerHeight*2-1)*0.5;
+  });
+
+  const clk=new THREE.Clock();
+  (function animIce(){
+    requestAnimationFrame(animIce);
+    const t=clk.getElapsedTime();
+    crystals.forEach(c=>{
+      c.rotation.x+=0.003;
+      c.rotation.y+=0.005;
+      c.position.y=c.userData.baseY+Math.sin(t*0.5+c.userData.phase)*0.35;
+    });
+    iceCam.position.x+=(camT.x-iceCam.position.x)*0.025;
+    iceCam.position.y+=(camT.y-iceCam.position.y)*0.025;
+    iceCam.lookAt(0,0,0);
+    iceRen.render(iceScene,iceCam);
+  })();
+
+  /* Resize */
+  window.addEventListener('resize',()=>{
+    scResize();
+    iceCam.aspect=window.innerWidth/window.innerHeight;
+    iceCam.updateProjectionMatrix();
+    iceRen.setSize(window.innerWidth,window.innerHeight);
+    onScroll();
+  });
+
+  </script>
 </body>
 </html>
