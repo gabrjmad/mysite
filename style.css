@@ -1,0 +1,255 @@
+/* RESET */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CANVAS FUMO */
+#smoke-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: screen;
+}
+
+/* SEZIONI */
+section {
+  position: relative;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* HERO */
+#hero {
+  height: 100vh;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+}
+
+#logo-title {
+  font-size: clamp(4rem, 11vw, 8rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+  color: #00ffff;
+  text-shadow:
+    0 0 20px rgba(0, 255, 255, 1),
+    0 0 50px rgba(0, 255, 255, 0.8),
+    0 0 120px rgba(0, 200, 255, 0.5);
+  user-select: none;
+}
+
+#hero-sub {
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+/* BOLLE DI SAPONE */
+#bubbles-container {
+  position: relative;
+  width: 100%;
+  height: 45vh;
+  overflow: hidden;
+}
+
+.soap-bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    rgba(255, 255, 255, 0.7) 0%,
+    rgba(0, 255, 255, 0.3) 40%,
+    rgba(0, 180, 255, 0.15) 65%,
+    transparent 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 0 20px rgba(255, 255, 255, 0.35),
+    inset 0 0 20px rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
+/* PORTAL */
+#portal {
+  height: 100vh;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1600px;
+}
+
+/* Porta */
+#portal-door {
+  position: absolute;
+  width: 220px;
+  height: 320px;
+  border-radius: 110px 110px 0 0;
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  background: radial-gradient(
+    ellipse at 50% 35%,
+    rgba(0, 200, 255, 0.15) 0%,
+    transparent 70%
+  );
+  box-shadow:
+    0 0 60px rgba(0, 200, 255, 0.25),
+    inset 0 0 60px rgba(0, 200, 255, 0.15);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+}
+
+/* Lettere intorno alla porta */
+.portal-letter {
+  position: absolute;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* Tunnel */
+#portal-tunnel {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+}
+
+.tunnel-wall {
+  position: absolute;
+  background: #000;
+  box-shadow: inset 0 0 80px rgba(0, 255, 255, 0.05);
+}
+
+/* Pareti */
+.wall-front,
+.wall-back,
+.wall-left,
+.wall-right,
+.wall-top,
+.wall-bottom {
+  width: 100%;
+  height: 100%;
+}
+
+.wall-front {
+  transform: translateZ(-400px);
+}
+.wall-back {
+  transform: rotateY(180deg) translateZ(-400px);
+}
+.wall-left {
+  transform: rotateY(-90deg) translateZ(-400px);
+}
+.wall-right {
+  transform: rotateY(90deg) translateZ(-400px);
+}
+.wall-top {
+  transform: rotateX(90deg) translateZ(-400px);
+}
+.wall-bottom {
+  transform: rotateX(-90deg) translateZ(-400px);
+}
+
+/* ICE (Three.js full screen) */
+#ice {
+  height: 100vh;
+  background: #000;
+}
+#ice canvas {
+  display: block;
+}
+
+/* INFO PANEL CRISTALLI */
+#info-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.85);
+  opacity: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.96);
+  border: 1px solid rgba(0, 255, 255, 0.4);
+  border-radius: 22px;
+  padding: 2.5rem 3rem;
+  width: min(420px, 92vw);
+  z-index: 5000;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 90px rgba(0, 255, 255, 0.3);
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.25s ease;
+}
+
+#info-panel.open {
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#info-panel h3 {
+  color: #00ffff;
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+#info-panel p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  opacity: 0.9;
+  white-space: pre-line;
+}
+
+#close-panel {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.4rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0.65;
+  transition: opacity 0.2s;
+}
+#close-panel:hover {
+  opacity: 1;
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 3rem 1rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.3;
+  background: #000;
+}
