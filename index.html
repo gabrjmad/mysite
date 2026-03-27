@@ -1,385 +1,50 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GABRIELE MADEO</title>
-  <style>
-    /* ── BASE ── */
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-    html{scroll-behavior:smooth;}
-    body{
-      background:#000;
-      color:#fff;
-      font-family:'Helvetica Neue',Arial,sans-serif;
-      overflow-x:hidden;
-      cursor:none;
-      position:relative;
-    }
-
-    /* ── SMOKE ── */
-    #smoke-canvas{
-      position:fixed;top:0;left:0;pointer-events:none;z-index:99999;
-      mix-blend-mode:screen;
-    }
-
-    /* ── SECTIONS ── */
-    section{position:relative;width:100vw;overflow:hidden;}
-
-    /* ── HERO ── */
-    #hero{
-      height:100vh;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:12vh;
-      background:#000;
-    }
-
-    /* LOGO STATICO */
-    #logo-title{
-      font-size:clamp(4rem,12vw,10rem);
-      font-weight:900;
-      letter-spacing:-0.02em;
-      text-transform:uppercase;
-      color:#00ffff;
-      text-shadow:
-        0 0 20px rgba(0,255,255,1),
-        0 0 50px rgba(0,255,255,0.8),
-        0 0 120px rgba(0,200,255,0.5);
-      user-select:none;
-      position:relative;
-      z-index:10;
-    }
-
-    /* SOAP BUBBLES */
-    #bubbles-container{
-      position:relative;width:100%;height:60vh;
-      overflow:hidden;
-    }
-    .soap-bubble{
-      position:absolute;
-      border-radius:50%;
-      background:radial-gradient(circle at 30% 30%,
-        rgba(0,255,255,0.4) 0%,
-        rgba(0,200,255,0.2) 50%,
-        rgba(0,150,200,0.1) 75%,
-        transparent 100%);
-      border:1px solid rgba(0,255,255,0.3);
-      backdrop-filter:blur(8px);
-      pointer-events:none;
-      animation:float linear infinite;
-      box-shadow:
-        0 0 20px rgba(0,255,255,0.2),
-        inset 0 0 20px rgba(255,255,255,0.1);
-    }
-    @keyframes float{
-      0%{transform:translateY(100vh) scale(0.3);}
-      100%{transform:translateY(-20vh) scale(1.2);}
-    }
-
-    /* TUNNEL PORTAL */
-    #portal{
-      height:100vh;
-      display:flex;align-items:center;justify-content:center;
-      background:#000;
-      position:relative;
-    }
-    #portal-door{
-      position:absolute;width:220px;height:320px;
-      border:2px solid rgba(0,255,255,0.25);
-      border-radius:110px 110px 0 0;
-      background:radial-gradient(ellipse at 50% 35%,
-        rgba(0,180,255,0.08) 0%, transparent 70%);
-      box-shadow:
-        0 0 60px rgba(0,180,255,0.15),
-        inset 0 0 50px rgba(0,180,255,0.08);
-      top:50%;left:50%;
-      transform:translate(-50%,-50%);
-      transition:transform 1.5s cubic-bezier(0.25,0.46,0.45,0.94);
-    }
-    .portal-letter{
-      position:absolute;
-      font-size:2.2rem;
-      font-weight:800;
-      color:#00ffff;
-      text-shadow:0 0 12px rgba(0,255,255,0.7);
-      pointer-events:none;
-      top:0;left:0;
-      will-change:transform,opacity;
-      transition:opacity 0.4s ease;
-    }
-
-    /* ICE */
-    #ice{height:100vh;background:#000;}
-    #ice canvas{display:block;}
-
-    /* INFO PANEL */
-    #info-panel{
-      position:fixed;top:50%;left:50%;
-      transform:translate(-50%,-50%) scale(0.85);opacity:0;
-      pointer-events:none;
-      background:rgba(0,0,0,0.96);
-      border:1px solid rgba(0,255,255,0.4);
-      border-radius:24px;
-      padding:2.6rem 3rem;width:min(420px,92vw);
-      z-index:5000;
-      backdrop-filter:blur(22px);
-      box-shadow:0 0 90px rgba(0,255,255,0.3);
-      transition:transform 0.4s cubic-bezier(.34,1.56,.64,1),opacity 0.3s ease;
-    }
-    #info-panel.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto;}
-    #info-panel h3{color:#00ffff;font-size:1.2rem;letter-spacing:0.15em;margin-bottom:1.2rem;}
-    #info-panel p{line-height:1.75;font-size:0.92rem;opacity:0.88;white-space:pre-line;}
-    #close-panel{position:absolute;top:1.2rem;right:1.4rem;font-size:1.1rem;cursor:pointer;opacity:0.65;transition:opacity 0.2s;}
-    #close-panel:hover{opacity:1;}
-
-    /* FOOTER */
-    footer{text-align:center;padding:4rem 1rem;font-size:0.8rem;letter-spacing:0.15em;text-transform:uppercase;opacity:0.3;background:#000;}
-  </style>
+  <meta charset="UTF-8" />
+  <title>GABRIELLE MADEO – Tunnel Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <!-- SMOKE -->
+  <!-- Canvas effetti fumo -->
   <canvas id="smoke-canvas"></canvas>
 
-  <!-- INFO PANEL -->
+  <!-- Pannello info cristalli -->
   <div id="info-panel">
     <span id="close-panel">✕</span>
     <h3 id="panel-title"></h3>
     <p id="panel-body"></p>
   </div>
 
-  <!-- HERO -->
+  <!-- HERO: titolo statico + bolle -->
   <section id="hero">
     <h1 id="logo-title">GABRIELE MADEO</h1>
+    <p id="hero-sub">Designer &amp; Developer · Esperienze 3D sul Web</p>
     <div id="bubbles-container"></div>
   </section>
 
-  <!-- PORTAL TUNNEL -->
+  <!-- PORTAL: porta + lettere + tunnel -->
   <section id="portal">
     <div id="portal-door"></div>
+    <div id="portal-tunnel">
+      <div class="tunnel-wall wall-front"></div>
+      <div class="tunnel-wall wall-back"></div>
+      <div class="tunnel-wall wall-left"></div>
+      <div class="tunnel-wall wall-right"></div>
+      <div class="tunnel-wall wall-top"></div>
+      <div class="tunnel-wall wall-bottom"></div>
+    </div>
   </section>
 
-  <!-- ICE -->
+  <!-- ICE: forme finali interattive -->
   <section id="ice"></section>
 
-  <footer>© 2026 GABRIELE MADEO</footer>
+  <footer>© 2026 GABRIELE MADEO – All rights reserved</footer>
 
+  <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-  <script>
-  /* ── SMOKE ── */
-  const sc= document.getElementById('smoke-canvas'), ctx=sc.getContext('2d'), pool=[];
-  let mx=-300,my=-300;
-  class SP{constructor(x,y){this.x=x+(Math.random()-.5)*8;this.y=y+(Math.random()-.5)*8;this.r=4+Math.random()*10;this.vx=(Math.random()-.5)*1.4;this.vy=-(0.5+Math.random()*1.6);this.a=0.18+Math.random()*0.28;this.da=0.011+Math.random()*0.009;this.c=Math.random()>.45?'0,230,255':'160,160,220';}tick(){this.x+=this.vx;this.y+=this.vy;this.r+=0.45;this.a-=this.da;}draw(){if(this.a<=0)return;const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r);g.addColorStop(0,`rgba(${this.c},${this.a})`);g.addColorStop(1,`rgba(${this.c},0)`);ctx.beginPath();ctx.fillStyle=g;ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fill();}dead(){return this.a<=0;}}
-  function scResize(){sc.width=window.innerWidth;sc.height=window.innerHeight;}scResize();window.addEventListener('resize',scResize);
-  function smokeLoop(){ctx.clearRect(0,0,sc.width,sc.height);for(let i=pool.length-1;i>=0;i--){pool[i].tick();pool[i].draw();if(pool[i].dead())pool.splice(i,1);}requestAnimationFrame(smokeLoop);}smokeLoop();
-  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;for(let i=0;i<6;i++)pool.push(new SP(mx,my));});
-
-  /* ── SOAP BUBBLES ── */
-  const bubblesContainer = document.getElementById('bubbles-container');
-  const bubbles = [];
-  class Bubble{
-    constructor(){
-      this.el = document.createElement('div');
-      this.el.className = 'soap-bubble';
-      this.size = 40 + Math.random() * 80;
-      this.el.style.width = this.size + 'px';
-      this.el.style.height = this.el.style.width;
-      this.speed = 0.4 + Math.random() * 0.6;
-      this.x = Math.random() * window.innerWidth;
-      this.y = window.innerHeight + 50;
-      this.vy = -this.speed;
-      this.vx = (Math.random() - 0.5) * 0.8;
-      this.life = 1;
-      this.targetX = this.x;
-      bubblesContainer.appendChild(this.el);
-    }
-    update(){
-      /* mouse repulsion */
-      const dx = mx - this.x;
-      const dy = my - this.y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      if(dist < 150 && dist > 0){
-        const force = (150 - dist) / 150 * 0.4;
-        this.vx += (dx / dist) * force;
-        this.vy += (dy / dist) * force * 0.5;
-      }
-      
-      /* physics */
-      this.vy *= 0.99; /* drag */
-      this.vx *= 0.96;
-      this.x += this.vx;
-      this.y += this.vy;
-      this.life -= 0.002;
-      
-      /* bounce edges */
-      if(this.x < this.size/2){this.x = this.size/2; this.vx *= -0.6;}
-      if(this.x > window.innerWidth - this.size/2){this.x = window.innerWidth - this.size/2; this.vx *= -0.6;}
-      
-      /* render */
-      const scale = Math.max(0.2, this.life);
-      this.el.style.transform = `translate(${this.x - this.size/2}px, ${this.y - this.size/2}px) scale(${scale})`;
-      this.el.style.opacity = this.life;
-      
-      return this.y > -100 && this.life > 0;
-    }
-    destroy(){this.el.remove();bubbles.splice(bubbles.indexOf(this),1);}
-  }
-
-  /* spawn bubbles */
-  function spawnBubble(){if(Math.random()<0.35)bubbles.push(new Bubble());}
-  setInterval(spawnBubble, 120);
-
-  /* update loop */
-  function bubbleLoop(){
-    for(let i=bubbles.length-1;i>=0;i--){
-      if(!bubbles[i].update())bubbles[i].destroy();
-    }
-    requestAnimationFrame(bubbleLoop);
-  }
-  bubbleLoop();
-
-  /* ── PORTAL TUNNEL (mohitvirli style) ── */
-  const portalSec = document.getElementById('portal');
-  const portalDoor = document.getElementById('portal-door');
-  const TEXT = 'GABRIELE MADEO'.split('');
-  const letters = [];
-
-  TEXT.forEach((char,i)=>{
-    const el = document.createElement('div');
-    el.className = 'portal-letter';
-    el.textContent = char;
-    el.style.left = `${50 + (i-TEXT.length/2)*3}%`;
-    portalSec.appendChild(el);
-    letters.push(el);
-  });
-
-  function portalScroll(){
-    const r = portalSec.getBoundingClientRect();
-    const prog = Math.max(0,Math.min(1,(window.innerHeight - r.top)/(window.innerHeight)));
-    
-    /* letters explode */
-    letters.forEach((el,i)=>{
-      const p = prog;
-      const angle = (i / TEXT.length) * Math.PI * 2 + p * Math.PI * 4;
-      const radius = 120 + p * 280;
-      const x = 50 + Math.cos(angle) * radius / 2;
-      const y = 50 + Math.sin(angle) * radius / 3;
-      const rot = p * 720 + i * 60;
-      el.style.transform = `translate(${x}%,${y}%) rotate(${rot}deg)`;
-      el.style.opacity = 1 - p * 0.8;
-    });
-    
-    /* door opens */
-    const doorProg = Math.max(0,(prog-0.3)/0.7);
-    const doorScale = 1 + doorProg * 8;
-    portalDoor.style.transform = `translate(-50%,-50%) scale(${doorScale}) rotateX(${doorProg * 90}deg)`;
-  }
-  window.addEventListener('scroll',portalScroll,{passive:true});
-  portalScroll();
-
-  /* ── ICE CRYSTALS ── */
-  const iceSec=document.getElementById('ice');
-  const iceScene=new THREE.Scene();
-  const iceCam=new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,0.1,100);
-  iceCam.position.set(0,0,10);
-  const iceRen=new THREE.WebGLRenderer({antialias:true,alpha:true});
-  iceRen.setSize(window.innerWidth,window.innerHeight);
-  iceRen.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  iceSec.appendChild(iceRen.domElement);
-
-  /* lights */
-  iceScene.add(new THREE.AmbientLight(0x001133,10));
-  iceScene.add(new THREE.PointLight(0x00ffff,15,35));
-  iceScene.add(new THREE.PointLight(0x0066ff,10,25));
-
-  /* crystals */
-  const CRYSTALS=[
-    {t:'CHI SONO',b:'Designer & Developer specializzato in WebGL e motion design.',c:0x00ffff},
-    {t:'PROGETTI',b:'Siti interattivi e esperienze 3D per brand.',c:0x0088ff},
-    {t:'CONTATTI',b:'gabriele@madeo.design\nMilano, Italia',c:0x00ccaa}
-  ];
-  const crystals=[];
-  CRYSTALS.forEach((d,i)=>{
-    const g=new THREE.Group();
-    const geo=new THREE.OctahedronGeometry(1.2+Math.random()*0.6,1);
-    const mat=new THREE.MeshPhongMaterial({color:d.c,transparent:true,opacity:0.32,shininess:200});
-    const wire=new THREE.MeshBasicMaterial({color:d.c,wireframe:true,transparent:true,opacity:0.75});
-    g.add(new THREE.Mesh(geo,mat));
-    g.add(new THREE.Mesh(geo.clone(),wire));
-    const a=i*2.1;
-    g.position.set(Math.cos(a)*5,Math.sin(a)*3,(Math.random()-.5)*3);
-    g.userData={...d};
-    iceScene.add(g);
-    crystals.push(g);
-  });
-
-  /* particles */
-  const pcount=1200;
-  const ppos=new Float32Array(pcount*3);
-  for(let i=0;i<pcount;i++){
-    ppos[i*3]=(Math.random()-.5)*30;
-    ppos[i*3+1]=(Math.random()-.5)*20;
-    ppos[i*3+2]=(Math.random()-.5)*20;
-  }
-  const pgeo=new THREE.BufferGeometry();
-  pgeo.setAttribute('position',new THREE.BufferAttribute(ppos,3));
-  iceScene.add(new THREE.Points(pgeo,new THREE.PointsMaterial({color:0x00ffff,size:0.07,transparent:true,opacity:0.65})));
-
-  /* raycaster */
-  const ray=new THREE.Raycaster(),mp2=new THREE.Vector2();
-  const meshes=crystals.map(c=>c.children[0]);
-  const hoverSet=new Set();
-
-  /* click */
-  iceRen.domElement.onclick=e=>{
-    const r=iceSec.getBoundingClientRect();
-    mp2.x=((e.clientX-r.left)/r.width)*2-1;
-    mp2.y=-((e.clientY-r.top)/r.height)*2+1;
-    ray.setFromCamera(mp2,iceCam);
-    const hits=ray.intersectObjects(meshes);
-    if(hits.length){
-      const d=hits[0].object.parent.userData;
-      document.getElementById('panel-title').textContent=d.t;
-      document.getElementById('panel-body').textContent=d.b;
-      document.getElementById('info-panel').classList.add('open');
-    }
-  };
-
-  /* hover */
-  iceRen.domElement.onmousemove=e=>{
-    const r=iceSec.getBoundingClientRect();
-    mp2.x=((e.clientX-r.left)/r.width)*2-1;
-    mp2.y=-((e.clientY-r.top)/r.height)*2+1;
-    ray.setFromCamera(mp2,iceCam);
-    const hits=ray.intersectObjects(meshes);
-    hoverSet.forEach(i=>{crystals[i].scale.setScalar(1);});
-    hoverSet.clear();
-    if(hits.length){
-      const i=meshes.indexOf(hits[0].object);
-      hoverSet.add(i);
-      crystals[i].scale.setScalar(1.45);
-    }
-  };
-
-  document.getElementById('close-panel').onclick=()=>document.getElementById('info-panel').classList.remove('open');
-
-  /* anim */
-  const clk=new THREE.Clock();
-  (function loop(){
-    requestAnimationFrame(loop);
-    const t=clk.getElapsedTime();
-    crystals.forEach(c=>{c.rotation.x+=0.006;c.rotation.y+=0.008;c.position.y+=Math.sin(t*0.8)*0.01;});
-    iceCam.lookAt(0,0,0);
-    iceRen.render(iceScene,iceCam);
-  })();
-
-  window.onresize=()=>{
-    scResize();
-    iceCam.aspect=window.innerWidth/window.innerHeight;
-    iceCam.updateProjectionMatrix();
-    iceRen.setSize(window.innerWidth,window.innerHeight);
-  };
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
