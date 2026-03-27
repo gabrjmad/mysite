@@ -17,6 +17,20 @@ section { position:relative; height:100vh; width:100vw; display:flex; align-item
   50%{opacity:0.8;}
 }
 
+/* Titolo 2D sovrimpressione */
+#title {
+  position:absolute;
+  top:2rem;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:4rem;
+  font-weight:700;
+  letter-spacing:0.2rem;
+  text-transform:uppercase;
+  text-shadow:0 0 15px rgba(0,255,255,0.6), 0 0 30px rgba(0,255,255,0.4);
+  z-index:10; /* sopra il canvas */
+}
+
 /* Stile porta/lettere */
 #portal h2 {
   font-size:5rem; letter-spacing:0.2rem; text-transform:uppercase;
