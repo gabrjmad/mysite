@@ -138,6 +138,57 @@ shards.forEach((shard) => {
   });
 });
 
+/* ------------------- CURSOR SMOKE EFFECT ------------------- */
+// Particelle semplici che seguono il cursore e si dissolvono
+const smokeContainer = document.createElement('div');
+smokeContainer.id = 'smoke-container';
+document.body.appendChild(smokeContainer);
+
+function createSmokeParticle(x, y) {
+  const particle = document.createElement('div');
+  particle.className = 'smoke-particle';
+  particle.style.left = `${x}px`;
+  particle.style.top = `${y}px`;
+  // dimensione casuale
+  const size = Math.random() * 6 + 4; // 4‑10px
+  particle.style.width = `${size}px`;
+  particle.style.height = `${size}px`;
+  smokeContainer.appendChild(particle);
+
+  // anima: fade out + movimento verso l'alto
+  gsap.to(particle, {
+    opacity: 0,
+    y: y - 30, // sale di 30px
+    duration: 1.2,
+    ease: 'power.out',
+    onComplete: () => particle.remove()
+  });
+}
+
+function onPointerMoveSmoke(e) {
+  createSmokeParticle(e.clientX, e.clientY);
+}
+window.addEventListener('pointermove', onPointerMoveSmoke);
+window.addEventListener('touchmove', (e) => {
+  if (e.touches.length) {
+    const touch = e.touches[0];
+    createSmokeParticle(touch.clientX, touch.clientY);
+  }
+}, { passive: true });
+
+/* Stile delle particelle (aggiunto qui per evitare duplicazioni in CSS) */
+const style = document.createElement('style');
+style.textContent = `
+  .smoke-particle {
+    position:fixed;
+    pointer-events:none;
+    background:rgba(200,200,200,0.6);
+    border-radius:50%;
+    opacity:0;
+  }
+`;
+document.head.appendChild(style);
+
 /* ------------------- RESPONSIVE ------------------- */
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
